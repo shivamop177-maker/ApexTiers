@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApexTiers - Official Minecraft PvP Rankings</title>
+
+    <!-- Google Fonts: Inter, Montserrat & Rajdhani -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@700;800;900&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome CDN for Gaming Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        apex: {
+                            bg: '#090a0f',
+                            card: '#12131c',
+                            cardHover: '#1a1c29',
+                            border: '#252838',
+                            yellow: '#f59e0b',
+                            yellowHover: '#d97706',
+                            gold: '#fbbf24',
+                            goldBright: '#ffe066',
+                            red: '#ef4444',
+                            redHover: '#dc2626',
+                            textMuted: '#9ca3af'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Rajdhani', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #090a0f;
+            color: #f3f4f6;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Glowing accents */
+        .glow-yellow {
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.25);
+        }
+        .glow-gold-red {
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.25), 0 0 35px rgba(239, 68, 68, 0.2);
+        }
+        .glow-red-sm {
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Shimmer & Red Glint Animations */
+        @keyframes glint-slide {
+            0% { transform: translateX(-150%) rotate(25deg); }
+            50% { transform: translateX(250%) rotate(25deg); }
+            100% { transform: translateX(250%) rotate(25deg); }
+        }
+
+        .glint-effect {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glint-effect::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 60%;
+            height: 200%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(239, 68, 68, 0.25),
+                rgba(245, 158, 11, 0.4),
+                rgba(239, 68, 68, 0.25),
+                transparent
+            );
+            animation: glint-slide 5s infinite ease-in-out;
+            pointer-events: none;
+        }
+
+        /* Glint Border */
+        .red-glint-border {
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            position: relative;
+        }
+        .red-glint-border::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.6), rgba(239, 68, 68, 0.4), rgba(245, 158, 11, 0.1));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090a0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #252838;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f59e0b;
+        }
+
+        /* Crisp Minecraft Head Rendering */
+        .mc-head {
+            image-rendering: pixelated;
+        }
+
+        /* Glassmorphism panel */
+        .glass-panel {
+            background: rgba(18, 19, 28, 0.88);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(245, 158, 11, 0.15);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-apex-yellow selection:text-black">
+
+    <header class="sticky top-0 z-40 w-full glass-panel border-b border-apex-border/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+            
+            <!-- ApexTiers Logo with Red Glint Icon -->
+            <div class="flex items-center gap-3 cursor-pointer group" onclick="switchView('home')">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-apex-yellow via-amber-500 to-red-600 flex items-center justify-center shadow-lg shadow-apex-yellow/20 relative glint-effect border border-apex-gold/40">
+                    <i class="fa-solid fa-crown text-slate-950 text-xl group-hover:scale-110 transition duration-300"></i>
+                    <span class="absolute -top-1 -right-1 w-3 h-3 bg-apex-red rounded-full border-2 border-apex-bg animate-pulse"></span>
+                </div>
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-display font-black text-2xl tracking-wider text-white">APEX<span class="text-apex-yellow">TIERS</span></span>
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-apex-red/20 text-apex-red border border-apex-red/40 tracking-wider uppercase">PVP</span>
+                    </div>
+                    <span class="hidden sm:block text-[10px] text-apex-textMuted uppercase tracking-widest font-bold">Official Minecraft Rankings</span>
+                </div>
+            </div>
+
+            <!-- Central Nav Buttons -->
+            <nav class="hidden md:flex items-center gap-1.5 bg-apex-card p-1.5 rounded-xl border border-apex-border">
+                <button onclick="switchView('home')" id="nav-btn-home" class="nav-tab px-5 py-2 rounded-lg font-bold text-xs transition duration-200 text-black bg-gradient-to-r from-apex-yellow to-amber-400 shadow-md shadow-apex-yellow/20 flex items-center gap-2">
+                    <i class="fa-solid fa-house"></i>Home
+                </button>
+                <button onclick="switchView('rankings')" id="nav-btn-rankings" class="nav-tab px-5 py-2 rounded-lg font-bold text-xs transition duration-200 text-apex-textMuted hover:text-white hover:bg-white/5 flex items-center gap-2">
+                    <i class="fa-solid fa-ranking-star"></i>Rankings
+                </button>
+            </nav>
+
+            <!-- Actions Right -->
+            <div class="flex items-center gap-3">
+                <!-- Search Input Trigger -->
+                <div class="relative hidden sm:block">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-apex-textMuted text-xs"></i>
+                    <input type="text" id="global-search" oninput="handleGlobalSearch(this.value)" placeholder="Search player..." 
+                        class="bg-apex-bg border border-apex-border rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-apex-textMuted focus:outline-none focus:border-apex-yellow transition-all w-36 focus:w-48 focus:ring-1 focus:ring-apex-yellow">
+                </div>
+
+                <!-- Admin Tester Modal Trigger -->
+                <button onclick="openAdminModal()" class="px-3.5 py-2 bg-apex-card hover:bg-apex-cardHover text-xs font-bold text-white rounded-xl border border-apex-border hover:border-apex-red/50 transition flex items-center gap-2 group">
+                    <i class="fa-solid fa-shield-halved text-apex-yellow group-hover:text-apex-red transition"></i>
+                    <span class="hidden sm:inline">Tester Admin</span>
+                </button>
+
+                <!-- Discord Link Button -->
+                <a href="https://discord.gg" target="_blank" rel="noopener" class="px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-xs font-bold text-white rounded-xl transition shadow-md shadow-[#5865F2]/20 flex items-center gap-2">
+                    <i class="fa-brands fa-discord text-sm"></i>
+                    <span class="hidden sm:inline">Discord</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow">
+        
+        <!-- HOME VIEW -->
+        <section id="view-home" class="transition-opacity duration-300">
+            <!-- Hero Section -->
+            <div class="relative py-16 md:py-24 px-4 overflow-hidden text-center flex flex-col items-center justify-center">
+                <!-- Ambient Glow Backgrounds -->
+                <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-apex-yellow/10 rounded-full blur-[120px] pointer-events-none"></div>
+                <div class="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[200px] bg-apex-red/15 rounded-full blur-[100px] pointer-events-none"></div>
+
+                <!-- Official Badge with Crimson Glint -->
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-apex-card border border-apex-yellow/40 text-apex-yellow text-xs font-extrabold tracking-wider uppercase mb-6 shadow-lg shadow-apex-yellow/10 red-glint-border">
+                    <span class="w-2 h-2 rounded-full bg-apex-red animate-ping"></span>
+                    OFFICIAL APEXTIERS LEADERBOARD
+                </div>
+
+                <!-- Main Hero Heading -->
+                <h1 class="text-5xl sm:text-7xl font-black font-display tracking-tight text-white max-w-4xl leading-tight">
+                    Apex<span class="text-transparent bg-clip-text bg-gradient-to-r from-apex-yellow via-amber-300 to-apex-gold drop-shadow-[0_0_25px_rgba(245,158,11,0.5)]">Tiers</span>
+                </h1>
+
+                <!-- Subtitle -->
+                <p class="mt-4 text-base sm:text-lg text-apex-textMuted max-w-2xl font-medium leading-relaxed">
+                    Dominate the competitive Minecraft PvP leaderboards. Test your combat skill, claim your tier rank, and challenge top players.
+                </p>
+
+                <!-- Hero CTA Buttons -->
+                <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+                    <button onclick="switchView('rankings')" class="px-8 py-3.5 bg-gradient-to-r from-apex-yellow to-amber-500 hover:from-amber-500 hover:to-apex-yellow text-black font-extrabold text-xs uppercase tracking-wider rounded-xl transition duration-200 shadow-xl shadow-apex-yellow/25 flex items-center gap-2 transform hover:-translate-y-0.5">
+                        <span>View Rankings</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                    <a href="https://discord.gg" target="_blank" rel="noopener" class="px-8 py-3.5 bg-apex-card hover:bg-apex-cardHover text-white font-bold text-xs uppercase tracking-wider rounded-xl border border-apex-border hover:border-apex-red/40 transition duration-200 flex items-center gap-2">
+                        <i class="fa-brands fa-discord text-base text-[#5865F2]"></i>
+                        <span>Join Tier Discord</span>
+                    </a>
+                </div>
+
+                <!-- Server Stats Counter Bar -->
+                <div class="mt-14 max-w-4xl w-full grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
+                    <div class="bg-apex-card/80 border border-apex-border rounded-2xl p-5 text-center relative overflow-hidden group hover:border-apex-yellow/40 transition">
+                        <div class="absolute top-0 left-0 w-full h-0.5 bg-apex-yellow"></div>
+                        <span class="text-[11px] uppercase tracking-widest font-extrabold text-apex-textMuted block mb-1">Gamemodes</span>
+                        <span class="text-3xl font-black font-heading text-white">8</span>
+                    </div>
+                    <div class="bg-apex-card/80 border border-apex-border rounded-2xl p-5 text-center relative overflow-hidden group hover:border-emerald-500/40 transition">
+                        <div class="absolute top-0 left-0 w-full h-0.5 bg-emerald-500"></div>
+                        <span class="text-[11px] uppercase tracking-widest font-extrabold text-apex-textMuted block mb-1">Status</span>
+                        <span class="text-2xl font-black font-heading text-emerald-400 flex items-center justify-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                            Online
+                        </span>
+                    </div>
+                    <div class="bg-apex-card/80 border border-apex-border rounded-2xl p-5 text-center relative overflow-hidden group hover:border-apex-yellow/40 transition">
+                        <div class="absolute top-0 left-0 w-full h-0.5 bg-apex-yellow"></div>
+                        <span class="text-[11px] uppercase tracking-widest font-extrabold text-apex-textMuted block mb-1">Tiered Players</span>
+                        <span id="stat-total-players" class="text-3xl font-black font-heading text-apex-yellow">0</span>
+                    </div>
+                    <div class="bg-apex-card/80 border border-apex-border rounded-2xl p-5 text-center relative overflow-hidden group hover:border-apex-red/40 transition">
+                        <div class="absolute top-0 left-0 w-full h-0.5 bg-apex-red"></div>
+                        <span class="text-[11px] uppercase tracking-widest font-extrabold text-apex-textMuted block mb-1">Total Tests</span>
+                        <span class="text-3xl font-black font-heading text-apex-red">280+</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <span class="text-xs font-black text-apex-red uppercase tracking-widest flex items-center gap-1.5">
+                            <i class="fa-solid fa-fire text-apex-yellow"></i> TOP COMPETITORS
+                        </span>
+                        <h2 class="text-3xl font-black font-heading text-white">Leaderboard Champions</h2>
+                    </div>
+                    <button onclick="switchView('rankings')" class="text-xs font-bold text-apex-yellow hover:text-apex-gold transition flex items-center gap-1">
+                        View All Tiers <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                </div>
+
+                <div id="top-players-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Dynamic Top 3 Cards -->
+                </div>
+            </div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div class="text-center mb-10">
+                    <span class="text-xs font-black text-apex-yellow uppercase tracking-widest block">COMPETITIVE CATEGORIES</span>
+                    <h2 class="text-3xl font-black font-heading text-white">Choose Your Gamemode</h2>
+                    <p class="text-apex-textMuted text-sm mt-1">Select a category to view tier rankings from Tier 1 (HT1/LT1) down to Tier 5.</p>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4" id="gamemodes-preview-grid">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+        </section>
+
+        <section id="view-rankings" class="hidden transition-opacity duration-300 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            
+            <!-- Category Tabs Navigation -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-none mb-8" id="gamemode-tabs">
+                <!-- Dynamic Tabs Rendered by JS -->
+            </div>
+
+            <!-- Search & Controls Bar -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 bg-apex-card/80 p-4 rounded-2xl border border-apex-border">
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <div class="relative w-full sm:w-80">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-apex-textMuted text-sm"></i>
+                        <input type="text" id="ranking-search" oninput="renderCurrentView()" placeholder="Filter player username..." 
+                            class="w-full bg-apex-bg border border-apex-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-apex-textMuted focus:outline-none focus:border-apex-yellow transition">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 text-xs text-apex-textMuted w-full sm:w-auto justify-end">
+                    <span>Active Category:</span>
+                    <span id="active-gamemode-label" class="font-extrabold text-apex-yellow uppercase tracking-wider bg-apex-yellow/10 border border-apex-yellow/30 px-3 py-1 rounded-lg">Overall</span>
+                </div>
+            </div>
+
+            <!-- OVERALL LEADERBOARD TABLE VIEW -->
+            <div id="overall-view-container" class="bg-apex-card rounded-2xl border border-apex-border overflow-hidden shadow-2xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-apex-border bg-apex-bg/60 text-xs font-extrabold text-apex-textMuted uppercase tracking-wider">
+                                <th class="py-4 px-6 w-16 text-center">Rank</th>
+                                <th class="py-4 px-6">Player IGN</th>
+                                <th class="py-4 px-6 text-right pr-10">Total Points</th>
+                                <th class="py-4 px-6 text-center">Gamemode Tiers Breakdown</th>
+                            </tr>
+                        </thead>
+                        <tbody id="overall-leaderboard-body" class="divide-y divide-apex-border/60 text-sm">
+                            <!-- Dynamic Leaderboard Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- GAMEMODE TIER COLUMNS VIEW (TIER 1 - TIER 5) -->
+            <div id="gamemode-tier-columns" class="hidden grid grid-cols-1 md:grid-cols-5 gap-4">
+                <!-- Tier 1 Column -->
+                <div class="bg-apex-card rounded-2xl border border-amber-500/40 p-4 flex flex-col h-full relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400 to-apex-red"></div>
+                    <div class="flex items-center justify-between pb-3 mb-4 border-b border-amber-500/20 text-amber-400 font-heading font-extrabold text-xl tracking-wide">
+                        <span>Tier 1</span>
+                        <i class="fa-solid fa-crown text-sm text-apex-yellow"></i>
+                    </div>
+                    <div id="column-tier-1" class="space-y-3 flex-grow min-h-[250px]"></div>
+                </div>
+
+                <!-- Tier 2 Column -->
+                <div class="bg-apex-card rounded-2xl border border-slate-400/40 p-4 flex flex-col h-full relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-300 to-amber-500"></div>
+                    <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-400/20 text-slate-300 font-heading font-extrabold text-xl tracking-wide">
+                        <span>Tier 2</span>
+                        <i class="fa-solid fa-shield text-sm"></i>
+                    </div>
+                    <div id="column-tier-2" class="space-y-3 flex-grow min-h-[250px]"></div>
+                </div>
+
+                <!-- Tier 3 Column -->
+                <div class="bg-apex-card rounded-2xl border border-amber-700/40 p-4 flex flex-col h-full relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-amber-700"></div>
+                    <div class="flex items-center justify-between pb-3 mb-4 border-b border-amber-700/20 text-amber-600 font-heading font-extrabold text-xl tracking-wide">
+                        <span>Tier 3</span>
+                        <i class="fa-solid fa-award text-sm"></i>
+                    </div>
+                    <div id="column-tier-3" class="space-y-3 flex-grow min-h-[250px]"></div>
+                </div>
+
+                <!-- Tier 4 Column -->
+                <div class="bg-apex-card rounded-2xl border border-sky-500/30 p-4 flex flex-col h-full relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-sky-500"></div>
+                    <div class="flex items-center justify-between pb-3 mb-4 border-b border-sky-500/20 text-sky-400 font-heading font-extrabold text-xl tracking-wide">
+                        <span>Tier 4</span>
+                        <i class="fa-solid fa-medal text-sm"></i>
+                    </div>
+                    <div id="column-tier-4" class="space-y-3 flex-grow min-h-[250px]"></div>
+                </div>
+
+                <!-- Tier 5 Column -->
+                <div class="bg-apex-card rounded-2xl border border-slate-600/30 p-4 flex flex-col h-full relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-slate-600"></div>
+                    <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-600/20 text-slate-400 font-heading font-extrabold text-xl tracking-wide">
+                        <span>Tier 5</span>
+                        <i class="fa-solid fa-user-ninja text-sm"></i>
+                    </div>
+                    <div id="column-tier-5" class="space-y-3 flex-grow min-h-[250px]"></div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <div id="player-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md hidden transition-all duration-300">
+        <div class="bg-apex-card border border-apex-border rounded-3xl max-w-md w-full p-6 relative shadow-2xl overflow-hidden red-glint-border">
+            <!-- Close button -->
+            <button onclick="closePlayerModal()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-apex-bg text-apex-textMuted hover:text-white flex items-center justify-center transition border border-apex-border hover:border-apex-red">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="text-center pt-2 pb-4">
+                <div class="relative inline-block mb-3">
+                    <img id="modal-player-head" src="" alt="Head" class="w-20 h-20 rounded-2xl border-2 border-apex-yellow mc-head shadow-xl shadow-apex-yellow/20 mx-auto">
+                    <span class="absolute -bottom-2 -right-2 bg-apex-red text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase border border-apex-bg">VERIFIED</span>
+                </div>
+                <h3 id="modal-player-name" class="text-2xl font-black font-display text-white"></h3>
+                <div class="flex items-center justify-center gap-3 mt-2">
+                    <span id="modal-player-rank" class="text-xs font-bold text-black bg-apex-yellow px-3 py-1 rounded-full uppercase tracking-wider font-heading"></span>
+                    <span id="modal-player-points" class="text-xs font-bold text-amber-300 bg-amber-400/10 border border-amber-400/30 px-3 py-1 rounded-full uppercase tracking-wider"></span>
+                </div>
+            </div>
+
+            <!-- Tiers Grid -->
+            <div class="mt-4">
+                <h4 class="text-xs font-bold uppercase tracking-widest text-apex-textMuted mb-3 flex items-center gap-1.5">
+                    <i class="fa-solid fa-list-check text-apex-yellow"></i> Gamemode Tier Breakdown
+                </h4>
+                <div id="modal-tiers-grid" class="grid grid-cols-2 gap-2.5">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md hidden transition-all duration-300">
+        <div class="bg-apex-card border border-apex-border rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden red-glint-border">
+            
+            <!-- Header -->
+            <div class="p-6 border-b border-apex-border flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-apex-yellow/10 border border-apex-yellow/40 flex items-center justify-center text-apex-yellow">
+                        <i class="fa-solid fa-sliders text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold font-heading text-white">Tier Tester & Data Manager</h3>
+                        <p class="text-xs text-apex-textMuted">Add, edit players, auto-update points or export JSON for Discord Bots.</p>
+                    </div>
+                </div>
+                <button onclick="closeAdminModal()" class="w-9 h-9 rounded-full bg-apex-bg text-apex-textMuted hover:text-white flex items-center justify-center transition border border-apex-border">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Admin Tabs Navigation -->
+            <div class="flex border-b border-apex-border bg-apex-bg/50 px-6 pt-2">
+                <button onclick="switchAdminTab('editor')" id="admin-tab-editor" class="admin-tab px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 border-apex-yellow text-apex-yellow">
+                    Player Editor
+                </button>
+                <button onclick="switchAdminTab('json')" id="admin-tab-json" class="admin-tab px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-apex-textMuted border-b-2 border-transparent hover:text-white">
+                    JSON Sync & Import/Export
+                </button>
+                <button onclick="switchAdminTab('guide')" id="admin-tab-guide" class="admin-tab px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-apex-textMuted border-b-2 border-transparent hover:text-white">
+                    Automated Sync Guide
+                </button>
+            </div>
+
+            <!-- Body Content -->
+            <div class="p-6 overflow-y-auto flex-grow space-y-6">
+
+                <!-- TAB 1: PLAYER EDITOR -->
+                <div id="admin-section-editor" class="space-y-6">
+                    <!-- Add / Edit Form -->
+                    <form id="player-form" onsubmit="handleSavePlayer(event)" class="bg-apex-bg p-5 rounded-2xl border border-apex-border space-y-4">
+                        <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-user-plus text-apex-yellow"></i> Add or Modify Player Tier
+                        </h4>
+                        <div>
+                            <label class="block text-xs text-apex-textMuted font-semibold mb-1">Minecraft IGN / Username</label>
+                            <input type="text" id="admin-input-username" required placeholder="e.g. BotizSpireX" 
+                                class="w-full bg-apex-card border border-apex-border rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-apex-yellow">
+                        </div>
+
+                        <!-- Gamemode Tiers Grid Inputs -->
+                        <div>
+                            <label class="block text-xs text-apex-textMuted font-semibold mb-2">Assign Gamemode Tiers</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="admin-tiers-inputs">
+                                <!-- Dynamic select dropdowns for each mode -->
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end gap-3 pt-2">
+                            <button type="button" onclick="resetForm()" class="px-4 py-2 bg-apex-card text-apex-textMuted hover:text-white rounded-xl text-xs font-semibold">Reset</button>
+                            <button type="submit" class="px-6 py-2 bg-gradient-to-r from-apex-yellow to-amber-500 hover:from-amber-500 hover:to-apex-yellow text-black font-extrabold rounded-xl text-xs uppercase tracking-wider shadow-md shadow-apex-yellow/20">Save Player Data</button>
+                        </div>
+                    </form>
+
+                    <!-- Existing Players Table -->
+                    <div>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-apex-textMuted mb-3">Existing Players Roster</h4>
+                        <div class="bg-apex-bg rounded-2xl border border-apex-border overflow-hidden max-h-60 overflow-y-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-apex-card border-b border-apex-border font-bold text-apex-textMuted uppercase">
+                                    <tr>
+                                        <th class="p-3">Username</th>
+                                        <th class="p-3">Points</th>
+                                        <th class="p-3 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-player-rows" class="divide-y divide-apex-border/50">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: JSON IMPORT / EXPORT -->
+                <div id="admin-section-json" class="hidden space-y-4">
+                    <p class="text-xs text-apex-textMuted">
+                        Export database to JSON format or import automated output from a Discord bot script.
+                    </p>
+                    <textarea id="json-textarea" class="w-full h-64 bg-apex-bg border border-apex-border rounded-2xl p-4 font-mono text-xs text-amber-300 focus:outline-none focus:border-apex-yellow" placeholder="JSON data..."></textarea>
+                    
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <button onclick="handleExportJSON()" class="px-4 py-2.5 bg-apex-card hover:bg-apex-cardHover border border-apex-border text-white text-xs font-semibold rounded-xl flex items-center gap-2">
+                            <i class="fa-solid fa-copy text-apex-yellow"></i> Copy JSON to Clipboard
+                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="resetDefaultData()" class="px-4 py-2.5 bg-rose-950/40 hover:bg-rose-900/40 border border-rose-800/40 text-rose-300 text-xs font-semibold rounded-xl">
+                                Wipe All Players
+                            </button>
+                            <button onclick="handleImportJSON()" class="px-5 py-2.5 bg-apex-yellow text-black hover:bg-amber-400 text-xs font-extrabold rounded-xl shadow-md">
+                                Import JSON Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: AUTOMATED SYNC GUIDE -->
+                <div id="admin-section-guide" class="hidden space-y-4 text-xs text-apex-textMuted leading-relaxed">
+                    <div class="bg-apex-bg p-4 rounded-2xl border border-apex-border space-y-3">
+                        <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-robot text-apex-yellow"></i> How Automatic Synchronization Works (Zero-Cost Setup)
+                        </h4>
+                        <p>When you conduct a tier test on Discord (e.g., using a Bot), you can easily push player tiers directly to this site without paying for database hosting.</p>
+                        
+                        <div class="space-y-2 pt-2">
+                            <div class="p-3 bg-apex-card rounded-xl border border-apex-border">
+                                <span class="font-bold text-white block mb-0.5">Option A: Discord Bot + GitHub API (Recommended & Free)</span>
+                                Have your Discord Bot update a simple <code class="text-apex-yellow font-mono">players.json</code> file in your free GitHub repository via GitHub REST API whenever a player passes a test. When hosted on GitHub Pages or Vercel, your website auto-fetches this file!
+                            </div>
+                            <div class="p-3 bg-apex-card rounded-xl border border-apex-border">
+                                <span class="font-bold text-white block mb-0.5">Option B: Tester Admin Panel</span>
+                                If you don't use a bot, tier testers can open the <strong class="text-white">Player Editor</strong> in this admin panel, type the username & assigned tiers, and hit Save. The site updates rankings instantly.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-apex-card border border-apex-yellow text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
+        <i class="fa-solid fa-circle-check text-apex-yellow text-lg"></i>
+        <span id="toast-message" class="text-xs font-bold">Action completed</span>
+    </div>
+
+    <footer class="bg-apex-card/60 border-t border-apex-border/80 py-8 text-center text-xs text-apex-textMuted mt-16">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="font-display font-black text-base text-white">APEX<span class="text-apex-yellow">TIERS</span></span>
+                <span>— Official Minecraft PvP Tierlist</span>
+            </div>
+            <p>Not affiliated with Mojang AB or Microsoft. Skins rendered via mc-heads.net.</p>
+        </div>
+    </footer>
+
+    <script>
+        /* GAMEMODES CONFIGURATION */
+        const GAMEMODES = [
+            { id: 'overall', name: 'Overall', icon: 'fa-trophy' },
+            { id: 'sword', name: 'Sword', icon: 'fa-khanda' },
+            { id: 'axe', name: 'Axe', icon: 'fa-gavel' },
+            { id: 'mace', name: 'Mace', icon: 'fa-hammer' },
+            { id: 'diapot', name: 'DiaPot', icon: 'fa-flask' },
+            { id: 'nethpot', name: 'NethPot', icon: 'fa-shield-halved' },
+            { id: 'smp', name: 'SMP', icon: 'fa-globe' },
+            { id: 'crystal', name: 'Crystal', icon: 'fa-gem' },
+            { id: 'uhc', name: 'UHC', icon: 'fa-heart' }
+        ];
+
+        /* TIER SCORING WEIGHTS */
+        const TIER_SCORES = {
+            'HT1': 30, 'LT1': 27,
+            'HT2': 24, 'LT2': 21,
+            'HT3': 18, 'LT3': 15,
+            'HT4': 12, 'LT4': 9,
+            'HT5': 6,  'LT5': 3,
+            'None': 0
+        };
+
+        /* INITIAL SEED DATA */
+        const DEFAULT_PLAYERS = [];
+
+        /* STATE MANAGEMENT */
+        let players = [];
+        let activeGamemode = 'overall';
+        let currentView = 'home';
+
+        /* INITIALIZATION */
+        window.onload = function() {
+            loadPlayersData();
+            renderGamemodeTabs();
+            renderGamemodesPreviewGrid();
+            renderAdminInputs();
+            renderCurrentView();
+            updateTotalPlayerCount();
+        };
+
+        /* STORAGE HANDLERS */
+        function loadPlayersData() {
+            const saved = localStorage.getItem('apextiers_players');
+            if (saved) {
+                try {
+                    players = JSON.parse(saved);
+                } catch (e) {
+                    players = [...DEFAULT_PLAYERS];
+                }
+            } else {
+                players = [...DEFAULT_PLAYERS];
+            }
+            calculateAllPoints();
+        }
+
+        function savePlayersData() {
+            calculateAllPoints();
+            localStorage.setItem('apextiers_players', JSON.stringify(players));
+            renderCurrentView();
+            updateTotalPlayerCount();
+        }
+
+        function calculateAllPoints() {
+            players.forEach(player => {
+                let total = 0;
+                GAMEMODES.filter(g => g.id !== 'overall').forEach(g => {
+                    const tier = player.tiers[g.id] || 'None';
+                    total += TIER_SCORES[tier] || 0;
+                });
+                player.totalPoints = total;
+            });
+
+            // Sort descending by points
+            players.sort((a, b) => b.totalPoints - a.totalPoints);
+        }
+
+        function updateTotalPlayerCount() {
+            const el = document.getElementById('stat-total-players');
+            if(el) el.textContent = players.length;
+        }
+
+        /* VIEW & TAB SWITCHING */
+        function switchView(view) {
+            currentView = view;
+            document.getElementById('view-home').classList.toggle('hidden', view !== 'home');
+            document.getElementById('view-rankings').classList.toggle('hidden', view !== 'rankings');
+
+            const homeBtn = document.getElementById('nav-btn-home');
+            const rankingsBtn = document.getElementById('nav-btn-rankings');
+
+            if (view === 'home') {
+                homeBtn.className = "nav-tab px-5 py-2 rounded-lg font-bold text-xs transition text-black bg-gradient-to-r from-apex-yellow to-amber-400 shadow-md shadow-apex-yellow/20 flex items-center gap-2";
+                rankingsBtn.className = "nav-tab px-5 py-2 rounded-lg font-bold text-xs transition text-apex-textMuted hover:text-white hover:bg-white/5 flex items-center gap-2";
+            } else {
+                rankingsBtn.className = "nav-tab px-5 py-2 rounded-lg font-bold text-xs transition text-black bg-gradient-to-r from-apex-yellow to-amber-400 shadow-md shadow-apex-yellow/20 flex items-center gap-2";
+                homeBtn.className = "nav-tab px-5 py-2 rounded-lg font-bold text-xs transition text-apex-textMuted hover:text-white hover:bg-white/5 flex items-center gap-2";
+            }
+
+            renderCurrentView();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function selectGamemode(modeId) {
+            activeGamemode = modeId;
+            document.getElementById('active-gamemode-label').textContent = GAMEMODES.find(g => g.id === modeId)?.name || modeId;
+            renderGamemodeTabs();
+            renderCurrentView();
+
+            if (currentView !== 'rankings') {
+                switchView('rankings');
+            }
+        }
+
+        /* RENDERING LOGIC */
+        function renderGamemodeTabs() {
+            const container = document.getElementById('gamemode-tabs');
+            if (!container) return;
+
+            container.innerHTML = GAMEMODES.map(g => {
+                const isActive = g.id === activeGamemode;
+                return `
+                    <button onclick="selectGamemode('${g.id}')" 
+                        class="flex items-center gap-2.5 px-5 py-3 rounded-xl border font-bold text-xs whitespace-nowrap transition-all duration-200 ${
+                            isActive 
+                            ? 'bg-apex-card border-apex-yellow text-apex-yellow glow-yellow red-glint-border' 
+                            : 'bg-apex-card/40 border-apex-border text-apex-textMuted hover:text-white hover:bg-apex-card'
+                        }">
+                        <i class="fa-solid ${g.icon} ${isActive ? 'text-apex-yellow' : 'text-apex-textMuted'}"></i>
+                        <span>${g.name}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function renderGamemodesPreviewGrid() {
+            const container = document.getElementById('gamemodes-preview-grid');
+            if (!container) return;
+
+            container.innerHTML = GAMEMODES.filter(g => g.id !== 'overall').map(g => `
+                <div onclick="selectGamemode('${g.id}')" class="bg-apex-card hover:bg-apex-cardHover border border-apex-border rounded-2xl p-4 text-center cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:border-apex-yellow/50 group">
+                    <div class="w-12 h-12 rounded-xl bg-apex-bg border border-apex-border group-hover:border-apex-yellow/50 flex items-center justify-center mx-auto mb-3 transition">
+                        <i class="fa-solid ${g.icon} text-lg text-apex-yellow group-hover:scale-110 transition"></i>
+                    </div>
+                    <span class="text-xs font-bold text-white block">${g.name}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderCurrentView() {
+            calculateAllPoints();
+
+            if (currentView === 'home') {
+                renderHomeTopPlayers();
+            } else if (currentView === 'rankings') {
+                if (activeGamemode === 'overall') {
+                    document.getElementById('overall-view-container').classList.remove('hidden');
+                    document.getElementById('gamemode-tier-columns').classList.add('hidden');
+                    renderOverallTable();
+                } else {
+                    document.getElementById('overall-view-container').classList.add('hidden');
+                    document.getElementById('gamemode-tier-columns').classList.remove('hidden');
+                    renderTierColumns(activeGamemode);
+                }
+            }
+        }
+
+        /* TOP PLAYERS SHOWCASE */
+        function renderHomeTopPlayers() {
+            const container = document.getElementById('top-players-container');
+            if (!container) return;
+
+            const top3 = players.slice(0, 3);
+            const rankBadges = [
+                { rank: '#1', color: 'text-amber-400', border: 'border-amber-400/50', glow: 'glow-gold-red red-glint-border' },
+                { rank: '#2', color: 'text-slate-300', border: 'border-slate-400/40', glow: '' },
+                { rank: '#3', color: 'text-amber-600', border: 'border-amber-700/40', glow: '' }
+            ];
+
+            container.innerHTML = top3.map((player, idx) => {
+                const badge = rankBadges[idx];
+                return `
+                    <div onclick="openPlayerModal('${player.username}')" class="bg-apex-card hover:bg-apex-cardHover border ${badge.border} rounded-2xl p-6 relative cursor-pointer transition-all duration-300 hover:-translate-y-1.5 ${badge.glow}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <span class="font-display font-black text-2xl ${badge.color}">${badge.rank}</span>
+                                <img src="https://mc-heads.net/avatar/${player.username}" alt="${player.username}" class="w-14 h-14 rounded-xl mc-head border border-apex-border shadow">
+                                <div>
+                                    <h3 class="font-bold text-white text-lg">${player.username}</h3>
+                                    <span class="text-xs text-apex-textMuted font-medium">Overall Champion</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-2xl font-black font-heading text-apex-yellow">${player.totalPoints}</span>
+                                <span class="block text-[10px] font-bold text-apex-textMuted uppercase tracking-wider">PTS</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /* OVERALL LEADERBOARD TABLE */
+        function renderOverallTable() {
+            const tbody = document.getElementById('overall-leaderboard-body');
+            const searchVal = (document.getElementById('ranking-search')?.value || '').toLowerCase();
+            const filtered = players.filter(p => p.username.toLowerCase().includes(searchVal));
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-apex-textMuted text-xs">No players found matching your search.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map((player, idx) => {
+                const globalIndex = players.findIndex(p => p.username === player.username) + 1;
+                
+                let rankDisplay = `#${globalIndex}`;
+                if (globalIndex === 1) rankDisplay = `<i class="fa-solid fa-crown text-amber-400 text-lg"></i>`;
+                else if (globalIndex === 2) rankDisplay = `<i class="fa-solid fa-medal text-slate-300 text-lg"></i>`;
+                else if (globalIndex === 3) rankDisplay = `<i class="fa-solid fa-medal text-amber-600 text-lg"></i>`;
+
+                // Build gamemodes badges with red glint highlights for HT
+                const modeBadges = GAMEMODES.filter(g => g.id !== 'overall').map(g => {
+                    const tier = player.tiers[g.id] || '-';
+                    if (tier === '-') return `<span class="text-apex-textMuted/40 text-[11px] font-mono px-1.5">—</span>`;
+                    
+                    const isHigh = tier.startsWith('HT');
+                    const colorClass = isHigh ? 'text-apex-yellow bg-apex-yellow/10 border-apex-yellow/40' : 'text-apex-red bg-apex-red/10 border-apex-red/40';
+
+                    return `
+                        <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border text-[10px] font-mono font-bold ${colorClass}" title="${g.name}: ${tier}">
+                            <i class="fa-solid ${g.icon} text-[9px] opacity-80"></i>
+                            <span>${tier}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <tr onclick="openPlayerModal('${player.username}')" class="hover:bg-apex-cardHover/80 transition cursor-pointer border-b border-apex-border/40">
+                        <td class="py-4 px-6 text-center font-heading font-bold text-base text-apex-textMuted">${rankDisplay}</td>
+                        <td class="py-4 px-6">
+                            <div class="flex items-center gap-3">
+                                <img src="https://mc-heads.net/avatar/${player.username}" alt="${player.username}" class="w-9 h-9 rounded-lg mc-head border border-apex-border">
+                                <span class="font-bold text-white text-sm hover:text-apex-yellow transition">${player.username}</span>
+                            </div>
+                        </td>
+                        <td class="py-4 px-6 text-right pr-10">
+                            <span class="font-black font-heading text-lg text-apex-yellow">${player.totalPoints}</span>
+                            <span class="text-[10px] text-apex-textMuted font-bold block -mt-1">pts</span>
+                        </td>
+                        <td class="py-4 px-6">
+                            <div class="flex flex-wrap items-center justify-center gap-1.5">
+                                ${modeBadges}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        /* GAMEMODE TIER COLUMNS RENDER (TIER 1 - TIER 5) */
+        function renderTierColumns(modeId) {
+            const searchVal = (document.getElementById('ranking-search')?.value || '').toLowerCase();
+            const filtered = players.filter(p => p.username.toLowerCase().includes(searchVal));
+
+            for (let t = 1; t <= 5; t++) {
+                const colEl = document.getElementById(`column-tier-${t}`);
+                if (!colEl) continue;
+
+                const columnPlayers = filtered.filter(p => {
+                    const tier = p.tiers[modeId];
+                    return tier === `HT${t}` || tier === `LT${t}`;
+                });
+
+                if (columnPlayers.length === 0) {
+                    colEl.innerHTML = `
+                        <div class="h-full flex flex-col items-center justify-center py-12 text-apex-textMuted/40 text-xs font-semibold">
+                            <i class="fa-solid fa-ghost text-2xl mb-2 opacity-30"></i>
+                            <span>No Players Yet</span>
+                        </div>
+                    `;
+                    continue;
+                }
+
+                colEl.innerHTML = columnPlayers.map(p => {
+                    const tierTag = p.tiers[modeId];
+                    const isHigh = tierTag.startsWith('HT');
+                    const badgeColor = isHigh ? 'text-apex-yellow bg-apex-yellow/10 border-apex-yellow/30' : 'text-apex-red bg-apex-red/10 border-apex-red/30';
+
+                    return `
+                        <div onclick="openPlayerModal('${p.username}')" class="bg-apex-bg hover:bg-apex-cardHover border border-apex-border hover:border-apex-yellow/50 rounded-xl p-3 flex items-center justify-between cursor-pointer transition">
+                            <div class="flex items-center gap-3">
+                                <img src="https://mc-heads.net/avatar/${p.username}" alt="${p.username}" class="w-8 h-8 rounded-lg mc-head">
+                                <span class="font-bold text-xs text-white">${p.username}</span>
+                            </div>
+                            <span class="text-[10px] font-mono font-black px-2 py-0.5 rounded-md border ${badgeColor}">${tierTag}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        /* PLAYER DETAILS MODAL */
+        function openPlayerModal(username) {
+            const player = players.find(p => p.username === username);
+            if (!player) return;
+
+            document.getElementById('modal-player-head').src = `https://mc-heads.net/avatar/${player.username}`;
+            document.getElementById('modal-player-name').textContent = player.username;
+
+            const globalRank = players.findIndex(p => p.username === player.username) + 1;
+            document.getElementById('modal-player-rank').textContent = `Rank #${globalRank}`;
+            document.getElementById('modal-player-points').textContent = `${player.totalPoints} Points`;
+
+            const grid = document.getElementById('modal-tiers-grid');
+            grid.innerHTML = GAMEMODES.filter(g => g.id !== 'overall').map(g => {
+                const tier = player.tiers[g.id] || 'Unranked';
+                const isHigh = tier.startsWith('HT');
+                const badgeColor = tier === 'Unranked' ? 'text-apex-textMuted bg-apex-bg border-apex-border' : (isHigh ? 'text-apex-yellow bg-apex-yellow/10 border-apex-yellow/30' : 'text-apex-red bg-apex-red/10 border-apex-red/30');
+
+                return `
+                    <div class="bg-apex-bg p-3 rounded-xl border border-apex-border flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid ${g.icon} text-apex-yellow text-xs"></i>
+                            <span class="text-xs font-semibold text-white">${g.name}</span>
+                        </div>
+                        <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border ${badgeColor}">${tier}</span>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('player-modal').classList.remove('hidden');
+        }
+
+        function closePlayerModal() {
+            document.getElementById('player-modal').classList.add('hidden');
+        }
+
+        /* SEARCH HANDLER */
+        function handleGlobalSearch(val) {
+            if (val.trim()) {
+                if (currentView !== 'rankings') switchView('rankings');
+                const searchInput = document.getElementById('ranking-search');
+                if (searchInput) {
+                    searchInput.value = val;
+                    renderCurrentView();
+                }
+            }
+        }
+
+        /* ADMIN TESTER PANEL LOGIC */
+        function openAdminModal() {
+            renderAdminPlayerRows();
+            document.getElementById('admin-modal').classList.remove('hidden');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-modal').classList.add('hidden');
+        }
+
+        function switchAdminTab(tab) {
+            ['editor', 'json', 'guide'].forEach(t => {
+                document.getElementById(`admin-section-${t}`).classList.toggle('hidden', t !== tab);
+                const btn = document.getElementById(`admin-tab-${t}`);
+                if (t === tab) {
+                    btn.classList.add('border-apex-yellow', 'text-apex-yellow');
+                    btn.classList.remove('border-transparent', 'text-apex-textMuted');
+                } else {
+                    btn.classList.remove('border-apex-yellow', 'text-apex-yellow');
+                    btn.classList.add('border-transparent', 'text-apex-textMuted');
+                }
+            });
+            if (tab === 'json') {
+                document.getElementById('json-textarea').value = JSON.stringify(players, null, 2);
+            }
+        }
+
+        function renderAdminInputs() {
+            const container = document.getElementById('admin-tiers-inputs');
+            if (!container) return;
+            
+            container.innerHTML = GAMEMODES.filter(g => g.id !== 'overall').map(g => `
+                <div class="bg-apex-bg p-2 rounded-xl border border-apex-border">
+                    <label class="block text-[10px] font-bold text-apex-textMuted mb-1 uppercase tracking-wider">${g.name}</label>
+                    <select id="input-tier-${g.id}" class="w-full bg-apex-card border border-apex-border rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-apex-yellow">
+                        <option value="None">None (Unranked)</option>
+                        ${[1,2,3,4,5].map(t => `<option value="HT${t}">HT${t}</option><option value="LT${t}">LT${t}</option>`).join('')}
+                    </select>
+                </div>
+            `).join('');
+        }
+
+        function renderAdminPlayerRows() {
+            const tbody = document.getElementById('admin-player-rows');
+            if (!tbody) return;
+            
+            tbody.innerHTML = players.map(p => `
+                <tr class="hover:bg-apex-cardHover transition border-b border-apex-border/30 last:border-0">
+                    <td class="p-3 font-bold text-white">${p.username}</td>
+                    <td class="p-3 text-apex-yellow font-black">${p.totalPoints} <span class="text-[10px] text-apex-textMuted">pts</span></td>
+                    <td class="p-3 text-right">
+                        <button type="button" onclick="editPlayer('${p.username}')" class="px-2 py-1 text-xs text-apex-textMuted hover:text-white transition" title="Edit Player">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button type="button" onclick="deletePlayer('${p.username}')" class="px-2 py-1 text-xs text-rose-500 hover:text-rose-400 transition" title="Delete Player">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function editPlayer(username) {
+            const p = players.find(x => x.username === username);
+            if (!p) return;
+            
+            document.getElementById('admin-input-username').value = p.username;
+            GAMEMODES.filter(g => g.id !== 'overall').forEach(g => {
+                const el = document.getElementById(`input-tier-${g.id}`);
+                if (el) el.value = p.tiers[g.id] || 'None';
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deletePlayer(username) {
+            if (confirm(`Are you sure you want to delete ${username}?`)) {
+                players = players.filter(p => p.username !== username);
+                savePlayersData();
+                renderAdminPlayerRows();
+                showToast(`Deleted player: ${username}`);
+            }
+        }
+
+        function handleSavePlayer(e) {
+            e.preventDefault();
+            const username = document.getElementById('admin-input-username').value.trim();
+            if (!username) return;
+
+            const tiers = {};
+            GAMEMODES.filter(g => g.id !== 'overall').forEach(g => {
+                const val = document.getElementById(`input-tier-${g.id}`).value;
+                if (val !== 'None') tiers[g.id] = val;
+            });
+
+            const existingIndex = players.findIndex(p => p.username.toLowerCase() === username.toLowerCase());
+            if (existingIndex >= 0) {
+                players[existingIndex].tiers = tiers;
+                showToast(`Updated tiers for ${username}`);
+            } else {
+                players.push({ username, tiers });
+                showToast(`Added new player: ${username}`);
+            }
+
+            savePlayersData();
+            renderAdminPlayerRows();
+            resetForm();
+        }
+
+        function resetForm() {
+            document.getElementById('player-form').reset();
+            GAMEMODES.filter(g => g.id !== 'overall').forEach(g => {
+                const el = document.getElementById(`input-tier-${g.id}`);
+                if (el) el.value = 'None';
+            });
+        }
+
+        function handleExportJSON() {
+            const data = JSON.stringify(players, null, 2);
+            navigator.clipboard.writeText(data).then(() => {
+                showToast("JSON copied to clipboard!");
+            }).catch(err => {
+                // Fallback for iFrame environments
+                const textarea = document.getElementById('json-textarea');
+                textarea.select();
+                document.execCommand('copy');
+                showToast("JSON copied to clipboard!");
+            });
+        }
+
+        function handleImportJSON() {
+            try {
+                const data = document.getElementById('json-textarea').value;
+                const parsed = JSON.parse(data);
+                if (Array.isArray(parsed)) {
+                    players = parsed;
+                    savePlayersData();
+                    renderAdminPlayerRows();
+                    showToast("Successfully imported data!");
+                } else {
+                    alert("Invalid JSON format. Expected an array of players.");
+                }
+            } catch(e) {
+                alert("Error parsing JSON: " + e.message);
+            }
+        }
+
+        function resetDefaultData() {
+            if (confirm("Are you sure you want to wipe all player data? This cannot be undone.")) {
+                players = [...DEFAULT_PLAYERS];
+                savePlayersData();
+                document.getElementById('json-textarea').value = JSON.stringify(players, null, 2);
+                renderAdminPlayerRows();
+                showToast("All player data wiped.");
+            }
+        }
+
+        /* TOAST NOTIFICATION */
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
