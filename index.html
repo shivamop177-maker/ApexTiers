@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>McTiers - Official Minecraft PvP Rankings</title>
+    <title>ApexTiers - Official Minecraft PvP Rankings</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,13 +21,13 @@
             theme: {
                 extend: {
                     colors: {
-                        mct: {
+                        apex: {
                             bg: '#070709',
                             card: '#0c0c0f',
                             cardHover: '#131318',
                             border: '#1a1a22',
-                            orange: '#f97316',
-                            orangeHover: '#ea580c',
+                            orange: '#e85d04',
+                            orangeHover: '#dc2f02',
                             gold: '#fbbf24',
                             textMuted: '#94a3b8',
                             textBright: '#f8fafc'
@@ -69,7 +69,7 @@
             font-family: 'Inter', sans-serif; 
             overflow-x: hidden;
             background-image: 
-                radial-gradient(circle at 50% -20%, rgba(249, 115, 22, 0.12), transparent 50%),
+                radial-gradient(circle at 50% -20%, rgba(232, 93, 4, 0.12), transparent 50%),
                 radial-gradient(circle at 10% 80%, rgba(251, 191, 36, 0.04), transparent 40%);
             background-attachment: fixed;
         }
@@ -87,72 +87,70 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #070709; }
         ::-webkit-scrollbar-thumb { background: #1a1a22; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #f97316; }
+        ::-webkit-scrollbar-thumb:hover { background: #e85d04; }
 
         .result-row { transition: all 0.2s ease; }
         .result-row:hover { 
-            background: rgba(249, 115, 22, 0.03); 
-            border-left: 2px solid #f97316;
+            background: rgba(232, 93, 4, 0.03); 
+            border-left: 2px solid #e85d04;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-mct-orange selection:text-white">
+<body class="min-h-screen flex flex-col selection:bg-apex-orange selection:text-white">
 
     <!-- Loading Splash -->
     <div id="entrance-overlay" class="fixed inset-0 z-[100] bg-[#070709] flex flex-col items-center justify-center">
         <div class="relative flex flex-col items-center">
-            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-mct-orange to-mct-gold p-[2px] animate-pulse">
-                <div class="w-full h-full bg-mct-bg rounded-2xl flex items-center justify-center">
-                    <i class="fa-solid fa-trophy text-mct-orange text-3xl"></i>
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-apex-orange to-apex-gold p-[2px] animate-pulse">
+                <div class="w-full h-full bg-apex-bg rounded-2xl flex items-center justify-center">
+                    <i class="fa-solid fa-shield-halved text-apex-orange text-3xl"></i>
                 </div>
             </div>
-            <h1 class="font-display font-black text-3xl tracking-widest text-white mt-6">MCTIERS</h1>
-            <div class="w-48 h-1 bg-mct-border mt-6 rounded-full overflow-hidden">
-                <div class="h-full bg-mct-orange animate-loading-bar"></div>
+            <h1 class="font-display font-black text-3xl tracking-widest text-white mt-6">APEXTIERS</h1>
+            <div class="w-48 h-1 bg-apex-border mt-6 rounded-full overflow-hidden">
+                <div class="h-full bg-apex-orange animate-loading-bar"></div>
             </div>
-            <p class="mt-3 text-[11px] font-heading tracking-widest uppercase text-mct-textMuted">Loading Global Rankings...</p>
+            <p class="mt-3 text-[11px] font-heading tracking-widest uppercase text-apex-textMuted">Loading Global Rankings...</p>
         </div>
     </div>
 
     <!-- Top Navigation Bar -->
-    <header class="sticky top-0 z-40 bg-[#070709]/90 backdrop-blur-xl border-b border-mct-border shadow-lg">
+    <header class="sticky top-0 z-40 bg-[#070709]/90 backdrop-blur-xl border-b border-apex-border shadow-lg">
         <div class="max-w-[1500px] mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
             <div class="flex items-center space-x-8">
                 <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('home')">
-                    <span class="font-display font-black text-2xl tracking-wider text-mct-orange">MCTIERS</span>
+                    <span class="font-display font-black text-2xl tracking-wider text-white">APEX<span class="text-apex-orange">TIERS</span></span>
                 </div>
                 <nav class="hidden md:flex items-center space-x-1">
-                    <button onclick="switchTab('home')" id="nav-home" class="px-4 py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider text-mct-textMuted hover:text-white transition-all">Home</button>
-                    <button onclick="switchTab('rankings')" id="nav-rankings" class="px-4 py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider bg-mct-orange/10 text-mct-orange border border-mct-orange/30 transition-all">Rankings</button>
-                    <a href="https://discord.gg/Stv5rzsAsk" target="_blank" class="px-4 py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider text-mct-textMuted hover:text-white transition-all">Discords</a>
-                    <a href="#" class="px-4 py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider text-mct-textMuted hover:text-white transition-all">API Docs</a>
+                    <button onclick="switchTab('home')" id="nav-home" class="px-4 py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider text-apex-textMuted hover:text-white transition-all">Home</button>
+                    <button onclick="switchTab('rankings')" id="nav-rankings" class="px-4 py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider bg-apex-orange/10 text-apex-orange border border-apex-orange/35 transition-all">Rankings</button>
+                    <a href="https://discord.gg/Stv5rzsAsk" target="_blank" class="px-4 py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider text-apex-textMuted hover:text-white transition-all">Discords</a>
+                    <a href="#" class="px-4 py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider text-apex-textMuted hover:text-white transition-all">API Docs</a>
                 </nav>
             </div>
 
             <div class="flex items-center space-x-4">
                 <!-- Server IP Pill -->
-                <div class="hidden lg:flex items-center bg-mct-card border border-mct-border rounded-full px-2 py-1.5 pr-4 cursor-pointer hover:border-mct-orange transition-colors" onclick="copyIP()">
+                <div class="hidden lg:flex items-center bg-apex-card border border-apex-border rounded-full px-2 py-1.5 pr-4 cursor-pointer hover:border-apex-orange transition-colors" onclick="copyIP()">
                     <div class="w-6 h-6 rounded-full bg-red-600/20 flex items-center justify-center mr-2 text-red-500 text-xs">
                         <i class="fa-solid fa-server"></i>
                     </div>
-                    <span class="text-[10px] text-mct-textMuted font-heading uppercase tracking-widest mr-2">Server IP:</span>
-                    <span class="font-heading font-bold text-xs tracking-wide text-white" id="nav-server-ip">mcpvp.club</span>
+                    <span class="text-[10px] text-apex-textMuted font-heading uppercase tracking-widest mr-2">Server IP:</span>
+                    <span class="font-heading font-bold text-xs tracking-wide text-white" id="nav-server-ip">play.apextiers.com</span>
                     <i class="fa-brands fa-discord ml-3 text-indigo-400"></i>
                 </div>
 
                 <!-- Admin Cog Button -->
-                <button onclick="openAdminModal()" class="w-10 h-10 flex items-center justify-center rounded-lg bg-mct-card border border-mct-border text-mct-textMuted hover:text-white hover:border-mct-orange transition-all" title="Admin Settings">
+                <button onclick="openAdminModal()" class="w-10 h-10 flex items-center justify-center rounded-lg bg-apex-card border border-apex-border text-apex-textMuted hover:text-white hover:border-apex-orange transition-all" title="Admin Settings">
                     <i class="fa-solid fa-gear"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Gamemode Category Bar (McTiers Style) -->
-    <div class="bg-[#0c0c0f] border-b border-mct-border sticky top-18 z-30 shadow-md">
-        <div class="max-w-[1500px] mx-auto px-4 sm:px-6 overflow-x-auto scrollbar-hide py-3 flex items-center space-x-2 sm:space-x-3" id="mct-gamemode-bar">
-            <!-- Dynamically populated gamemode tabs with icons/PNGs -->
-        </div>
+    <!-- Gamemode Category Bar (With .png / .webp support) -->
+    <div class="bg-[#0c0c0f] border-b border-apex-border sticky top-18 z-30 shadow-md">
+        <div class="max-w-[1500px] mx-auto px-4 sm:px-6 overflow-x-auto scrollbar-hide py-3 flex items-center space-x-2 sm:space-x-3" id="apex-gamemode-bar"></div>
     </div>
 
     <!-- Main Content -->
@@ -161,13 +159,13 @@
         <!-- HOME DASHBOARD VIEW -->
         <div id="view-home" class="hidden space-y-8">
             <div class="glass-panel p-8 rounded-2xl space-y-4">
-                <h2 class="font-display font-black text-3xl text-white">Welcome to McTiers</h2>
-                <p class="text-sm text-mct-textMuted max-w-3xl leading-relaxed">
-                    The official competitive Minecraft PvP rankings network. Explore tier lists across multiple game modes, verified test results, and global leaderboards.
+                <h2 class="font-display font-black text-3xl text-white">Welcome to ApexTiers</h2>
+                <p class="text-sm text-apex-textMuted max-w-3xl leading-relaxed">
+                    The official competitive Minecraft PvP rankings network. Explore tier lists across multiple game modes, verified test results, and global leaderboards across 5 regions.
                 </p>
                 <div class="pt-2 flex gap-4">
-                    <button onclick="switchTab('rankings')" class="px-6 py-3 rounded-xl bg-mct-orange hover:bg-mct-orangeHover text-white font-heading font-bold uppercase tracking-wider text-xs transition-all shadow-lg shadow-orange-500/20">View Leaderboards</button>
-                    <a id="home-discord-btn" href="https://discord.gg/Stv5rzsAsk" target="_blank" class="px-6 py-3 rounded-xl bg-mct-card hover:bg-mct-border border border-mct-border text-white font-heading font-bold uppercase tracking-wider text-xs transition-all flex items-center space-x-2">
+                    <button onclick="switchTab('rankings')" class="px-6 py-3 rounded-xl bg-apex-orange hover:bg-apex-orangeHover text-white font-heading font-bold uppercase tracking-wider text-xs transition-all shadow-lg shadow-orange-500/20">View Leaderboards</button>
+                    <a id="home-discord-btn" href="https://discord.gg/Stv5rzsAsk" target="_blank" class="px-6 py-3 rounded-xl bg-apex-card hover:bg-apex-border border border-apex-border text-white font-heading font-bold uppercase tracking-wider text-xs transition-all flex items-center space-x-2">
                         <i class="fa-brands fa-discord text-indigo-400"></i><span>Join Discord</span>
                     </a>
                 </div>
@@ -176,25 +174,25 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-2 glass-panel rounded-2xl p-6 space-y-4">
                     <h3 class="font-display font-bold text-lg text-white flex items-center space-x-2">
-                        <i class="fa-solid fa-fire text-mct-orange"></i><span>Recent High Tier Results</span>
+                        <i class="fa-solid fa-fire text-apex-orange"></i><span>Recent High Tier Results</span>
                     </h3>
                     <div id="home-high-tiers" class="space-y-2"></div>
                 </div>
                 <div class="glass-panel rounded-2xl p-6 space-y-4">
                     <h3 class="font-display font-bold text-lg text-white flex items-center space-x-2">
-                        <i class="fa-solid fa-chart-line text-mct-gold"></i><span>Network Stats</span>
+                        <i class="fa-solid fa-chart-line text-apex-gold"></i><span>Network Stats</span>
                     </h3>
                     <div class="space-y-3 pt-2">
-                        <div class="flex justify-between items-center bg-[#070709] p-3 rounded-xl border border-mct-border">
-                            <span class="text-xs font-heading uppercase text-mct-textMuted">Registered Players</span>
+                        <div class="flex justify-between items-center bg-[#070709] p-3 rounded-xl border border-apex-border">
+                            <span class="text-xs font-heading uppercase text-apex-textMuted">Registered Players</span>
                             <span id="stat-total-players" class="font-bold text-white font-heading text-sm">0</span>
                         </div>
-                        <div class="flex justify-between items-center bg-[#070709] p-3 rounded-xl border border-mct-border">
-                            <span class="text-xs font-heading uppercase text-mct-textMuted">Server Status</span>
+                        <div class="flex justify-between items-center bg-[#070709] p-3 rounded-xl border border-apex-border">
+                            <span class="text-xs font-heading uppercase text-apex-textMuted">Server Status</span>
                             <span class="px-2.5 py-0.5 rounded bg-green-500/20 text-green-400 text-xs font-heading font-bold">Online</span>
                         </div>
-                        <div class="flex justify-between items-center bg-[#070709] p-3 rounded-xl border border-mct-border">
-                            <span class="text-xs font-heading uppercase text-mct-textMuted">Discord Members</span>
+                        <div class="flex justify-between items-center bg-[#070709] p-3 rounded-xl border border-apex-border">
+                            <span class="text-xs font-heading uppercase text-apex-textMuted">Discord Members</span>
                             <span id="stat-discord-members" class="font-bold text-white font-heading text-sm">450</span>
                         </div>
                     </div>
@@ -202,16 +200,16 @@
             </div>
         </div>
 
-        <!-- RANKINGS VIEW (McTiers Table Format) -->
+        <!-- RANKINGS VIEW -->
         <div id="view-rankings" class="space-y-6">
             <!-- Search & Filter Bar -->
             <div class="flex flex-col md:flex-row gap-4 items-center justify-between glass-panel p-4 rounded-2xl">
                 <div class="relative w-full md:w-96">
-                    <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-mct-textMuted"></i>
-                    <input type="text" id="player-search" oninput="renderRankings()" placeholder="Search player IGN..." class="w-full bg-[#070709] border border-mct-border rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-mct-textMuted focus:outline-none focus:border-mct-orange transition-colors">
+                    <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-apex-textMuted"></i>
+                    <input type="text" id="player-search" oninput="renderRankings()" placeholder="Search player IGN..." class="w-full bg-[#070709] border border-apex-border rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-apex-textMuted focus:outline-none focus:border-apex-orange transition-colors">
                 </div>
                 <div class="flex items-center space-x-3 w-full md:w-auto justify-end">
-                    <select id="region-filter" onchange="renderRankings()" class="bg-[#070709] border border-mct-border rounded-xl px-4 py-3 text-xs font-heading font-bold uppercase text-white focus:outline-none focus:border-mct-orange">
+                    <select id="region-filter" onchange="renderRankings()" class="bg-[#070709] border border-apex-border rounded-xl px-4 py-3 text-xs font-heading font-bold uppercase text-white focus:outline-none focus:border-apex-orange">
                         <option value="ALL">All Regions</option>
                         <option value="NA">NA</option>
                         <option value="EU">EU</option>
@@ -222,19 +220,19 @@
                 </div>
             </div>
 
-            <!-- McTiers Rankings Table -->
+            <!-- Rankings Table -->
             <div class="glass-panel rounded-2xl overflow-hidden shadow-2xl">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="border-b border-mct-border bg-[#070709]/80 text-[10px] font-heading font-bold uppercase tracking-wider text-mct-textMuted">
+                            <tr class="border-b border-apex-border bg-[#070709]/80 text-[10px] font-heading font-bold uppercase tracking-wider text-apex-textMuted">
                                 <th class="py-4 px-6 w-24">Rank</th>
                                 <th class="py-4 px-6">Player</th>
                                 <th class="py-4 px-6 text-center w-28">Region</th>
                                 <th class="py-4 px-6 text-right pr-8">Tiers Breakdown</th>
                             </tr>
                         </thead>
-                        <tbody id="rankings-tbody" class="divide-y divide-mct-border/40 font-sans text-sm"></tbody>
+                        <tbody id="rankings-tbody" class="divide-y divide-apex-border/40 font-sans text-sm"></tbody>
                     </table>
                 </div>
             </div>
@@ -243,57 +241,57 @@
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-mct-border/50 bg-[#070709] py-8 mt-auto">
+    <footer class="border-t border-apex-border/50 bg-[#070709] py-8 mt-auto">
         <div class="max-w-[1500px] mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
-            <p class="text-xs text-mct-textMuted">© 2026 McTiers Network. All rights reserved.</p>
-            <div class="flex items-center space-x-6 text-xs font-heading font-bold uppercase text-mct-textMuted">
-                <a href="#" class="hover:text-mct-orange transition-colors">Terms</a>
-                <a href="#" class="hover:text-mct-orange transition-colors">Privacy</a>
-                <a id="footer-discord" href="https://discord.gg/Stv5rzsAsk" target="_blank" class="hover:text-mct-orange transition-colors">Discord</a>
+            <p class="text-xs text-apex-textMuted">© 2026 ApexTiers Network. All rights reserved.</p>
+            <div class="flex items-center space-x-6 text-xs font-heading font-bold uppercase text-apex-textMuted">
+                <a href="#" class="hover:text-apex-orange transition-colors">Terms</a>
+                <a href="#" class="hover:text-apex-orange transition-colors">Privacy</a>
+                <a id="footer-discord" href="https://discord.gg/Stv5rzsAsk" target="_blank" class="hover:text-apex-orange transition-colors">Discord</a>
             </div>
         </div>
     </footer>
 
     <!-- ADMIN MODAL (Passcode: shivam?98) -->
     <div id="admin-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="glass-panel rounded-2xl max-w-3xl w-full p-6 sm:p-8 space-y-6 relative border-t-2 border-t-mct-orange">
-            <button onclick="closeAdminModal()" class="absolute right-6 top-6 text-mct-textMuted hover:text-white transition-colors">
+        <div class="glass-panel rounded-2xl max-w-3xl w-full p-6 sm:p-8 space-y-6 relative border-t-2 border-t-apex-orange">
+            <button onclick="closeAdminModal()" class="absolute right-6 top-6 text-apex-textMuted hover:text-white transition-colors">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
             <div class="space-y-1">
-                <h3 class="font-display font-black text-2xl text-white">Network Admin Panel</h3>
-                <p class="text-xs text-mct-textMuted font-heading uppercase tracking-widest">Configure players, tiers, region filters, and gamemode PNG icons.</p>
+                <h3 class="font-display font-black text-2xl text-white">ApexTiers Admin Panel</h3>
+                <p class="text-xs text-apex-textMuted font-heading uppercase tracking-widest">Manage players, tiers (HT1 to LT5), regions, and gamemode .png/.webp icons.</p>
             </div>
 
             <!-- Password Gate -->
             <div id="admin-gate" class="space-y-4 pt-4">
                 <div>
-                    <input type="password" id="admin-pass-input" placeholder="Enter secure passcode (shivam?98)..." class="w-full bg-[#070709] border border-mct-border rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-mct-orange font-mono">
+                    <input type="password" id="admin-pass-input" placeholder="Enter secure passcode (shivam?98)..." class="w-full bg-[#070709] border border-apex-border rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-apex-orange font-mono">
                 </div>
-                <button onclick="verifyAdminPassword()" class="w-full py-3.5 rounded-xl bg-mct-orange hover:bg-mct-orangeHover text-white font-heading font-bold uppercase tracking-widest transition-all">
+                <button onclick="verifyAdminPassword()" class="w-full py-3.5 rounded-xl bg-apex-orange hover:bg-apex-orangeHover text-white font-heading font-bold uppercase tracking-widest transition-all">
                     Authenticate
                 </button>
             </div>
 
             <!-- Admin Dashboard -->
             <div id="admin-workspace" class="hidden space-y-6 pt-2">
-                <div class="flex border-b border-mct-border space-x-6 overflow-x-auto scrollbar-hide">
-                    <button onclick="switchAdminTab('editor')" id="admin-tab-editor" class="pb-3 text-xs font-heading font-bold uppercase tracking-widest border-b-2 border-mct-orange text-mct-orange whitespace-nowrap">Add / Edit Player</button>
-                    <button onclick="switchAdminTab('manage')" id="admin-tab-manage" class="pb-3 text-xs font-heading font-bold uppercase tracking-widest border-b-2 border-transparent text-mct-textMuted hover:text-white whitespace-nowrap">Manage Players</button>
-                    <button onclick="switchAdminTab('icons')" id="admin-tab-icons" class="pb-3 text-xs font-heading font-bold uppercase tracking-widest border-b-2 border-transparent text-mct-textMuted hover:text-white whitespace-nowrap">Gamemode PNG Icons</button>
-                    <button onclick="switchAdminTab('settings')" id="admin-tab-settings" class="pb-3 text-xs font-heading font-bold uppercase tracking-widest border-b-2 border-transparent text-mct-textMuted hover:text-white whitespace-nowrap">Server Settings</button>
+                <div class="flex border-b border-apex-border space-x-6 overflow-x-auto scrollbar-hide">
+                    <button onclick="switchAdminTab('editor')" id="admin-tab-editor" class="pb-3 text-xs font-heading font-bold uppercase tracking-widest border-b-2 border-apex-orange text-apex-orange whitespace-nowrap">Add / Edit Player</button>
+                    <button onclick="switchAdminTab('manage')" id="admin-tab-manage" class="pb-3 text-xs font-heading font-bold uppercase tracking-widest border-b-2 border-transparent text-apex-textMuted hover:text-white whitespace-nowrap">Manage Players</button>
+                    <button onclick="switchAdminTab('icons')" id="admin-tab-icons" class="pb-3 text-xs font-heading font-bold uppercase tracking-widest border-b-2 border-transparent text-apex-textMuted hover:text-white whitespace-nowrap">Gamemode .png / .webp Icons</button>
+                    <button onclick="switchAdminTab('settings')" id="admin-tab-settings" class="pb-3 text-xs font-heading font-bold uppercase tracking-widest border-b-2 border-transparent text-apex-textMuted hover:text-white whitespace-nowrap">Server Settings</button>
                 </div>
 
                 <!-- 1. Player Editor -->
                 <div id="admin-panel-editor" class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-heading font-bold uppercase tracking-widest text-mct-textMuted mb-2">Minecraft IGN</label>
-                            <input type="text" id="edit-ign" placeholder="Player username" class="w-full bg-[#070709] border border-mct-border rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-mct-orange">
+                            <label class="block text-[10px] font-heading font-bold uppercase tracking-widest text-apex-textMuted mb-2">Minecraft IGN</label>
+                            <input type="text" id="edit-ign" placeholder="Player username" class="w-full bg-[#070709] border border-apex-border rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-apex-orange">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-heading font-bold uppercase tracking-widest text-mct-textMuted mb-2">Region</label>
-                            <select id="edit-region" class="w-full bg-[#070709] border border-mct-border rounded-xl px-4 py-3 text-sm text-white font-heading font-bold focus:outline-none focus:border-mct-orange">
+                            <label class="block text-[10px] font-heading font-bold uppercase tracking-widest text-apex-textMuted mb-2">Region (NA, EU, AS, AU, ME)</label>
+                            <select id="edit-region" class="w-full bg-[#070709] border border-apex-border rounded-xl px-4 py-3 text-sm text-white font-heading font-bold focus:outline-none focus:border-apex-orange">
                                 <option value="NA">NA</option>
                                 <option value="EU">EU</option>
                                 <option value="AS">AS</option>
@@ -303,10 +301,10 @@
                         </div>
                     </div>
                     <div class="space-y-2 pt-2">
-                        <label class="block text-[10px] font-heading font-bold uppercase tracking-widest text-mct-textMuted">Tiers per Gamemode (HT1 - LT5)</label>
+                        <label class="block text-[10px] font-heading font-bold uppercase tracking-widest text-apex-textMuted">Tiers per Gamemode (HT1 down to LT5)</label>
                         <div id="admin-tiers-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
                     </div>
-                    <button onclick="savePlayerFromAdmin()" class="w-full py-3.5 rounded-xl bg-mct-orange hover:bg-mct-orangeHover text-white font-heading font-bold text-xs uppercase tracking-widest transition-all">
+                    <button onclick="savePlayerFromAdmin()" class="w-full py-3.5 rounded-xl bg-apex-orange hover:bg-apex-orangeHover text-white font-heading font-bold text-xs uppercase tracking-widest transition-all">
                         Save Player to Rankings
                     </button>
                 </div>
@@ -316,26 +314,26 @@
                     <div id="admin-players-list" class="space-y-2"></div>
                 </div>
 
-                <!-- 3. Gamemode PNG Icons Customizer -->
+                <!-- 3. Gamemode .png / .webp Icons Customizer -->
                 <div id="admin-panel-icons" class="hidden space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                    <p class="text-xs text-mct-textMuted">Paste direct PNG/image URLs for each gamemode icon (matching McTiers style):</p>
+                    <p class="text-xs text-apex-textMuted">Paste direct <strong>.png</strong> or <strong>.webp</strong> image URLs for each gamemode icon:</p>
                     <div id="admin-icons-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
-                    <button onclick="saveGamemodeIcons()" class="w-full py-3.5 rounded-xl bg-mct-orange hover:bg-mct-orangeHover text-white font-heading font-bold text-xs uppercase tracking-widest transition-all">
-                        Save Gamemode Icons
+                    <button onclick="saveGamemodeIcons()" class="w-full py-3.5 rounded-xl bg-apex-orange hover:bg-apex-orangeHover text-white font-heading font-bold text-xs uppercase tracking-widest transition-all">
+                        Save Gamemode Icons (.png / .webp)
                     </button>
                 </div>
 
                 <!-- 4. Server Settings -->
                 <div id="admin-panel-settings" class="hidden space-y-4">
                     <div>
-                        <label class="block text-[10px] font-heading font-bold uppercase tracking-widest text-mct-textMuted mb-2">Server IP Address</label>
-                        <input type="text" id="setting-server-ip" placeholder="mcpvp.club" class="w-full bg-[#070709] border border-mct-border rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-mct-orange">
+                        <label class="block text-[10px] font-heading font-bold uppercase tracking-widest text-apex-textMuted mb-2">Server IP Address</label>
+                        <input type="text" id="setting-server-ip" placeholder="play.apextiers.com" class="w-full bg-[#070709] border border-apex-border rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-apex-orange">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-heading font-bold uppercase tracking-widest text-mct-textMuted mb-2">Discord Invite Link</label>
-                        <input type="text" id="setting-discord-url" placeholder="https://discord.gg/..." class="w-full bg-[#070709] border border-mct-border rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-mct-orange">
+                        <label class="block text-[10px] font-heading font-bold uppercase tracking-widest text-apex-textMuted mb-2">Discord Invite Link</label>
+                        <input type="text" id="setting-discord-url" placeholder="https://discord.gg/..." class="w-full bg-[#070709] border border-apex-border rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-apex-orange">
                     </div>
-                    <button onclick="saveSiteSettings()" class="w-full py-3.5 rounded-xl bg-mct-orange hover:bg-mct-orangeHover text-white font-heading font-bold text-xs uppercase tracking-widest transition-all">
+                    <button onclick="saveSiteSettings()" class="w-full py-3.5 rounded-xl bg-apex-orange hover:bg-apex-orangeHover text-white font-heading font-bold text-xs uppercase tracking-widest transition-all">
                         Save Configuration
                     </button>
                 </div>
@@ -345,8 +343,8 @@
 
     <!-- PLAYER PROFILE MODAL -->
     <div id="profile-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="glass-panel rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 relative border-t-2 border-t-mct-gold">
-            <button onclick="closeProfileModal()" class="absolute right-6 top-6 text-mct-textMuted hover:text-white transition-colors">
+        <div class="glass-panel rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 relative border-t-2 border-t-apex-gold">
+            <button onclick="closeProfileModal()" class="absolute right-6 top-6 text-apex-textMuted hover:text-white transition-colors">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
             <div id="profile-content" class="space-y-6"></div>
@@ -378,9 +376,9 @@
             'None': 0
         };
 
-        let playersData = JSON.parse(localStorage.getItem('mct_players')) || [];
-        let siteSettings = JSON.parse(localStorage.getItem('mct_settings')) || {
-            serverIp: "mcpvp.club",
+        let playersData = JSON.parse(localStorage.getItem('apex_tiers_players')) || [];
+        let siteSettings = JSON.parse(localStorage.getItem('apex_tiers_settings')) || {
+            serverIp: "play.apextiers.com",
             discordUrl: "https://discord.gg/Stv5rzsAsk",
             memberCount: 450,
             icons: {}
@@ -388,7 +386,7 @@
         let currentGamemodeTab = 'overall';
 
         function getTierColor(tier) {
-            if (!tier || tier === 'None') return 'text-mct-textMuted';
+            if (!tier || tier === 'None') return 'text-apex-textMuted';
             if (tier.startsWith('HT')) return 'text-amber-400 font-extrabold';
             return 'text-slate-300 font-bold';
         }
@@ -396,11 +394,11 @@
         function initApp() {
             if (playersData.length === 0) {
                 playersData = [
-                    { username: 'Marlowww', region: 'NA', title: 'Combat Grandmaster', points: 450, tiers: { sword: 'HT1', axe: 'HT1', mace: 'HT1', pot: 'HT1', nethop: 'HT1', smp: 'HT1', uhc: 'LT1', vanilla: 'LT1' } },
-                    { username: 'ItzRealMe', region: 'NA', title: 'Combat Master', points: 330, tiers: { sword: 'HT3', axe: 'HT1', mace: 'HT1', pot: 'HT1', nethop: 'HT1', smp: 'HT1', uhc: 'LT2', vanilla: 'LT2' } },
-                    { username: 'coldified', region: 'EU', title: 'Combat Master', points: 326, tiers: { sword: 'LT1', axe: 'LT3', mace: 'HT1', pot: 'HT1', nethop: 'LT1', smp: 'LT1', uhc: 'LT1', vanilla: 'LT2' } },
-                    { username: 'Swight', region: 'NA', title: 'Combat Master', points: 290, tiers: { sword: 'LT3', axe: 'HT1', mace: 'HT1', pot: 'HT1', nethop: 'HT2', smp: 'LT2', uhc: 'LT2', vanilla: 'HT2' } },
-                    { username: 'janekv', region: 'EU', title: 'Combat Master', points: 260, tiers: { sword: 'LT3', axe: 'HT4', mace: 'HT1', pot: 'HT1', nethop: 'HT1', smp: 'HT2', uhc: 'LT2', vanilla: 'LT2' } }
+                    { username: 'Marlowww', region: 'NA', title: 'Combat Grandmaster', tiers: { sword: 'HT1', axe: 'HT1', mace: 'HT1', pot: 'HT1', nethop: 'HT1', smp: 'HT1', uhc: 'LT1', vanilla: 'LT1' } },
+                    { username: 'ItzRealMe', region: 'NA', title: 'Combat Master', tiers: { sword: 'HT3', axe: 'HT1', mace: 'HT1', pot: 'HT1', nethop: 'HT1', smp: 'HT1', uhc: 'LT2', vanilla: 'LT2' } },
+                    { username: 'coldified', region: 'EU', title: 'Combat Master', tiers: { sword: 'LT1', axe: 'LT3', mace: 'HT1', pot: 'HT1', nethop: 'LT1', smp: 'LT1', uhc: 'LT1', vanilla: 'LT2' } },
+                    { username: 'Swight', region: 'NA', title: 'Combat Master', tiers: { sword: 'LT3', axe: 'HT1', mace: 'HT1', pot: 'HT1', nethop: 'HT2', smp: 'LT2', uhc: 'LT2', vanilla: 'HT2' } },
+                    { username: 'janekv', region: 'EU', title: 'Combat Master', tiers: { sword: 'LT3', axe: 'HT4', mace: 'HT1', pot: 'HT1', nethop: 'HT1', smp: 'HT2', uhc: 'LT2', vanilla: 'LT2' } }
                 ];
                 saveData();
             }
@@ -422,12 +420,12 @@
         }
 
         function saveData() {
-            localStorage.setItem('mct_players', JSON.stringify(playersData));
-            localStorage.setItem('mct_settings', JSON.stringify(siteSettings));
+            localStorage.setItem('apex_tiers_players', JSON.stringify(playersData));
+            localStorage.setItem('apex_tiers_settings', JSON.stringify(siteSettings));
         }
 
         function applySiteSettings() {
-            document.getElementById('nav-server-ip').innerText = siteSettings.serverIp || "mcpvp.club";
+            document.getElementById('nav-server-ip').innerText = siteSettings.serverIp || "play.apextiers.com";
             document.getElementById('stat-discord-members').innerText = siteSettings.memberCount || 450;
             document.getElementById('home-discord-btn').href = siteSettings.discordUrl || "https://discord.gg/Stv5rzsAsk";
             document.getElementById('footer-discord').href = siteSettings.discordUrl || "https://discord.gg/Stv5rzsAsk";
@@ -437,7 +435,7 @@
         }
 
         function copyIP() {
-            navigator.clipboard.writeText(siteSettings.serverIp || "mcpvp.club");
+            navigator.clipboard.writeText(siteSettings.serverIp || "play.apextiers.com");
             const el = document.querySelector('[onclick="copyIP()"]');
             if(el) {
                 el.classList.add('border-green-500');
@@ -449,18 +447,18 @@
             document.getElementById('view-home').classList.add('hidden');
             document.getElementById('view-rankings').classList.add('hidden');
             
-            document.getElementById('nav-home').className = "px-4 py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider text-mct-textMuted hover:text-white transition-all";
-            document.getElementById('nav-rankings').className = "px-4 py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider text-mct-textMuted hover:text-white transition-all";
+            document.getElementById('nav-home').className = "px-4 py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider text-apex-textMuted hover:text-white transition-all";
+            document.getElementById('nav-rankings').className = "px-4 py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider text-apex-textMuted hover:text-white transition-all";
 
             document.getElementById(`view-${tabId}`).classList.remove('hidden');
-            document.getElementById(`nav-${tabId}`).className = "px-4 py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider bg-mct-orange/10 text-mct-orange border border-mct-orange/35 transition-all";
+            document.getElementById(`nav-${tabId}`).className = "px-4 py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider bg-apex-orange/10 text-apex-orange border border-apex-orange/35 transition-all";
             
             if (tabId === 'rankings') renderRankings();
             if (tabId === 'home') renderHomeStats();
         }
 
         function renderGamemodeBar() {
-            const bar = document.getElementById('mct-gamemode-bar');
+            const bar = document.getElementById('apex-gamemode-bar');
             if (!bar) return;
             let html = "";
             GAMEMODES.forEach(gm => {
@@ -469,10 +467,10 @@
                 
                 let iconHtml = customIconUrl 
                     ? `<img src="${customIconUrl}" class="w-4 h-4 object-contain">` 
-                    : `<i class="${gm.icon} text-sm">`;
+                    : `<i class="${gm.icon} text-sm"></i>`;
 
                 html += `
-                    <button onclick="selectGamemodeTab('${gm.id}')" class="flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-heading font-bold uppercase tracking-wider transition-all whitespace-nowrap ${isActive ? 'bg-mct-orange text-white shadow-lg shadow-orange-500/20' : 'bg-[#070709] text-mct-textMuted hover:text-white border border-mct-border'}">
+                    <button onclick="selectGamemodeTab('${gm.id}')" class="flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-heading font-bold uppercase tracking-wider transition-all whitespace-nowrap ${isActive ? 'bg-apex-orange text-white shadow-lg shadow-orange-500/20' : 'bg-[#070709] text-apex-textMuted hover:text-white border border-apex-border'}">
                         ${iconHtml}
                         <span>${gm.name}</span>
                     </button>
@@ -509,7 +507,7 @@
             if (region !== 'ALL') list = list.filter(p => p.region === region);
 
             if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="py-12 text-center text-mct-textMuted font-heading uppercase text-xs">No players found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="py-12 text-center text-apex-textMuted font-heading uppercase text-xs">No players found.</td></tr>`;
                 return;
             }
 
@@ -518,13 +516,11 @@
                 const rank = idx + 1;
                 const skin = `https://minotar.net/avatar/${player.username}/36.png`;
                 
-                // Rank styling like McTiers
-                let rankBadge = `<span class="font-heading font-extrabold text-sm text-mct-textMuted">#${rank}</span>`;
+                let rankBadge = `<span class="font-heading font-extrabold text-sm text-apex-textMuted">#${rank}</span>`;
                 if (rank === 1) rankBadge = `<span class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-400 font-heading font-extrabold text-xs border border-amber-500/40">#1</span>`;
                 if (rank === 2) rankBadge = `<span class="px-2.5 py-1 rounded-lg bg-slate-400/20 text-slate-300 font-heading font-extrabold text-xs border border-slate-400/40">#2</span>`;
                 if (rank === 3) rankBadge = `<span class="px-2.5 py-1 rounded-lg bg-amber-700/20 text-amber-600 font-heading font-extrabold text-xs border border-amber-700/40">#3</span>`;
 
-                // Tiers breakdown icons across row
                 let tiersHtml = '<div class="flex items-center justify-end space-x-3 sm:space-x-4 overflow-x-auto scrollbar-hide py-1">';
                 GAMEMODES.filter(g => g.id !== 'overall').forEach(gm => {
                     const tier = player.tiers && player.tiers[gm.id] ? player.tiers[gm.id] : 'None';
@@ -533,7 +529,7 @@
 
                     tiersHtml += `
                         <div class="flex flex-col items-center min-w-[32px]" title="${gm.name}: ${tier}">
-                            <div class="text-mct-textMuted mb-1">${iconElem}</div>
+                            <div class="text-apex-textMuted mb-1">${iconElem}</div>
                             <span class="text-[11px] font-heading ${getTierColor(tier)}">${tier}</span>
                         </div>
                     `;
@@ -544,14 +540,14 @@
                     <tr class="result-row cursor-pointer" onclick='openProfileModal(${JSON.stringify(player)})'>
                         <td class="py-4 px-6">${rankBadge}</td>
                         <td class="py-4 px-6 flex items-center space-x-3">
-                            <img src="${skin}" class="w-9 h-9 rounded-lg border border-mct-border bg-[#070709]">
+                            <img src="${skin}" class="w-9 h-9 rounded-lg border border-apex-border bg-[#070709]">
                             <div>
                                 <h4 class="font-bold text-white text-sm tracking-wide">${player.username}</h4>
-                                <p class="text-[10px] text-mct-textMuted font-heading uppercase">${player.title || 'Combat Master'} (${player.computedPoints} pts)</p>
+                                <p class="text-[10px] text-apex-textMuted font-heading uppercase">${player.title || 'Combat Master'} (${player.computedPoints} pts)</p>
                             </div>
                         </td>
                         <td class="py-4 px-6 text-center">
-                            <span class="px-2.5 py-1 rounded-lg bg-mct-orange/15 text-mct-orange font-heading font-bold text-[10px] border border-mct-orange/30">${player.region || 'NA'}</span>
+                            <span class="px-2.5 py-1 rounded-lg bg-apex-orange/15 text-apex-orange font-heading font-bold text-[10px] border border-apex-orange/30">${player.region || 'NA'}</span>
                         </td>
                         <td class="py-4 px-6 text-right pr-6">${tiersHtml}</td>
                     </tr>
@@ -570,17 +566,17 @@
             topPlayers.forEach((p, i) => {
                 const skin = `https://minotar.net/avatar/${p.username}/32.png`;
                 html += `
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-[#070709] border border-mct-border">
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-[#070709] border border-apex-border">
                         <div class="flex items-center space-x-3">
-                            <span class="font-heading font-bold text-xs text-mct-textMuted">#${i+1}</span>
-                            <img src="${skin}" class="w-7 h-7 rounded border border-mct-border">
+                            <span class="font-heading font-bold text-xs text-apex-textMuted">#${i+1}</span>
+                            <img src="${skin}" class="w-7 h-7 rounded border border-apex-border">
                             <span class="font-bold text-white text-sm">${p.username}</span>
                         </div>
-                        <span class="text-xs font-heading font-bold text-mct-orange">${p.computedPoints} PTS</span>
+                        <span class="text-xs font-heading font-bold text-apex-orange">${p.computedPoints} PTS</span>
                     </div>
                 `;
             });
-            highTiersContainer.innerHTML = html || '<p class="text-xs text-mct-textMuted">No players available.</p>';
+            highTiersContainer.innerHTML = html || '<p class="text-xs text-apex-textMuted">No players available.</p>';
         }
 
         // Admin Modal Controls
@@ -604,10 +600,10 @@
         function switchAdminTab(tab) {
             ['editor', 'manage', 'icons', 'settings'].forEach(t => {
                 document.getElementById(`admin-panel-${t}`).classList.add('hidden');
-                document.getElementById(`admin-tab-${t}`).className = "pb-3 text-xs font-heading font-bold uppercase tracking-widest border-b-2 border-transparent text-mct-textMuted hover:text-white whitespace-nowrap";
+                document.getElementById(`admin-tab-${t}`).className = "pb-3 text-xs font-heading font-bold uppercase tracking-widest border-b-2 border-transparent text-apex-textMuted hover:text-white whitespace-nowrap";
             });
             document.getElementById(`admin-panel-${tab}`).classList.remove('hidden');
-            document.getElementById(`admin-tab-${tab}`).className = "pb-3 text-xs font-heading font-bold uppercase tracking-widest border-b-2 border-mct-orange text-mct-orange whitespace-nowrap";
+            document.getElementById(`admin-tab-${tab}`).className = "pb-3 text-xs font-heading font-bold uppercase tracking-widest border-b-2 border-apex-orange text-apex-orange whitespace-nowrap";
         }
 
         function renderAdminTiersGrid() {
@@ -617,9 +613,9 @@
             let html = "";
             GAMEMODES.filter(g => g.id !== 'overall').forEach(gm => {
                 html += `
-                    <div class="bg-[#070709] p-3 rounded-xl border border-mct-border space-y-1.5">
-                        <label class="block text-[10px] font-heading font-bold text-mct-orange uppercase">${gm.name}</label>
-                        <select id="admin-tier-${gm.id}" class="w-full bg-[#0c0c0f] border border-mct-border rounded-lg py-1.5 px-2 text-xs text-white focus:outline-none focus:border-mct-orange">
+                    <div class="bg-[#070709] p-3 rounded-xl border border-apex-border space-y-1.5">
+                        <label class="block text-[10px] font-heading font-bold text-apex-orange uppercase">${gm.name}</label>
+                        <select id="admin-tier-${gm.id}" class="w-full bg-[#0c0c0f] border border-apex-border rounded-lg py-1.5 px-2 text-xs text-white focus:outline-none focus:border-apex-orange">
                             ${tiers.map(t => `<option value="${t}">${t}</option>`).join('')}
                         </select>
                     </div>
@@ -635,9 +631,9 @@
             GAMEMODES.filter(g => g.id !== 'overall').forEach(gm => {
                 const currentUrl = (siteSettings.icons && siteSettings.icons[gm.id]) || '';
                 html += `
-                    <div class="bg-[#070709] p-3 rounded-xl border border-mct-border space-y-1">
-                        <label class="block text-[10px] font-heading font-bold uppercase text-mct-textMuted">${gm.name} PNG URL</label>
-                        <input type="text" id="icon-url-${gm.id}" value="${currentUrl}" placeholder="https://...png" class="w-full bg-[#0c0c0f] border border-mct-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-mct-orange">
+                    <div class="bg-[#070709] p-3 rounded-xl border border-apex-border space-y-1">
+                        <label class="block text-[10px] font-heading font-bold uppercase text-apex-textMuted">${gm.name} (.png / .webp URL)</label>
+                        <input type="text" id="icon-url-${gm.id}" value="${currentUrl}" placeholder="https://...png or .webp" class="w-full bg-[#0c0c0f] border border-apex-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-apex-orange">
                     </div>
                 `;
             });
@@ -654,20 +650,20 @@
             saveData();
             renderGamemodeBar();
             renderRankings();
-            alert("Gamemode PNG icons updated successfully!");
+            alert("Gamemode .png/.webp icons updated successfully!");
         }
 
         function renderAdminPlayersList() {
             const container = document.getElementById('admin-players-list');
             if(!container) return;
             if(playersData.length === 0) {
-                container.innerHTML = `<p class="text-xs text-mct-textMuted">No players found.</p>`;
+                container.innerHTML = `<p class="text-xs text-apex-textMuted">No players found.</p>`;
                 return;
             }
             let html = "";
             playersData.forEach(p => {
                 html += `
-                    <div class="flex items-center justify-between bg-[#070709] p-3 rounded-xl border border-mct-border">
+                    <div class="flex items-center justify-between bg-[#070709] p-3 rounded-xl border border-apex-border">
                         <span class="font-bold text-sm text-white">${p.username} (${p.region})</span>
                         <button onclick="removePlayer('${p.username}')" class="px-3 py-1 rounded bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white text-xs font-heading font-bold uppercase transition-all">Remove</button>
                     </div>
@@ -734,8 +730,8 @@
             if (player.tiers) {
                 for (let gm in player.tiers) {
                     breakdown += `
-                        <div class="flex justify-between items-center bg-[#070709] p-3 rounded-xl border border-mct-border">
-                            <span class="text-xs font-heading uppercase font-bold text-mct-textMuted">${gm}</span>
+                        <div class="flex justify-between items-center bg-[#070709] p-3 rounded-xl border border-apex-border">
+                            <span class="text-xs font-heading uppercase font-bold text-apex-textMuted">${gm}</span>
                             <span class="text-xs font-heading font-bold ${getTierColor(player.tiers[gm])}">${player.tiers[gm]}</span>
                         </div>
                     `;
@@ -743,15 +739,15 @@
             }
 
             container.innerHTML = `
-                <div class="flex items-center space-x-4 border-b border-mct-border pb-4">
-                    <img src="${skin}" class="w-16 h-16 rounded-xl border border-mct-border bg-[#070709]">
+                <div class="flex items-center space-x-4 border-b border-apex-border pb-4">
+                    <img src="${skin}" class="w-16 h-16 rounded-xl border border-apex-border bg-[#070709]">
                     <div>
                         <h3 class="font-display font-black text-xl text-white">${player.username}</h3>
-                        <p class="text-xs text-mct-textMuted font-heading uppercase">${player.title || 'Combat Master'} • ${player.region}</p>
+                        <p class="text-xs text-apex-textMuted font-heading uppercase">${player.title || 'Combat Master'} • ${player.region}</p>
                     </div>
                 </div>
                 <div class="space-y-2 max-h-56 overflow-y-auto pr-1">
-                    ${breakdown || '<p class="text-xs text-mct-textMuted">No tier records.</p>'}
+                    ${breakdown || '<p class="text-xs text-apex-textMuted">No tier records.</p>'}
                 </div>
             `;
             document.getElementById('profile-modal').classList.remove('hidden');
