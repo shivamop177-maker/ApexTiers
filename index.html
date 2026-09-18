@@ -61,7 +61,7 @@
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             transition: color 0.3s ease;
             cursor: pointer;
         }
@@ -87,30 +87,36 @@
         /* Top Bar: Modes + Server Widget */
         .top-action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 20px; flex-wrap: wrap; }
         .categories {
-            display: flex; gap: 10px; background: var(--bg-panel); padding: 10px 15px;
+            display: flex; gap: 8px; background: var(--bg-panel); padding: 10px 15px;
             border-radius: 12px; overflow-x: auto; border: 1px solid var(--border-color); flex: 1;
         }
         .category {
             display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer;
-            padding: 8px 14px; border-radius: 8px; transition: all 0.3s ease; color: var(--text-muted);
-            min-width: 70px; font-size: 12px; font-weight: 600;
+            padding: 8px 12px; border-radius: 8px; transition: all 0.3s ease; color: var(--text-muted);
+            min-width: 65px; font-size: 11px; font-weight: 600;
         }
-        .category img { width: 26px; height: 26px; object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5)); transition: transform 0.3s ease; }
+        .category img { width: 24px; height: 24px; object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5)); transition: transform 0.3s ease; }
         .category:hover { background: var(--bg-hover); color: var(--text-main); }
         .category:hover img { transform: translateY(-2px); }
         .category.active { background: var(--gold-gradient); color: var(--bg-dark); font-weight: 700; }
 
         /* Server IP Widget */
         .server-widget { display: flex; align-items: center; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 10px; padding: 6px 15px; gap: 15px; }
+        .info-btn {
+            background: #1a1a1f; border: 1px solid var(--border-color); color: var(--text-main);
+            padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;
+        }
         .server-ip-box { display: flex; align-items: center; background: #0d0d0f; border: 1px solid var(--border-color); border-radius: 6px; padding: 4px 12px; gap: 10px; cursor: pointer; }
         .server-icon-badge { background: #cc2222; color: white; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; }
         .server-ip-text { font-size: 13px; font-weight: 700; color: #fff; }
 
-        /* Admin Panel Section */
+        /* Hidden Admin Panel (Secured) */
         .admin-panel {
+            display: none; /* Hidden by default */
             margin-bottom: 30px; padding: 25px; background: #121216;
-            border: 2px solid var(--gold-primary); border-radius: 12px;
+            border: 2px dashed var(--gold-primary); border-radius: 12px;
             box-shadow: 0 4px 20px rgba(242, 169, 0, 0.15);
+            animation: fadeIn 0.4s ease;
         }
         .admin-header { color: var(--gold-primary); margin-bottom: 15px; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
         .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -139,7 +145,7 @@
         .h-rank { width: 60px; }
         .h-player { flex: 1; }
         .h-region { width: 90px; }
-        .h-tiers { width: 320px; }
+        .h-tiers { width: 340px; }
 
         /* Rankings Rows */
         .ranking-list { display: flex; flex-direction: column; gap: 10px; }
@@ -163,7 +169,7 @@
         .player-details span { font-size: 11px; color: var(--gold-primary); font-weight: 600; }
         .region { width: 90px; color: #ff4d4d; font-weight: 800; font-size: 13px; }
 
-        .player-tiers { width: 320px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .player-tiers { width: 340px; display: flex; gap: 8px; flex-wrap: wrap; }
         .tier-badge { display: flex; flex-direction: column; align-items: center; gap: 3px; }
         .tier-badge img { width: 18px; height: 18px; object-fit: contain; }
         .tier-label { font-size: 10px; padding: 1px 5px; border-radius: 3px; font-weight: 800; }
@@ -182,11 +188,11 @@
 
     <!-- Top Navigation -->
     <nav>
-        <div class="logo" onclick="window.scrollTo({top:0, behavior:'smooth'})">APEXTIERS</div>
+        <div class="logo" id="main-logo" onclick="handleLogoClick()" title="Triple-click to open Admin Panel">APEXTIERS</div>
         <div class="nav-links">
             <a id="nav-home" class="active" onclick="switchTab('home')"><i class="fa-solid fa-house"></i> Home</a>
             <a id="nav-rankings" onclick="switchTab('rankings')"><i class="fa-solid fa-trophy"></i> Rankings</a>
-            <a href="https://discord.gg/Stv5rzsAsk" target="_blank"><i class="fa-brands fa-discord"></i> Discords</a>
+            <a href="https://discord.gg/Stv5rzsAsk" target="_blank"><i class="fa-brands fa-discord"></i> Discords <i class="fa-solid fa-chevron-down" style="font-size:10px;"></i></a>
             <a href="#"><i class="fa-solid fa-file-code"></i> API Docs</a>
         </div>
         <div class="search-container">
@@ -197,19 +203,31 @@
 
     <div class="container">
         <!-- Modes & Server IP Header Bar -->
-        <div class="top-action-bar" id="main-content-bar">
+        <div class="top-action-bar">
             <div class="categories" id="categories-container">
                 <div class="category active" data-mode="overall">
                     <span style="font-size: 20px;">🏆</span>
                     <span>Overall</span>
                 </div>
+                <div class="category" data-mode="ltms">
+                    <img src="spearmace.webp" alt="LTMs" onerror="this.src='pot.webp'">
+                    <span>LTMs</span>
+                </div>
+                <div class="category" data-mode="vanilla">
+                    <img src="sword.webp" alt="Vanilla" onerror="this.src='pot.webp'">
+                    <span>Vanilla</span>
+                </div>
+                <div class="category" data-mode="uhc">
+                    <img src="uhc.webp" alt="UHC" onerror="this.src='pot.webp'">
+                    <span>UHC</span>
+                </div>
                 <div class="category" data-mode="pot">
                     <img src="pot.webp" alt="Pot" onerror="this.src='pot.webp'">
                     <span>Pot</span>
                 </div>
-                <div class="category" data-mode="cpvp">
-                    <img src="cpvp.webp" alt="CPVP" onerror="this.src='pot.webp'">
-                    <span>CPVP</span>
+                <div class="category" data-mode="nethop">
+                    <img src="cpvp.webp" alt="NethOP" onerror="this.src='pot.webp'">
+                    <span>NethOP</span>
                 </div>
                 <div class="category" data-mode="smp">
                     <img src="smp.webp" alt="SMP" onerror="this.src='pot.webp'">
@@ -227,34 +245,29 @@
                     <img src="mace.webp" alt="Mace" onerror="this.src='pot.webp'">
                     <span>Mace</span>
                 </div>
-                <div class="category" data-mode="uhc">
-                    <img src="uhc.webp" alt="UHC" onerror="this.src='pot.webp'">
-                    <span>UHC</span>
-                </div>
-                <div class="category" data-mode="spearmace">
-                    <img src="spearmace.webp" alt="SpearMace" onerror="this.src='pot.webp'">
-                    <span>SpearMace</span>
-                </div>
             </div>
 
             <!-- Server IP Widget -->
             <div class="server-widget">
+                <button class="info-btn" onclick="alert('ApexTiers - Premier Minecraft PvP Rankings Hub')">
+                    <i class="fa-solid fa-circle-info"></i> Information
+                </button>
                 <div class="server-ip-box" onclick="copyIP()" title="Click to copy IP">
                     <span class="server-icon-badge">CLUB</span>
-                    <span class="server-ip-text" id="display-server-ip">play.apextiers.fun</span>
+                    <span class="server-ip-text" id="display-server-ip">mcpvp.club</span>
                     <i class="fa-brands fa-discord" style="color: #5865F2;"></i>
                 </div>
             </div>
         </div>
 
-        <!-- Fully Visible Admin Panel -->
+        <!-- Hidden Admin Panel (Unlocked by triple-clicking logo with password) -->
         <div class="admin-panel" id="admin-panel-section">
-            <h2 class="admin-header"><i class="fa-solid fa-gear"></i> Server & Player Management</h2>
+            <h2 class="admin-header"><i class="fa-solid fa-gear"></i> Secured Admin Controls</h2>
             <div class="admin-grid">
                 <div class="admin-box">
                     <h4>Add / Update Player</h4>
                     <input type="text" id="admin-name" class="admin-input" placeholder="Player Name (e.g. Marlowww)">
-                    <input type="text" id="admin-uuid" class="admin-input" placeholder="Minecraft UUID (for skin head)">
+                    <input type="text" id="admin-uuid" class="admin-input" placeholder="Minecraft UUID (for avatar head)">
                     <select id="admin-region" class="admin-input">
                         <option value="NA">NA</option>
                         <option value="EU">EU</option>
@@ -291,22 +304,22 @@
     </div>
 
     <script>
-        const GAMEMODES = ['pot', 'cpvp', 'smp', 'sword', 'axe', 'mace', 'uhc', 'spearmace'];
+        const GAMEMODES = ['ltms', 'vanilla', 'uhc', 'pot', 'nethop', 'smp', 'sword', 'axe', 'mace'];
         const TIER_SCORES = {
             'HT1': 30, 'LT1': 27, 'HT2': 24, 'LT2': 21,
             'HT3': 18, 'LT3': 15, 'HT4': 12, 'LT4': 9, 'None': 0
         };
 
         const defaultPlayers = [
-            { name: "Marlowww", uuid: "61699b2e-d327-4a01-9f1e-0ea8c3f06bc6", region: "NA", tiers: { pot: "HT1", sword: "HT1", cpvp: "HT1", axe: "HT1", smp: "HT1", mace: "HT1", uhc: "LT1", spearmace: "LT1" } },
-            { name: "ItzRealMe", uuid: "8667ba71-b85a-4004-af54-457a9734eed7", region: "NA", tiers: { sword: "HT3", pot: "HT1", cpvp: "HT1", smp: "HT1", uhc: "LT2", mace: "LT2" } },
-            { name: "coldified", uuid: "069a79f4-44e9-4726-a5be-fca90e38aaf5", region: "EU", tiers: { pot: "LT1", sword: "LT3", cpvp: "HT1", smp: "HT1", uhc: "LT1", axe: "HT1", mace: "LT2" } },
-            { name: "Swight", uuid: "1a82d658-7512-4217-9104-1bbf6e5f1d46", region: "NA", tiers: { pot: "LT3", sword: "HT1", cpvp: "HT1", smp: "HT1", uhc: "HT2", mace: "LT2", spearmace: "LT2" } },
-            { name: "janekv", uuid: "c0695026-0e9f-44e9-92b0-9c2f42a0b1bc", region: "EU", tiers: { pot: "LT3", sword: "HT4", cpvp: "HT1", smp: "HT1", uhc: "HT1", axe: "HT2", mace: "LT2", spearmace: "LT2" } }
+            { name: "Marlowww", uuid: "61699b2e-d327-4a01-9f1e-0ea8c3f06bc6", region: "NA", tiers: { pot: "HT1", sword: "HT1", nethop: "HT1", axe: "HT1", smp: "HT1", mace: "HT1", uhc: "LT1", ltms: "LT1" } },
+            { name: "ItzRealMe", uuid: "8667ba71-b85a-4004-af54-457a9734eed7", region: "NA", tiers: { sword: "HT3", pot: "HT1", nethop: "HT1", smp: "HT1", uhc: "LT2", mace: "LT2" } },
+            { name: "coldified", uuid: "069a79f4-44e9-4726-a5be-fca90e38aaf5", region: "EU", tiers: { pot: "LT1", sword: "LT3", nethop: "HT1", smp: "HT1", uhc: "LT1", axe: "HT1", mace: "LT2" } },
+            { name: "Swight", uuid: "1a82d658-7512-4217-9104-1bbf6e5f1d46", region: "NA", tiers: { pot: "LT3", sword: "HT1", nethop: "HT1", smp: "HT1", uhc: "HT2", mace: "LT2", ltms: "LT2" } },
+            { name: "janekv", uuid: "c0695026-0e9f-44e9-92b0-9c2f42a0b1bc", region: "EU", tiers: { pot: "LT3", sword: "HT4", nethop: "HT1", smp: "HT1", uhc: "HT1", axe: "HT2", mace: "LT2", ltms: "LT2" } }
         ];
 
         let playersDB = JSON.parse(localStorage.getItem('apexTiersDB')) || defaultPlayers;
-        let serverIP = localStorage.getItem('apexServerIP') || 'play.apextiers.fun';
+        let serverIP = localStorage.getItem('apexServerIP') || 'mcpvp.club';
         let currentMode = 'overall';
 
         document.getElementById('display-server-ip').innerText = serverIP;
@@ -318,7 +331,7 @@
             GAMEMODES.forEach(gm => {
                 html += `
                     <div class="tier-input-row">
-                        <img src="${gm}.webp" alt="${gm}" onerror="this.src='pot.webp'">
+                        <img src="${gm === 'ltms' || gm === 'nethop' ? 'pot' : gm}.webp" alt="${gm}" onerror="this.src='pot.webp'">
                         <select id="admin-gm-${gm}">
                             <option value="None">None</option>
                             ${Object.keys(TIER_SCORES).filter(t => t !== 'None').map(t => `<option value="${t}">${t}</option>`).join('')}
@@ -388,9 +401,10 @@
                     for (let gm in player.tiers) {
                         let t = player.tiers[gm];
                         if (t && t !== 'None') {
+                            let iconName = gm;
                             tiersHTML += `
                                 <div class="tier-badge">
-                                    <img src="${gm}.webp" alt="${gm}" onerror="this.src='pot.webp'">
+                                    <img src="${iconName}.webp" alt="${gm}" onerror="this.src='pot.webp'">
                                     <span class="tier-label ${t.toLowerCase()}">${t}</span>
                                 </div>
                             `;
@@ -427,21 +441,43 @@
             });
         });
 
-        // Tab Navigation Logic (Home vs Rankings)
+        // Tab Navigation Logic
         function switchTab(tab) {
             document.getElementById('nav-home').classList.remove('active');
             document.getElementById('nav-rankings').classList.remove('active');
 
             if (tab === 'home') {
                 document.getElementById('nav-home').classList.add('active');
-                document.getElementById('admin-panel-section').style.display = 'block';
-                document.getElementById('main-content-bar').style.display = 'flex';
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else if (tab === 'rankings') {
                 document.getElementById('nav-rankings').classList.add('active');
-                document.getElementById('admin-panel-section').style.display = 'none';
-                document.getElementById('main-content-bar').style.display = 'flex';
                 document.getElementById('ranking-container').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Secret Admin Trigger (Triple click on APEXTIERS logo)
+        let logoClicks = 0;
+        let logoTimer = null;
+        function handleLogoClick() {
+            logoClicks++;
+            if (logoClicks === 1) {
+                logoTimer = setTimeout(() => { logoClicks = 0; }, 1000);
+            } else if (logoClicks === 3) {
+                clearTimeout(logoTimer);
+                logoClicks = 0;
+                let pass = prompt("🔒 Restricted Access. Enter Admin Password:");
+                if (pass === "hitler?988") {
+                    const panel = document.getElementById('admin-panel-section');
+                    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+                    if(panel.style.display === 'block') {
+                        panel.scrollIntoView({ behavior: 'smooth' });
+                        alert("Admin Panel Unlocked!");
+                    } else {
+                        alert("Admin Panel Minimized.");
+                    }
+                } else if (pass !== null) {
+                    alert("Incorrect Password!");
+                }
             }
         }
 
@@ -459,12 +495,12 @@
                 if (val !== 'None') tiersObj[gm] = val;
             });
 
-            // Remove existing if updating
+            // Update or add
             playersDB = playersDB.filter(p => p.name.toLowerCase() !== name.toLowerCase());
             playersDB.push({ name, uuid, region, tiers: tiersObj });
 
             localStorage.setItem('apexTiersDB', JSON.stringify(playersDB));
-            alert(`Successfully saved ${name}!`);
+            alert(`Successfully saved player: ${name}!`);
 
             document.getElementById('admin-name').value = '';
             document.getElementById('admin-uuid').value = '';
@@ -483,7 +519,7 @@
                 alert("Player not found.");
             } else {
                 localStorage.setItem('apexTiersDB', JSON.stringify(playersDB));
-                alert(`Removed ${name}`);
+                alert(`Removed player: ${name}`);
                 document.getElementById('admin-remove-name').value = '';
                 renderApp();
             }
