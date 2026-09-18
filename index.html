@@ -1,3 +1,99 @@
+from flask import Flask, render_template_string, request, jsonify
+import json
+import os
+
+app = Flask(__name__)
+
+DATA_FILE = 'apex_database.json'
+SETTINGS_FILE = 'apex_settings.json'
+
+# Default McTiers-style sample database
+DEFAULT_PLAYERS = [
+    {"name": "Marlowww", "uuid": "61699b2e-d327-4a01-9f1e-0ea8c3f06bc6", "region": "NA", "tiers": {"pot": "HT1", "sword": "HT1", "cpvp": "HT1", "axe": "HT1", "smp": "HT1", "mace": "HT1", "uhc": "LT1", "spearmace": "LT1"}},
+    {"name": "ItzRealMe", "uuid": "8667ba71-b85a-4004-af54-457a9734eed7", "region": "NA", "tiers": {"sword": "HT3", "pot": "HT1", "cpvp": "HT1", "smp": "HT1", "uhc": "LT2", "mace": "LT2"}},
+    {"name": "coldified", "uuid": "069a79f4-44e9-4726-a5be-fca90e38aaf5", "region": "EU", "tiers": {"pot": "LT1", "sword": "LT3", "cpvp": "HT1", "smp": "HT1", "uhc": "LT1", "axe": "HT1", "mace": "LT2"}},
+    {"name": "Swight", "uuid": "1a82d658-7512-4217-9104-1bbf6e5f1d46", "region": "NA", "tiers": {"pot": "LT3", "sword": "HT1", "cpvp": "HT1", "smp": "HT1", "uhc": "HT2", "mace": "LT2", "spearmace": "LT2"}},
+    {"name": "janekv", "uuid": "c0695026-0e9f-44e9-92b0-9c2f42a0b1bc", "region": "EU", "tiers": {"pot": "LT3", "sword": "HT4", "cpvp": "HT1", "smp": "HT1", "uhc": "HT1", "axe": "HT2", "mace": "LT2", "spearmace": "LT2"}}
+]
+
+def load_data():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, 'r') as f:
+            try:
+                return json.load(f)
+            except:
+                return DEFAULT_PLAYERS
+    return DEFAULT_PLAYERS
+
+def save_data(data):
+    with open(DATA_FILE, 'w') as f:
+        json.dump(data, f, indent=4)
+
+def load_settings():
+    if os.path.exists(SETTINGS_FILE):
+        with open(SETTINGS_FILE, 'r') as f:
+            try:
+                return json.load(f)
+            except:
+                return {"server_ip": "play.apextiers.fun"}
+    return {"server_ip": "play.apextiers.fun"}
+
+def save_settings(settings):
+    with open(SETTINGS_FILE, 'w') as f:
+        json.dump(settings, f, indent=4)
+
+@app.route('/')
+def index():
+    return render_template_string(TEMPLATE, active_page='home')
+
+@app.route('/rankings')
+def rankings():
+    return render_template_string(TEMPLATE, active_page='rankings')
+
+@app.route('/api/players', methods=['GET'])
+def get_players():
+    return jsonify(load_data())
+
+@app.route('/api/players', methods=['POST'])
+def save_player():
+    req = request.json
+    name = req.get('name', '').strip()
+    if not name:
+        return jsonify({"success": False, "error": "Name is required"}), 400
+    
+    players = load_data()
+    players = [p for p in players if p['name'].lower() != name.lower()]
+    
+    new_player = {
+        "name": name,
+        "uuid": req.get('uuid', '').strip(),
+        "region": req.get('region', 'NA'),
+        "tiers": req.get('tiers', {})
+    }
+    players.append(new_player)
+    save_data(players)
+    return jsonify({"success": True, "players": players})
+
+@app.route('/api/players/remove', methods=['POST'])
+def remove_player():
+    req = request.json
+    name = req.get('name', '').strip()
+    players = load_data()
+    updated = [p for p in players if p['name'].lower() != name.lower()]
+    save_data(updated)
+    return jsonify({"success": True, "players": updated})
+
+@app.route('/api/settings', methods=['GET', 'POST'])
+def handle_settings():
+    settings = load_settings()
+    if request.method == 'POST':
+        req = request.json
+        if 'server_ip' in req:
+            settings['server_ip'] = req['server_ip']
+            save_settings(settings)
+    return jsonify(settings)
+
+TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,18 +114,8 @@
             --border-color: #222228;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            overflow-x: hidden;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); overflow-x: hidden; }
 
         @keyframes goldGlow {
             0% { box-shadow: 0 0 10px rgba(242, 169, 0, 0.2); }
@@ -42,7 +128,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Top Navbar (McTiers Style) */
+        /* Top Navbar */
         nav {
             display: flex;
             justify-content: space-between;
@@ -63,12 +149,7 @@
             letter-spacing: 1px;
         }
 
-        .nav-links {
-            display: flex;
-            gap: 25px;
-            align-items: center;
-        }
-
+        .nav-links { display: flex; gap: 25px; align-items: center; }
         .nav-links a {
             color: var(--text-muted);
             text-decoration: none;
@@ -79,10 +160,7 @@
             gap: 8px;
             transition: color 0.3s ease;
         }
-
-        .nav-links a:hover, .nav-links a.active {
-            color: var(--gold-primary);
-        }
+        .nav-links a:hover, .nav-links a.active { color: var(--gold-primary); }
 
         .search-container {
             position: relative;
@@ -95,264 +173,96 @@
             gap: 10px;
             width: 250px;
         }
-
         .search-container i { color: var(--text-muted); font-size: 13px; }
-        .search-bar {
-            background: transparent;
-            border: none;
-            color: white;
-            outline: none;
-            font-size: 13px;
-            width: 100%;
-        }
+        .search-bar { background: transparent; border: none; color: white; outline: none; font-size: 13px; width: 100%; }
 
-        /* Main Container */
-        .container {
-            max-width: 1300px;
-            margin: 30px auto;
-            padding: 0 20px;
-            animation: fadeIn 0.5s ease-out;
-        }
+        /* Container */
+        .container { max-width: 1300px; margin: 30px auto; padding: 0 20px; animation: fadeIn 0.5s ease-out; }
 
         /* Top Bar: Modes + Server Widget */
-        .top-action-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
+        .top-action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 20px; flex-wrap: wrap; }
         .categories {
-            display: flex;
-            gap: 10px;
-            background: var(--bg-panel);
-            padding: 10px 15px;
-            border-radius: 12px;
-            overflow-x: auto;
-            border: 1px solid var(--border-color);
-            flex: 1;
+            display: flex; gap: 10px; background: var(--bg-panel); padding: 10px 15px;
+            border-radius: 12px; overflow-x: auto; border: 1px solid var(--border-color); flex: 1;
         }
-
         .category {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            padding: 8px 14px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            color: var(--text-muted);
-            min-width: 70px;
-            font-size: 12px;
-            font-weight: 600;
+            display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer;
+            padding: 8px 14px; border-radius: 8px; transition: all 0.3s ease; color: var(--text-muted);
+            min-width: 70px; font-size: 12px; font-weight: 600;
         }
-
-        .category img {
-            width: 26px;
-            height: 26px;
-            object-fit: contain;
-            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
-            transition: transform 0.3s ease;
-        }
-
-        .category:hover {
-            background: var(--bg-hover);
-            color: var(--text-main);
-        }
-
+        .category img { width: 26px; height: 26px; object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5)); transition: transform 0.3s ease; }
+        .category:hover { background: var(--bg-hover); color: var(--text-main); }
         .category:hover img { transform: translateY(-2px); }
-        .category.active {
-            background: var(--gold-gradient);
-            color: var(--bg-dark);
-            font-weight: 700;
-        }
+        .category.active { background: var(--gold-gradient); color: var(--bg-dark); font-weight: 700; }
 
-        /* Server IP Widget (McTiers Style) */
-        .server-widget {
-            display: flex;
-            align-items: center;
-            background: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 6px 15px;
-            gap: 15px;
-        }
+        /* Server IP Widget */
+        .server-widget { display: flex; align-items: center; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 10px; padding: 6px 15px; gap: 15px; }
+        .server-ip-box { display: flex; align-items: center; background: #0d0d0f; border: 1px solid var(--border-color); border-radius: 6px; padding: 4px 12px; gap: 10px; cursor: pointer; }
+        .server-icon-badge { background: #cc2222; color: white; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; }
+        .server-ip-text { font-size: 13px; font-weight: 700; color: #fff; }
 
-        .info-btn {
-            background: #1a1a1f;
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: border-color 0.2s;
+        /* Admin Panel Section (Fully Visible, No Hiding) */
+        .admin-panel {
+            margin-bottom: 30px; padding: 25px; background: #121216;
+            border: 2px solid var(--gold-primary); border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(242, 169, 0, 0.15);
         }
-        .info-btn:hover { border-color: var(--gold-primary); }
+        .admin-header { color: var(--gold-primary); margin-bottom: 15px; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .admin-box { background: #18181c; padding: 18px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .admin-box h4 { margin-bottom: 12px; color: #fff; font-size: 14px; }
+        .admin-input {
+            width: 100%; padding: 10px 12px; margin-bottom: 10px;
+            background: #0a0a0c; color: #fff; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; outline: none;
+        }
+        .admin-input:focus { border-color: var(--gold-primary); }
 
-        .server-ip-box {
-            display: flex;
-            align-items: center;
-            background: #0d0d0f;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 4px 12px;
-            gap: 10px;
-            cursor: pointer;
-        }
+        .tier-inputs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .tier-input-row { display: flex; align-items: center; gap: 8px; background: #0a0a0c; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border-color); }
+        .tier-input-row img { width: 18px; height: 18px; }
+        .tier-input-row select { background: transparent; color: white; border: none; outline: none; width: 100%; font-size: 12px; }
 
-        .server-icon-badge {
-            background: #cc2222;
-            color: white;
-            font-size: 10px;
-            font-weight: 800;
-            padding: 2px 6px;
-            border-radius: 4px;
+        .admin-btn {
+            padding: 10px; background: var(--gold-gradient); color: #000;
+            border: none; border-radius: 6px; cursor: pointer; font-weight: 700; width: 100%; font-size: 13px; transition: opacity 0.2s;
         }
+        .admin-btn:hover { opacity: 0.9; }
+        .admin-btn.danger { background: #ff4444; color: white; }
 
-        .server-ip-text {
-            font-size: 13px;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        /* Table Column Headers */
-        .list-headers {
-            display: flex;
-            padding: 0 25px 8px 25px;
-            color: var(--text-muted);
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+        /* Table Headers */
+        .list-headers { display: flex; padding: 0 25px 8px 25px; color: var(--text-muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
         .h-rank { width: 60px; }
         .h-player { flex: 1; }
         .h-region { width: 90px; }
         .h-tiers { width: 320px; }
 
-        /* Rankings Rows with McTiers Background Colors */
-        .ranking-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+        /* Rankings Rows */
+        .ranking-list { display: flex; flex-direction: column; gap: 10px; }
+        .rank-row { display: flex; align-items: center; background: var(--bg-panel); padding: 14px 25px; border-radius: 10px; border: 1px solid var(--border-color); transition: all 0.25s ease; }
+        .rank-row:hover { transform: translateX(6px); border-color: var(--gold-primary); background: var(--bg-hover); }
 
-        .rank-row {
-            display: flex;
-            align-items: center;
-            background: var(--bg-panel);
-            padding: 14px 25px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            transition: all 0.25s ease;
-        }
-
-        .rank-row:hover {
-            transform: translateX(6px);
-            border-color: var(--gold-primary);
-            background: var(--bg-hover);
-        }
-
-        /* Rank 1: Shining Gold */
-        .rank-row.rank-1 {
-            background: linear-gradient(90deg, rgba(242, 169, 0, 0.25) 0%, var(--bg-panel) 40%);
-            border-color: rgba(242, 169, 0, 0.5);
-            animation: goldGlow 3s infinite;
-        }
+        /* Top 3 Glowing & Slanted Styles */
+        .rank-row.rank-1 { background: linear-gradient(90deg, rgba(242, 169, 0, 0.25) 0%, var(--bg-panel) 40%); border-color: rgba(242, 169, 0, 0.5); animation: goldGlow 3s infinite; }
         .rank-row.rank-1 .rank-number { color: #ffd700; text-shadow: 0 0 12px rgba(255, 215, 0, 0.6); }
 
-        /* Rank 2: Silver */
-        .rank-row.rank-2 {
-            background: linear-gradient(90deg, rgba(148, 163, 184, 0.18) 0%, var(--bg-panel) 40%);
-            border-color: rgba(148, 163, 184, 0.4);
-        }
+        .rank-row.rank-2 { background: linear-gradient(90deg, rgba(148, 163, 184, 0.18) 0%, var(--bg-panel) 40%); border-color: rgba(148, 163, 184, 0.4); }
         .rank-row.rank-2 .rank-number { color: #e2e8f0; }
 
-        /* Rank 3: Bronze */
-        .rank-row.rank-3 {
-            background: linear-gradient(90deg, rgba(205, 127, 50, 0.18) 0%, var(--bg-panel) 40%);
-            border-color: rgba(205, 127, 50, 0.4);
-        }
+        .rank-row.rank-3 { background: linear-gradient(90deg, rgba(205, 127, 50, 0.18) 0%, var(--bg-panel) 40%); border-color: rgba(205, 127, 50, 0.4); }
         .rank-row.rank-3 .rank-number { color: #f97316; }
 
-        .rank-number {
-            font-size: 22px;
-            font-weight: 800;
-            width: 60px;
-            color: var(--text-muted);
-            font-style: italic;
-        }
+        .rank-number { font-size: 22px; font-weight: 800; width: 60px; color: var(--text-muted); font-style: italic; }
+        .player-info { display: flex; align-items: center; gap: 15px; flex: 1; }
+        .player-avatar { width: 42px; height: 42px; border-radius: 6px; background: #1f1f26; border: 1px solid var(--border-color); }
+        .player-details h3 { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+        .player-details span { font-size: 11px; color: var(--gold-primary); font-weight: 600; }
+        .region { width: 90px; color: #ff4d4d; font-weight: 800; font-size: 13px; }
 
-        .player-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex: 1;
-        }
+        .player-tiers { width: 320px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .tier-badge { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .tier-badge img { width: 18px; height: 18px; object-fit: contain; }
+        .tier-label { font-size: 10px; padding: 1px 5px; border-radius: 3px; font-weight: 800; }
 
-        .player-avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 6px;
-            background: #1f1f26;
-            border: 1px solid var(--border-color);
-        }
-
-        .player-details h3 {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 2px;
-        }
-
-        .player-details span {
-            font-size: 11px;
-            color: var(--gold-primary);
-            font-weight: 600;
-        }
-
-        .region {
-            width: 90px;
-            color: #ff4d4d;
-            font-weight: 800;
-            font-size: 13px;
-        }
-
-        .player-tiers {
-            width: 320px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .tier-badge {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-        }
-
-        .tier-badge img {
-            width: 18px;
-            height: 18px;
-            object-fit: contain;
-        }
-
-        .tier-label {
-            font-size: 10px;
-            padding: 1px 5px;
-            border-radius: 3px;
-            font-weight: 800;
-        }
-
-        /* Tier Colors */
         .ht1 { background: #ffaa00; color: #000; }
         .lt1 { background: #aa00ff; color: #fff; }
         .ht2 { background: #e69900; color: #000; }
@@ -361,47 +271,16 @@
         .lt3 { background: #4444dd; color: #fff; }
         .ht4 { background: #b37700; color: #fff; }
         .lt4 { background: #3333bb; color: #fff; }
-
-        /* Hidden Admin Panel */
-        #admin-panel {
-            display: none;
-            margin-top: 30px;
-            padding: 25px;
-            background: #111;
-            border: 2px dashed var(--gold-primary);
-            border-radius: 10px;
-            animation: fadeIn 0.4s ease;
-        }
-
-        .admin-header { color: var(--gold-primary); margin-bottom: 15px; font-size: 18px; }
-        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .admin-box { background: #18181c; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); }
-        .admin-box h4 { margin-bottom: 10px; color: #fff; font-size: 14px; }
-        .admin-input {
-            width: 100%; padding: 9px 12px; margin-bottom: 10px;
-            background: #0a0a0c; color: #fff; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;
-        }
-        
-        .tier-inputs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-        .tier-input-row { display: flex; align-items: center; gap: 8px; background: #0a0a0c; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color); }
-        .tier-input-row img { width: 18px; height: 18px; }
-        .tier-input-row select { background: transparent; color: white; border: none; outline: none; width: 100%; font-size: 12px; }
-
-        .admin-btn {
-            padding: 10px; background: var(--gold-gradient); color: #000;
-            border: none; border-radius: 6px; cursor: pointer; font-weight: 700; width: 100%; font-size: 13px;
-        }
-        .admin-btn.danger { background: #ff4444; color: white; }
     </style>
 </head>
 <body>
 
     <!-- Top Navigation -->
     <nav>
-        <div class="logo" id="main-logo" onclick="handleLogoClick()">APEXTIERS</div>
+        <div class="logo" onclick="window.location.href='/'">APEXTIERS</div>
         <div class="nav-links">
-            <a href="#" class="active"><i class="fa-solid fa-house"></i> Home</a>
-            <a href="#"><i class="fa-solid fa-trophy"></i> Rankings</a>
+            <a href="/" class="{% if active_page == 'home' %}active{% endif %}"><i class="fa-solid fa-house"></i> Home</a>
+            <a href="/rankings" class="{% if active_page == 'rankings' %}active{% endif %}"><i class="fa-solid fa-trophy"></i> Rankings</a>
             <a href="https://discord.gg/Stv5rzsAsk" target="_blank"><i class="fa-brands fa-discord"></i> Discords</a>
             <a href="#"><i class="fa-solid fa-file-code"></i> API Docs</a>
         </div>
@@ -455,20 +334,17 @@
 
             <!-- Server IP Widget -->
             <div class="server-widget">
-                <button class="info-btn" onclick="alert('ApexTiers Network - Global PvP & Tierlist Hub')">
-                    <i class="fa-solid fa-circle-info"></i> Information
-                </button>
                 <div class="server-ip-box" onclick="copyIP()" title="Click to copy IP">
                     <span class="server-icon-badge">CLUB</span>
-                    <span class="server-ip-text" id="display-server-ip">mcpvp.club</span>
+                    <span class="server-ip-text" id="display-server-ip">Loading...</span>
                     <i class="fa-brands fa-discord" style="color: #5865F2;"></i>
                 </div>
             </div>
         </div>
 
-        <!-- Hidden Tester Admin Panel -->
-        <div id="admin-panel">
-            <h2 class="admin-header">⚙️ Tester Admin Controls (Secured)</h2>
+        <!-- Fully Visible Admin Panel -->
+        <div class="admin-panel">
+            <h2 class="admin-header"><i class="fa-solid fa-gear"></i> Server & Player Management</h2>
             <div class="admin-grid">
                 <div class="admin-box">
                     <h4>Add / Update Player</h4>
@@ -486,10 +362,11 @@
                     <button class="admin-btn" onclick="saveAdminPlayer()">Save / Update Player</button>
                 </div>
                 <div class="admin-box">
-                    <h4>Manage Server & Players</h4>
-                    <input type="text" id="admin-server-ip-input" class="admin-input" placeholder="Change Server IP (e.g. play.apextiers.com)">
-                    <button class="admin-btn" style="margin-bottom: 15px;" onclick="updateServerIP()">Update Server IP</button>
+                    <h4>Server Configuration & Removal</h4>
+                    <input type="text" id="admin-server-ip-input" class="admin-input" placeholder="Change Server IP (e.g. mcpvp.club)">
+                    <button class="admin-btn" style="margin-bottom: 20px;" onclick="updateServerIP()">Update Server IP</button>
                     
+                    <h4 style="margin-top: 15px;">Remove Player</h4>
                     <input type="text" id="admin-remove-name" class="admin-input" placeholder="Exact Name to Remove">
                     <button class="admin-btn danger" onclick="removeAdminPlayer()">Remove Player</button>
                 </div>
@@ -509,29 +386,16 @@
     </div>
 
     <script>
-        const ADMIN_PASS = "hitler?988";
         const GAMEMODES = ['pot', 'cpvp', 'smp', 'sword', 'axe', 'mace', 'uhc', 'spearmace'];
         const TIER_SCORES = {
             'HT1': 30, 'LT1': 27, 'HT2': 24, 'LT2': 21,
             'HT3': 18, 'LT3': 15, 'HT4': 12, 'LT4': 9, 'None': 0
         };
 
-        // Pre-loaded realistic default data matching McTiers
-        let defaultPlayers = [
-            { name: "Marlowww", uuid: "61699b2e-d327-4a01-9f1e-0ea8c3f06bc6", region: "NA", tiers: { pot: "HT1", sword: "HT1", cpvp: "HT1", axe: "HT1", smp: "HT1", mace: "HT1", uhc: "LT1", spearmace: "LT1" } },
-            { name: "ItzRealMe", uuid: "8667ba71-b85a-4004-af54-457a9734eed7", region: "NA", tiers: { sword: "HT3", pot: "HT1", cpvp: "HT1", smp: "HT1", uhc: "LT2", mace: "LT2" } },
-            { name: "coldified", uuid: "069a79f4-44e9-4726-a5be-fca90e38aaf5", region: "EU", tiers: { pot: "LT1", sword: "LT3", cpvp: "HT1", smp: "HT1", uhc: "LT1", axe: "HT1", mace: "LT2" } },
-            { name: "Swight", uuid: "1a82d658-7512-4217-9104-1bbf6e5f1d46", region: "NA", tiers: { pot: "LT3", sword: "HT1", cpvp: "HT1", smp: "HT1", uhc: "HT2", mace: "LT2", spearmace: "LT2" } },
-            { name: "janekv", uuid: "c0695026-0e9f-44e9-92b0-9c2f42a0b1bc", region: "EU", tiers: { pot: "LT3", sword: "HT4", cpvp: "HT1", smp: "HT1", uhc: "HT1", axe: "HT2", mace: "LT2", spearmace: "LT2" } }
-        ];
-
-        let db = JSON.parse(localStorage.getItem('apexTiersDB')) || defaultPlayers;
-        let serverIP = localStorage.getItem('apexServerIP') || 'mcpvp.club';
+        let playersDB = [];
+        let serverIP = 'play.apextiers.fun';
         let currentMode = 'overall';
 
-        document.getElementById('display-server-ip').innerText = serverIP;
-
-        // Populate Admin Tier Inputs
         function setupAdminInputs() {
             const container = document.getElementById('admin-tier-inputs');
             let html = '';
@@ -550,6 +414,23 @@
         }
         setupAdminInputs();
 
+        async function fetchData() {
+            try {
+                const res = await fetch('/api/players');
+                playersDB = await res.json();
+                
+                const sRes = await fetch('/api/settings');
+                const sData = await sRes.json();
+                serverIP = sData.server_ip || 'play.apextiers.fun';
+                document.getElementById('display-server-ip').innerText = serverIP;
+                document.getElementById('admin-server-ip-input').value = serverIP;
+
+                renderApp();
+            } catch(e) {
+                console.error("Error fetching data:", e);
+            }
+        }
+
         function calculatePoints(tiers) {
             let total = 0;
             for (let gm in tiers) {
@@ -565,20 +446,17 @@
             return "Fighter";
         }
 
-        // Render Leaderboard
         function renderApp() {
             const container = document.getElementById('ranking-container');
             const searchVal = document.getElementById('search-bar').value.toLowerCase();
             container.innerHTML = '';
 
-            let list = [...db];
+            let list = [...playersDB];
 
-            // Filter Search
             if (searchVal) {
                 list = list.filter(p => p.name.toLowerCase().includes(searchVal));
             }
 
-            // Filter & Sort by Mode
             if (currentMode !== 'overall') {
                 list = list.filter(p => p.tiers && p.tiers[currentMode] && p.tiers[currentMode] !== 'None');
                 list.sort((a, b) => {
@@ -650,27 +528,8 @@
             });
         });
 
-        // Secret Admin Trigger (Triple click logo)
-        let clicks = 0;
-        let timer;
-        function handleLogoClick() {
-            clicks++;
-            if (clicks === 1) timer = setTimeout(() => clicks = 0, 1500);
-            if (clicks === 3) {
-                clearTimeout(timer);
-                clicks = 0;
-                let pass = prompt("Enter Admin Password:");
-                if (pass === ADMIN_PASS) {
-                    document.getElementById('admin-panel').style.display = 'block';
-                    document.getElementById('admin-panel').scrollIntoView({ behavior: 'smooth' });
-                } else if (pass !== null) {
-                    alert("Incorrect Password.");
-                }
-            }
-        }
-
-        // Admin Save Player
-        function saveAdminPlayer() {
+        // Admin Actions via Python Backend API
+        async function saveAdminPlayer() {
             const name = document.getElementById('admin-name').value.trim();
             const uuid = document.getElementById('admin-uuid').value.trim();
             const region = document.getElementById('admin-region').value;
@@ -683,42 +542,63 @@
                 if (val !== 'None') tiersObj[gm] = val;
             });
 
-            // Update or add
-            db = db.filter(p => p.name.toLowerCase() !== name.toLowerCase());
-            db.push({ name, uuid, region, tiers: tiersObj });
-
-            localStorage.setItem('apexTiersDB', JSON.stringify(db));
-            alert(`Successfully saved ${name}!`);
-            
-            document.getElementById('admin-name').value = '';
-            document.getElementById('admin-uuid').value = '';
-            renderApp();
-        }
-
-        // Admin Remove Player
-        function removeAdminPlayer() {
-            const name = document.getElementById('admin-remove-name').value.trim();
-            if (!name) return alert("Enter name to remove.");
-            
-            let len = db.length;
-            db = db.filter(p => p.name.toLowerCase() !== name.toLowerCase());
-            if (db.length === len) alert("Player not found.");
-            else {
-                localStorage.setItem('apexTiersDB', JSON.stringify(db));
-                alert(`Removed ${name}`);
-                document.getElementById('admin-remove-name').value = '';
-                renderApp();
+            try {
+                const res = await fetch('/api/players', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, uuid, region, tiers: tiersObj })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    playersDB = data.players;
+                    alert(`Successfully saved ${name}!`);
+                    document.getElementById('admin-name').value = '';
+                    document.getElementById('admin-uuid').value = '';
+                    renderApp();
+                } else {
+                    alert("Error: " + data.error);
+                }
+            } catch(e) {
+                alert("Network error while saving.");
             }
         }
 
-        // Update Server IP
-        function updateServerIP() {
+        async function removeAdminPlayer() {
+            const name = document.getElementById('admin-remove-name').value.trim();
+            if (!name) return alert("Enter name to remove.");
+
+            try {
+                const res = await fetch('/api/players/remove', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    playersDB = data.players;
+                    alert(`Removed ${name}`);
+                    document.getElementById('admin-remove-name').value = '';
+                    renderApp();
+                }
+            } catch(e) {
+                alert("Error removing player.");
+            }
+        }
+
+        async function updateServerIP() {
             const newIp = document.getElementById('admin-server-ip-input').value.trim();
-            if (newIp) {
+            if (!newIp) return;
+            try {
+                await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ server_ip: newIp })
+                });
                 serverIP = newIp;
-                localStorage.setItem('apexServerIP', serverIP);
                 document.getElementById('display-server-ip').innerText = serverIP;
-                alert("Server IP updated!");
+                alert("Server IP updated successfully!");
+            } catch(e) {
+                alert("Error updating server IP.");
             }
         }
 
@@ -727,8 +607,11 @@
             alert(`Copied server IP: ${serverIP}`);
         }
 
-        // Initial Load
-        renderApp();
+        fetchData();
     </script>
 </body>
 </html>
+"""
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
