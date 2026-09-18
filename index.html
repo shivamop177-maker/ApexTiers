@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ApexTiers - Rankings</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* Golden & Black Theme Variables */
         :root {
             --bg-dark: #0a0a0a;
             --bg-panel: #141414;
@@ -14,8 +14,8 @@
             --gold-primary: #f2a900;
             --gold-gradient: linear-gradient(135deg, #f2a900 0%, #b37700 100%);
             --text-main: #ffffff;
-            --text-muted: #888888;
-            --border-color: #333333;
+            --text-muted: #8b8b99;
+            --border-color: #222228;
         }
 
         * {
@@ -31,47 +31,52 @@
             overflow-x: hidden;
         }
 
+        @keyframes goldGlow {
+            0% { box-shadow: 0 0 10px rgba(242, 169, 0, 0.2); }
+            50% { box-shadow: 0 0 25px rgba(242, 169, 0, 0.6); }
+            100% { box-shadow: 0 0 10px rgba(242, 169, 0, 0.2); }
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Navbar */
+        /* Top Navbar (McTiers Style) */
         nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 50px;
+            padding: 15px 40px;
             background-color: var(--bg-panel);
-            border-bottom: 2px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
         }
 
         .logo {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 800;
             background: var(--gold-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             cursor: pointer;
             user-select: none;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: transform 0.3s ease;
-        }
-
-        .logo:hover {
-            transform: scale(1.05);
+            letter-spacing: 1px;
         }
 
         .nav-links {
             display: flex;
-            gap: 30px;
+            gap: 25px;
+            align-items: center;
         }
 
         .nav-links a {
             color: var(--text-muted);
             text-decoration: none;
+            font-size: 14px;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             transition: color 0.3s ease;
         }
 
@@ -79,58 +84,77 @@
             color: var(--gold-primary);
         }
 
-        .search-bar {
-            background: var(--bg-dark);
+        .search-container {
+            position: relative;
+            background: #0d0d0f;
             border: 1px solid var(--border-color);
-            padding: 8px 15px;
-            border-radius: 20px;
-            color: white;
-            outline: none;
-            transition: border-color 0.3s ease;
+            border-radius: 8px;
+            padding: 6px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 250px;
         }
 
-        .search-bar:focus {
-            border-color: var(--gold-primary);
+        .search-container i { color: var(--text-muted); font-size: 13px; }
+        .search-bar {
+            background: transparent;
+            border: none;
+            color: white;
+            outline: none;
+            font-size: 13px;
+            width: 100%;
         }
 
         /* Main Container */
         .container {
-            max-width: 1200px;
-            margin: 40px auto;
+            max-width: 1300px;
+            margin: 30px auto;
             padding: 0 20px;
-            animation: fadeIn 0.6s ease-out;
+            animation: fadeIn 0.5s ease-out;
         }
 
-        /* Mode Categories */
+        /* Top Bar: Modes + Server Widget */
+        .top-action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
         .categories {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             background: var(--bg-panel);
-            padding: 15px 25px;
+            padding: 10px 15px;
             border-radius: 12px;
             overflow-x: auto;
             border: 1px solid var(--border-color);
-            margin-bottom: 30px;
+            flex: 1;
         }
 
         .category {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 4px;
             cursor: pointer;
-            padding: 10px 20px;
+            padding: 8px 14px;
             border-radius: 8px;
             transition: all 0.3s ease;
             color: var(--text-muted);
-            min-width: 80px;
+            min-width: 70px;
+            font-size: 12px;
+            font-weight: 600;
         }
 
         .category img {
-            width: 32px;
-            height: 32px;
+            width: 26px;
+            height: 26px;
             object-fit: contain;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
             transition: transform 0.3s ease;
         }
 
@@ -139,17 +163,82 @@
             color: var(--text-main);
         }
 
-        .category:hover img {
-            transform: translateY(-3px);
-        }
-
+        .category:hover img { transform: translateY(-2px); }
         .category.active {
             background: var(--gold-gradient);
             color: var(--bg-dark);
-            font-weight: 600;
+            font-weight: 700;
         }
 
-        /* Rankings Table */
+        /* Server IP Widget (McTiers Style) */
+        .server-widget {
+            display: flex;
+            align-items: center;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 6px 15px;
+            gap: 15px;
+        }
+
+        .info-btn {
+            background: #1a1a1f;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: border-color 0.2s;
+        }
+        .info-btn:hover { border-color: var(--gold-primary); }
+
+        .server-ip-box {
+            display: flex;
+            align-items: center;
+            background: #0d0d0f;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 4px 12px;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .server-icon-badge {
+            background: #cc2222;
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .server-ip-text {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* Table Column Headers */
+        .list-headers {
+            display: flex;
+            padding: 0 25px 8px 25px;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .h-rank { width: 60px; }
+        .h-player { flex: 1; }
+        .h-region { width: 90px; }
+        .h-tiers { width: 320px; }
+
+        /* Rankings Rows with McTiers Background Colors */
         .ranking-list {
             display: flex;
             flex-direction: column;
@@ -160,33 +249,47 @@
             display: flex;
             align-items: center;
             background: var(--bg-panel);
-            padding: 15px 25px;
+            padding: 14px 25px;
             border-radius: 10px;
             border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            animation: fadeIn 0.4s ease-out;
+            transition: all 0.25s ease;
         }
 
         .rank-row:hover {
-            transform: translateX(10px);
+            transform: translateX(6px);
             border-color: var(--gold-primary);
             background: var(--bg-hover);
-            box-shadow: -5px 0 15px rgba(242, 169, 0, 0.1);
         }
+
+        /* Rank 1: Shining Gold */
+        .rank-row.rank-1 {
+            background: linear-gradient(90deg, rgba(242, 169, 0, 0.25) 0%, var(--bg-panel) 40%);
+            border-color: rgba(242, 169, 0, 0.5);
+            animation: goldGlow 3s infinite;
+        }
+        .rank-row.rank-1 .rank-number { color: #ffd700; text-shadow: 0 0 12px rgba(255, 215, 0, 0.6); }
+
+        /* Rank 2: Silver */
+        .rank-row.rank-2 {
+            background: linear-gradient(90deg, rgba(148, 163, 184, 0.18) 0%, var(--bg-panel) 40%);
+            border-color: rgba(148, 163, 184, 0.4);
+        }
+        .rank-row.rank-2 .rank-number { color: #e2e8f0; }
+
+        /* Rank 3: Bronze */
+        .rank-row.rank-3 {
+            background: linear-gradient(90deg, rgba(205, 127, 50, 0.18) 0%, var(--bg-panel) 40%);
+            border-color: rgba(205, 127, 50, 0.4);
+        }
+        .rank-row.rank-3 .rank-number { color: #f97316; }
 
         .rank-number {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 800;
-            width: 50px;
+            width: 60px;
             color: var(--text-muted);
+            font-style: italic;
         }
-
-        /* Top 3 Stylings */
-        .rank-row:nth-child(1) .rank-number { color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-        .rank-row:nth-child(2) .rank-number { color: #c0c0c0; text-shadow: 0 0 10px rgba(192, 192, 192, 0.3); }
-        .rank-row:nth-child(3) .rank-number { color: #cd7f32; text-shadow: 0 0 10px rgba(205, 127, 50, 0.3); }
 
         .player-info {
             display: flex;
@@ -196,34 +299,36 @@
         }
 
         .player-avatar {
-            width: 45px;
-            height: 45px;
+            width: 42px;
+            height: 42px;
             border-radius: 6px;
-            background: #2a2a2a; 
+            background: #1f1f26;
+            border: 1px solid var(--border-color);
         }
 
         .player-details h3 {
-            font-size: 18px;
+            font-size: 16px;
+            font-weight: 700;
             margin-bottom: 2px;
         }
 
         .player-details span {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--gold-primary);
+            font-weight: 600;
         }
 
         .region {
-            width: 80px;
+            width: 90px;
             color: #ff4d4d;
             font-weight: 800;
-            text-align: center;
-            margin-right: 20px;
+            font-size: 13px;
         }
 
         .player-tiers {
+            width: 320px;
             display: flex;
-            gap: 12px;
-            width: 300px;
+            gap: 10px;
             flex-wrap: wrap;
         }
 
@@ -231,23 +336,23 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
         }
 
         .tier-badge img {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             object-fit: contain;
         }
 
         .tier-label {
-            font-size: 11px;
-            padding: 2px 6px;
-            border-radius: 4px;
+            font-size: 10px;
+            padding: 1px 5px;
+            border-radius: 3px;
             font-weight: 800;
-            text-transform: uppercase;
         }
 
+        /* Tier Colors */
         .ht1 { background: #ffaa00; color: #000; }
         .lt1 { background: #aa00ff; color: #fff; }
         .ht2 { background: #e69900; color: #000; }
@@ -256,415 +361,374 @@
         .lt3 { background: #4444dd; color: #fff; }
         .ht4 { background: #b37700; color: #fff; }
         .lt4 { background: #3333bb; color: #fff; }
-        .ht5 { background: #996600; color: #fff; }
-        .lt5 { background: #222299; color: #fff; }
-
-        .empty-state {
-            text-align: center;
-            color: var(--text-muted);
-            padding: 40px;
-            background: var(--bg-panel);
-            border-radius: 10px;
-            border: 1px dashed var(--border-color);
-        }
 
         /* Hidden Admin Panel */
         #admin-panel {
             display: none;
-            margin-bottom: 30px;
+            margin-top: 30px;
             padding: 25px;
             background: #111;
             border: 2px dashed var(--gold-primary);
             border-radius: 10px;
-            animation: fadeIn 0.5s ease;
+            animation: fadeIn 0.4s ease;
         }
 
-        .admin-header {
-            color: var(--gold-primary);
-            margin-bottom: 15px;
-        }
-
-        .admin-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .admin-box {
-            background: #1a1a1a;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #333;
-        }
-
-        .admin-box h4 { margin-bottom: 15px; color: #fff; }
+        .admin-header { color: var(--gold-primary); margin-bottom: 15px; font-size: 18px; }
+        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .admin-box { background: #18181c; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .admin-box h4 { margin-bottom: 10px; color: #fff; font-size: 14px; }
         .admin-input {
-            width: 100%; padding: 10px; margin-bottom: 10px;
-            background: #000; color: #fff; border: 1px solid #444; border-radius: 4px;
+            width: 100%; padding: 9px 12px; margin-bottom: 10px;
+            background: #0a0a0c; color: #fff; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;
         }
         
-        .tier-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .tier-input-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #000;
-            padding: 5px 10px;
-            border: 1px solid #444;
-            border-radius: 4px;
-        }
-
-        .tier-input-group img {
-            width: 20px; height: 20px;
-        }
-
-        .tier-input-group select {
-            background: transparent;
-            color: white;
-            border: none;
-            outline: none;
-            width: 100%;
-        }
+        .tier-inputs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .tier-input-row { display: flex; align-items: center; gap: 8px; background: #0a0a0c; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color); }
+        .tier-input-row img { width: 18px; height: 18px; }
+        .tier-input-row select { background: transparent; color: white; border: none; outline: none; width: 100%; font-size: 12px; }
 
         .admin-btn {
-            padding: 12px 20px; background: var(--gold-gradient); color: #000;
-            border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%;
-            transition: opacity 0.2s;
+            padding: 10px; background: var(--gold-gradient); color: #000;
+            border: none; border-radius: 6px; cursor: pointer; font-weight: 700; width: 100%; font-size: 13px;
         }
-        .admin-btn:hover { opacity: 0.9; }
         .admin-btn.danger { background: #ff4444; color: white; }
     </style>
 </head>
 <body>
 
+    <!-- Top Navigation -->
     <nav>
-        <div class="logo" id="main-logo" onclick="handleLogoClick()">ApexTiers</div>
+        <div class="logo" id="main-logo" onclick="handleLogoClick()">APEXTIERS</div>
         <div class="nav-links">
-            <a href="#" class="active">Rankings</a>
-            <a href="#">Information</a>
-            <a href="https://discord.gg/Stv5rzsAsk" target="_blank">Discord</a>
+            <a href="#" class="active"><i class="fa-solid fa-house"></i> Home</a>
+            <a href="#"><i class="fa-solid fa-trophy"></i> Rankings</a>
+            <a href="https://discord.gg/Stv5rzsAsk" target="_blank"><i class="fa-brands fa-discord"></i> Discords</a>
+            <a href="#"><i class="fa-solid fa-file-code"></i> API Docs</a>
         </div>
-        <input type="text" class="search-bar" id="search-input" placeholder="Search player..." oninput="renderLeaderboard()">
+        <div class="search-container">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" id="search-bar" class="search-bar" placeholder="Search player..." oninput="renderApp()">
+        </div>
     </nav>
 
     <div class="container">
-        <!-- Modes Header -->
-        <div class="categories">
-            <div class="category active" data-mode="overall">
-                <span style="font-size: 24px;">🏆</span>
-                <span>Overall</span>
+        <!-- Modes & Server IP Header Bar -->
+        <div class="top-action-bar">
+            <div class="categories" id="categories-container">
+                <div class="category active" data-mode="overall">
+                    <span style="font-size: 20px;">🏆</span>
+                    <span>Overall</span>
+                </div>
+                <div class="category" data-mode="pot">
+                    <img src="pot.webp" alt="Pot" onerror="this.src='pot.webp'">
+                    <span>Pot</span>
+                </div>
+                <div class="category" data-mode="cpvp">
+                    <img src="cpvp.webp" alt="CPVP" onerror="this.src='pot.webp'">
+                    <span>CPVP</span>
+                </div>
+                <div class="category" data-mode="smp">
+                    <img src="smp.webp" alt="SMP" onerror="this.src='pot.webp'">
+                    <span>SMP</span>
+                </div>
+                <div class="category" data-mode="sword">
+                    <img src="sword.webp" alt="Sword" onerror="this.src='pot.webp'">
+                    <span>Sword</span>
+                </div>
+                <div class="category" data-mode="axe">
+                    <img src="axe.webp" alt="Axe" onerror="this.src='pot.webp'">
+                    <span>Axe</span>
+                </div>
+                <div class="category" data-mode="mace">
+                    <img src="mace.webp" alt="Mace" onerror="this.src='pot.webp'">
+                    <span>Mace</span>
+                </div>
+                <div class="category" data-mode="uhc">
+                    <img src="uhc.webp" alt="UHC" onerror="this.src='pot.webp'">
+                    <span>UHC</span>
+                </div>
+                <div class="category" data-mode="spearmace">
+                    <img src="spearmace.webp" alt="SpearMace" onerror="this.src='pot.webp'">
+                    <span>SpearMace</span>
+                </div>
             </div>
-            <div class="category" data-mode="pot">
-                <img src="pot.webp" alt="Pot">
-                <span>Pot</span>
-            </div>
-            <div class="category" data-mode="cpvp">
-                <img src="cpvp.webp" alt="CPVP">
-                <span>CPVP</span>
-            </div>
-            <div class="category" data-mode="smp">
-                <img src="smp.webp" alt="SMP">
-                <span>SMP</span>
-            </div>
-            <div class="category" data-mode="sword">
-                <img src="sword.webp" alt="Sword">
-                <span>Sword</span>
-            </div>
-            <div class="category" data-mode="axe">
-                <img src="axe.webp" alt="Axe">
-                <span>Axe</span>
-            </div>
-            <div class="category" data-mode="mace">
-                <img src="mace.webp" alt="Mace">
-                <span>Mace</span>
-            </div>
-            <div class="category" data-mode="uhc">
-                <img src="uhc.webp" alt="UHC">
-                <span>UHC</span>
-            </div>
-            <div class="category" data-mode="spearmace">
-                <img src="spearmace.webp" alt="SpearMace">
-                <span>SpearMace</span>
+
+            <!-- Server IP Widget -->
+            <div class="server-widget">
+                <button class="info-btn" onclick="alert('ApexTiers Network - Global PvP & Tierlist Hub')">
+                    <i class="fa-solid fa-circle-info"></i> Information
+                </button>
+                <div class="server-ip-box" onclick="copyIP()" title="Click to copy IP">
+                    <span class="server-icon-badge">CLUB</span>
+                    <span class="server-ip-text" id="display-server-ip">mcpvp.club</span>
+                    <i class="fa-brands fa-discord" style="color: #5865F2;"></i>
+                </div>
             </div>
         </div>
 
-        <!-- Hidden Tester Admin -->
+        <!-- Hidden Tester Admin Panel -->
         <div id="admin-panel">
             <h2 class="admin-header">⚙️ Tester Admin Controls (Secured)</h2>
             <div class="admin-grid">
-                <!-- Add Player Form -->
                 <div class="admin-box">
                     <h4>Add / Update Player</h4>
-                    <input type="text" id="add-name" class="admin-input" placeholder="Player Name (e.g. Marlowww)">
-                    <input type="text" id="add-uuid" class="admin-input" placeholder="Minecraft UUID (Optional, for avatar)">
-                    <select id="add-region" class="admin-input">
+                    <input type="text" id="admin-name" class="admin-input" placeholder="Player Name (e.g. Marlowww)">
+                    <input type="text" id="admin-uuid" class="admin-input" placeholder="Minecraft UUID (for skin head)">
+                    <select id="admin-region" class="admin-input">
                         <option value="NA">NA</option>
                         <option value="EU">EU</option>
                         <option value="AS">AS</option>
                         <option value="AU">AU</option>
                         <option value="ME">ME</option>
                     </select>
-                    
-                    <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">Set Tiers (Points calculate automatically)</p>
-                    <div class="tier-grid" id="admin-tiers-grid">
-                        <!-- Populated by JS -->
-                    </div>
-
-                    <button class="admin-btn" onclick="addPlayer()">Save Player Record</button>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">Assign Tiers (Points calculate automatically):</p>
+                    <div class="tier-inputs-grid" id="admin-tier-inputs"></div>
+                    <button class="admin-btn" onclick="saveAdminPlayer()">Save / Update Player</button>
                 </div>
-                
-                <!-- Remove Player Form -->
                 <div class="admin-box">
-                    <h4>Remove Player</h4>
-                    <input type="text" id="remove-name" class="admin-input" placeholder="Exact Player Name to Remove">
-                    <button class="admin-btn danger" onclick="removePlayer()">Remove Player</button>
+                    <h4>Manage Server & Players</h4>
+                    <input type="text" id="admin-server-ip-input" class="admin-input" placeholder="Change Server IP (e.g. play.apextiers.com)">
+                    <button class="admin-btn" style="margin-bottom: 15px;" onclick="updateServerIP()">Update Server IP</button>
                     
-                    <br><br><br>
-                    <button class="admin-btn" style="background:#444; color:white;" onclick="alert('Discord bot sync endpoint not yet configured.')">Sync Discord Bot</button>
+                    <input type="text" id="admin-remove-name" class="admin-input" placeholder="Exact Name to Remove">
+                    <button class="admin-btn danger" onclick="removeAdminPlayer()">Remove Player</button>
                 </div>
             </div>
         </div>
 
-        <!-- Dynamic Rankings Table -->
-        <div class="ranking-list" id="ranking-container">
-            <!-- JavaScript will populate this based on the selected mode -->
+        <!-- Table Headers -->
+        <div class="list-headers">
+            <div class="h-rank">#</div>
+            <div class="h-player">PLAYER</div>
+            <div class="h-region">REGION</div>
+            <div class="h-tiers">TIERS</div>
         </div>
+
+        <!-- Rankings Table List -->
+        <div class="ranking-list" id="ranking-container"></div>
     </div>
 
     <script>
-        // System Constants
         const ADMIN_PASS = "hitler?988";
         const GAMEMODES = ['pot', 'cpvp', 'smp', 'sword', 'axe', 'mace', 'uhc', 'spearmace'];
         const TIER_SCORES = {
-            'HT1': 30, 'LT1': 27,
-            'HT2': 24, 'LT2': 21,
-            'HT3': 18, 'LT3': 15,
-            'HT4': 12, 'LT4': 9,
-            'HT5': 6,  'LT5': 3,
-            'None': 0
+            'HT1': 30, 'LT1': 27, 'HT2': 24, 'LT2': 21,
+            'HT3': 18, 'LT3': 15, 'HT4': 12, 'LT4': 9, 'None': 0
         };
-        const ALL_TIERS = Object.keys(TIER_SCORES);
 
-        // State
+        // Pre-loaded realistic default data matching McTiers
+        let defaultPlayers = [
+            { name: "Marlowww", uuid: "61699b2e-d327-4a01-9f1e-0ea8c3f06bc6", region: "NA", tiers: { pot: "HT1", sword: "HT1", cpvp: "HT1", axe: "HT1", smp: "HT1", mace: "HT1", uhc: "LT1", spearmace: "LT1" } },
+            { name: "ItzRealMe", uuid: "8667ba71-b85a-4004-af54-457a9734eed7", region: "NA", tiers: { sword: "HT3", pot: "HT1", cpvp: "HT1", smp: "HT1", uhc: "LT2", mace: "LT2" } },
+            { name: "coldified", uuid: "069a79f4-44e9-4726-a5be-fca90e38aaf5", region: "EU", tiers: { pot: "LT1", sword: "LT3", cpvp: "HT1", smp: "HT1", uhc: "LT1", axe: "HT1", mace: "LT2" } },
+            { name: "Swight", uuid: "1a82d658-7512-4217-9104-1bbf6e5f1d46", region: "NA", tiers: { pot: "LT3", sword: "HT1", cpvp: "HT1", smp: "HT1", uhc: "HT2", mace: "LT2", spearmace: "LT2" } },
+            { name: "janekv", uuid: "c0695026-0e9f-44e9-92b0-9c2f42a0b1bc", region: "EU", tiers: { pot: "LT3", sword: "HT4", cpvp: "HT1", smp: "HT1", uhc: "HT1", axe: "HT2", mace: "LT2", spearmace: "LT2" } }
+        ];
+
+        let db = JSON.parse(localStorage.getItem('apexTiersDB')) || defaultPlayers;
+        let serverIP = localStorage.getItem('apexServerIP') || 'mcpvp.club';
         let currentMode = 'overall';
-        let db = JSON.parse(localStorage.getItem('apexTiersDB')) || [];
 
-        // Utility: Calculate total points for a player
-        function calculatePoints(tiersObj) {
-            let total = 0;
-            for (let gm in tiersObj) {
-                if (TIER_SCORES[tiersObj[gm]]) {
-                    total += TIER_SCORES[tiersObj[gm]];
-                }
-            }
-            return total;
-        }
+        document.getElementById('display-server-ip').innerText = serverIP;
 
-        // Utility: Generate a cool title based on points
-        function getTitle(points) {
-            if (points >= 150) return "Combat Grandmaster";
-            if (points >= 100) return "Combat Master";
-            if (points >= 60) return "Combat Veteran";
-            if (points >= 30) return "Combatant";
-            if (points > 0) return "Fighter";
-            return "Unranked";
-        }
-
-        // Render Admin Tier Selectors
-        function setupAdminTiers() {
-            const grid = document.getElementById('admin-tiers-grid');
+        // Populate Admin Tier Inputs
+        function setupAdminInputs() {
+            const container = document.getElementById('admin-tier-inputs');
             let html = '';
             GAMEMODES.forEach(gm => {
                 html += `
-                    <div class="tier-input-group">
+                    <div class="tier-input-row">
                         <img src="${gm}.webp" alt="${gm}" onerror="this.src='pot.webp'">
-                        <select id="tier-${gm}">
-                            ${ALL_TIERS.map(t => `<option value="${t}">${t}</option>`).join('')}
+                        <select id="admin-gm-${gm}">
+                            <option value="None">None</option>
+                            ${Object.keys(TIER_SCORES).filter(t => t !== 'None').map(t => `<option value="${t}">${t}</option>`).join('')}
                         </select>
                     </div>
                 `;
             });
-            grid.innerHTML = html;
+            container.innerHTML = html;
         }
-        setupAdminTiers();
+        setupAdminInputs();
+
+        function calculatePoints(tiers) {
+            let total = 0;
+            for (let gm in tiers) {
+                total += TIER_SCORES[tiers[gm]] || 0;
+            }
+            return total;
+        }
+
+        function getTitle(points) {
+            if (points >= 200) return "Combat Grandmaster";
+            if (points >= 120) return "Combat Master";
+            if (points >= 60) return "Combat Veteran";
+            return "Fighter";
+        }
 
         // Render Leaderboard
-        function renderLeaderboard() {
+        function renderApp() {
             const container = document.getElementById('ranking-container');
-            const searchQuery = document.getElementById('search-input').value.toLowerCase();
-            container.innerHTML = ''; 
+            const searchVal = document.getElementById('search-bar').value.toLowerCase();
+            container.innerHTML = '';
 
-            let filteredPlayers = [...db];
+            let list = [...db];
 
-            // 1. Filter by Search Query
-            if (searchQuery) {
-                filteredPlayers = filteredPlayers.filter(p => p.name.toLowerCase().includes(searchQuery));
+            // Filter Search
+            if (searchVal) {
+                list = list.filter(p => p.name.toLowerCase().includes(searchVal));
             }
 
-            // 2. Filter & Sort by Gamemode
+            // Filter & Sort by Mode
             if (currentMode !== 'overall') {
-                // Keep only players who have a rank in this specific gamemode
-                filteredPlayers = filteredPlayers.filter(p => p.tiers && p.tiers[currentMode] && p.tiers[currentMode] !== 'None');
-                
-                // Sort by the specific gamemode's tier score (e.g. HT1 > LT2)
-                filteredPlayers.sort((a, b) => {
+                list = list.filter(p => p.tiers && p.tiers[currentMode] && p.tiers[currentMode] !== 'None');
+                list.sort((a, b) => {
                     let scoreA = TIER_SCORES[a.tiers[currentMode]] || 0;
                     let scoreB = TIER_SCORES[b.tiers[currentMode]] || 0;
-                    // If tied in this gamemode, use total points as tiebreaker
                     if (scoreA === scoreB) return calculatePoints(b.tiers) - calculatePoints(a.tiers);
                     return scoreB - scoreA;
                 });
             } else {
-                // Sort by total overall points
-                filteredPlayers.sort((a, b) => calculatePoints(b.tiers) - calculatePoints(a.tiers));
+                list.sort((a, b) => calculatePoints(b.tiers) - calculatePoints(a.tiers));
             }
 
-            if (filteredPlayers.length === 0) {
-                container.innerHTML = `<div class="empty-state">No players found. Use the Admin Panel to add players.</div>`;
+            if (list.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">No records found in this category.</div>`;
                 return;
             }
 
-            // 3. Generate HTML
-            filteredPlayers.forEach((player, index) => {
-                let tiersHTML = '';
-                let totalPoints = calculatePoints(player.tiers);
-                let title = getTitle(totalPoints);
+            list.forEach((player, index) => {
+                const rank = index + 1;
+                let rankClass = '';
+                if (rank === 1) rankClass = 'rank-1';
+                else if (rank === 2) rankClass = 'rank-2';
+                else if (rank === 3) rankClass = 'rank-3';
 
-                // Build the tier badges
+                const points = calculatePoints(player.tiers);
+                const title = getTitle(points);
+
+                let tiersHTML = '';
                 if (player.tiers) {
                     for (let gm in player.tiers) {
-                        let rank = player.tiers[gm];
-                        if (rank !== 'None') {
+                        let t = player.tiers[gm];
+                        if (t && t !== 'None') {
                             tiersHTML += `
                                 <div class="tier-badge">
                                     <img src="${gm}.webp" alt="${gm}" onerror="this.src='pot.webp'">
-                                    <span class="tier-label ${rank.toLowerCase()}">${rank}</span>
+                                    <span class="tier-label ${t.toLowerCase()}">${t}</span>
                                 </div>
                             `;
                         }
                     }
                 }
 
-                // Avatar fallback
-                const avatarUrl = player.uuid && player.uuid.trim() !== '' 
-                    ? `https://crafatar.com/avatars/${player.uuid}?overlay` 
-                    : `https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7?overlay`;
+                const avatar = player.uuid ? `https://crafatar.com/avatars/${player.uuid}?overlay` : `https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7?overlay`;
 
-                const row = `
-                    <div class="rank-row">
-                        <div class="rank-number">${index + 1}.</div>
+                container.innerHTML += `
+                    <div class="rank-row ${rankClass}">
+                        <div class="rank-number">${rank}.</div>
                         <div class="player-info">
-                            <img src="${avatarUrl}" alt="${player.name}" class="player-avatar">
+                            <img src="${avatar}" alt="${player.name}" class="player-avatar">
                             <div class="player-details">
                                 <h3>${player.name}</h3>
-                                <span>❖ ${title} (${totalPoints} points)</span>
+                                <span>❖ ${title} (${points} points)</span>
                             </div>
                         </div>
-                        <div class="region">${player.region.toUpperCase()}</div>
-                        <div class="player-tiers">
-                            ${tiersHTML}
-                        </div>
+                        <div class="region">${player.region}</div>
+                        <div class="player-tiers">${tiersHTML}</div>
                     </div>
                 `;
-                container.innerHTML += row;
             });
         }
 
-        // Category Selection Click Logic
-        const categoryElements = document.querySelectorAll('.category');
-        categoryElements.forEach(category => {
-            category.addEventListener('click', () => {
-                categoryElements.forEach(c => c.classList.remove('active'));
-                category.classList.add('active');
-                
-                currentMode = category.getAttribute('data-mode');
-                renderLeaderboard();
+        // Mode Switching
+        document.querySelectorAll('.category').forEach(cat => {
+            cat.addEventListener('click', () => {
+                document.querySelectorAll('.category').forEach(c => c.classList.remove('active'));
+                cat.classList.add('active');
+                currentMode = cat.getAttribute('data-mode');
+                renderApp();
             });
         });
 
-        // Secret Admin Logic (Triple click)
-        let clickCount = 0;
-        let clickTimer;
+        // Secret Admin Trigger (Triple click logo)
+        let clicks = 0;
+        let timer;
         function handleLogoClick() {
-            clickCount++;
-            if (clickCount === 1) {
-                clickTimer = setTimeout(() => { clickCount = 0; }, 1500);
-            }
-            if (clickCount === 3) {
-                clearTimeout(clickTimer);
-                clickCount = 0;
-                const password = prompt("Restricted Access. Enter Admin Password:");
-                if (password === ADMIN_PASS) {
+            clicks++;
+            if (clicks === 1) timer = setTimeout(() => clicks = 0, 1500);
+            if (clicks === 3) {
+                clearTimeout(timer);
+                clicks = 0;
+                let pass = prompt("Enter Admin Password:");
+                if (pass === ADMIN_PASS) {
                     document.getElementById('admin-panel').style.display = 'block';
                     document.getElementById('admin-panel').scrollIntoView({ behavior: 'smooth' });
-                } else if (password !== null) {
-                    alert("Authentication Failed.");
+                } else if (pass !== null) {
+                    alert("Incorrect Password.");
                 }
             }
         }
 
-        // Admin: Add/Update Player
-        function addPlayer() {
-            const name = document.getElementById('add-name').value.trim();
-            const uuid = document.getElementById('add-uuid').value.trim();
-            const region = document.getElementById('add-region').value;
+        // Admin Save Player
+        function saveAdminPlayer() {
+            const name = document.getElementById('admin-name').value.trim();
+            const uuid = document.getElementById('admin-uuid').value.trim();
+            const region = document.getElementById('admin-region').value;
 
-            if (!name) return alert("Player name is required!");
+            if (!name) return alert("Player Name is required.");
 
-            // Collect assigned tiers
             let tiersObj = {};
             GAMEMODES.forEach(gm => {
-                let rank = document.getElementById(`tier-${gm}`).value;
-                if (rank !== 'None') {
-                    tiersObj[gm] = rank;
-                }
+                let val = document.getElementById(`admin-gm-${gm}`).value;
+                if (val !== 'None') tiersObj[gm] = val;
             });
 
-            // Remove if exists to update
+            // Update or add
             db = db.filter(p => p.name.toLowerCase() !== name.toLowerCase());
-
-            // Push new record
-            db.push({
-                name: name,
-                uuid: uuid,
-                region: region,
-                tiers: tiersObj
-            });
+            db.push({ name, uuid, region, tiers: tiersObj });
 
             localStorage.setItem('apexTiersDB', JSON.stringify(db));
-            alert(`Saved ${name}!`);
+            alert(`Successfully saved ${name}!`);
             
-            document.getElementById('add-name').value = '';
-            document.getElementById('add-uuid').value = '';
-            renderLeaderboard();
+            document.getElementById('admin-name').value = '';
+            document.getElementById('admin-uuid').value = '';
+            renderApp();
         }
 
-        // Admin: Remove Player
-        function removePlayer() {
-            const name = document.getElementById('remove-name').value.trim();
-            if (!name) return alert("Enter a name to remove.");
-
-            const initialLength = db.length;
+        // Admin Remove Player
+        function removeAdminPlayer() {
+            const name = document.getElementById('admin-remove-name').value.trim();
+            if (!name) return alert("Enter name to remove.");
+            
+            let len = db.length;
             db = db.filter(p => p.name.toLowerCase() !== name.toLowerCase());
-
-            if (db.length === initialLength) {
-                alert(`Player ${name} not found.`);
-            } else {
+            if (db.length === len) alert("Player not found.");
+            else {
                 localStorage.setItem('apexTiersDB', JSON.stringify(db));
-                alert(`Removed ${name}.`);
-                document.getElementById('remove-name').value = '';
-                renderLeaderboard();
+                alert(`Removed ${name}`);
+                document.getElementById('admin-remove-name').value = '';
+                renderApp();
             }
+        }
+
+        // Update Server IP
+        function updateServerIP() {
+            const newIp = document.getElementById('admin-server-ip-input').value.trim();
+            if (newIp) {
+                serverIP = newIp;
+                localStorage.setItem('apexServerIP', serverIP);
+                document.getElementById('display-server-ip').innerText = serverIP;
+                alert("Server IP updated!");
+            }
+        }
+
+        function copyIP() {
+            navigator.clipboard.writeText(serverIP);
+            alert(`Copied server IP: ${serverIP}`);
         }
 
         // Initial Load
-        renderLeaderboard();
+        renderApp();
     </script>
 </body>
 </html>
