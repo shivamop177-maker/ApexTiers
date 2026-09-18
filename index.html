@@ -31,7 +31,6 @@
             overflow-x: hidden;
         }
 
-        /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -150,21 +149,6 @@
             font-weight: 600;
         }
 
-        /* List Headers (Like McTiers) */
-        .list-headers {
-            display: flex;
-            padding: 0 25px 10px 25px;
-            color: var(--text-muted);
-            font-size: 12px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .h-rank { width: 50px; }
-        .h-player { flex: 1; }
-        .h-region { width: 100px; text-align: left; }
-        .h-tiers { width: 250px; text-align: left; }
-
         /* Rankings Table */
         .ranking-list {
             display: flex;
@@ -180,6 +164,8 @@
             border-radius: 10px;
             border: 1px solid var(--border-color);
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
             animation: fadeIn 0.4s ease-out;
         }
 
@@ -199,8 +185,8 @@
 
         /* Top 3 Stylings */
         .rank-row:nth-child(1) .rank-number { color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-        .rank-row:nth-child(2) .rank-number { color: #c0c0c0; }
-        .rank-row:nth-child(3) .rank-number { color: #cd7f32; }
+        .rank-row:nth-child(2) .rank-number { color: #c0c0c0; text-shadow: 0 0 10px rgba(192, 192, 192, 0.3); }
+        .rank-row:nth-child(3) .rank-number { color: #cd7f32; text-shadow: 0 0 10px rgba(205, 127, 50, 0.3); }
 
         .player-info {
             display: flex;
@@ -227,15 +213,17 @@
         }
 
         .region {
-            width: 100px;
+            width: 80px;
             color: #ff4d4d;
             font-weight: 800;
+            text-align: center;
+            margin-right: 20px;
         }
 
         .player-tiers {
-            width: 250px;
             display: flex;
             gap: 12px;
+            width: 300px;
             flex-wrap: wrap;
         }
 
@@ -249,6 +237,7 @@
         .tier-badge img {
             width: 20px;
             height: 20px;
+            object-fit: contain;
         }
 
         .tier-label {
@@ -256,12 +245,19 @@
             padding: 2px 6px;
             border-radius: 4px;
             font-weight: 800;
+            text-transform: uppercase;
         }
 
         .ht1 { background: #ffaa00; color: #000; }
-        .ht2 { background: #e69900; color: #000; }
         .lt1 { background: #aa00ff; color: #fff; }
+        .ht2 { background: #e69900; color: #000; }
         .lt2 { background: #5555ff; color: #fff; }
+        .ht3 { background: #cc8800; color: #fff; }
+        .lt3 { background: #4444dd; color: #fff; }
+        .ht4 { background: #b37700; color: #fff; }
+        .lt4 { background: #3333bb; color: #fff; }
+        .ht5 { background: #996600; color: #fff; }
+        .lt5 { background: #222299; color: #fff; }
 
         .empty-state {
             text-align: center;
@@ -278,7 +274,7 @@
             margin-bottom: 30px;
             padding: 25px;
             background: #111;
-            border: 2px dashed #f2a900;
+            border: 2px dashed var(--gold-primary);
             border-radius: 10px;
             animation: fadeIn 0.5s ease;
         }
@@ -301,18 +297,48 @@
             border: 1px solid #333;
         }
 
-        .admin-box h4 { margin-bottom: 10px; color: #fff; }
+        .admin-box h4 { margin-bottom: 15px; color: #fff; }
         .admin-input {
-            width: 100%; padding: 8px; margin-bottom: 10px;
+            width: 100%; padding: 10px; margin-bottom: 10px;
             background: #000; color: #fff; border: 1px solid #444; border-radius: 4px;
         }
+        
+        .tier-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .tier-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #000;
+            padding: 5px 10px;
+            border: 1px solid #444;
+            border-radius: 4px;
+        }
+
+        .tier-input-group img {
+            width: 20px; height: 20px;
+        }
+
+        .tier-input-group select {
+            background: transparent;
+            color: white;
+            border: none;
+            outline: none;
+            width: 100%;
+        }
+
         .admin-btn {
-            padding: 10px 20px; background: var(--gold-gradient); color: #000;
+            padding: 12px 20px; background: var(--gold-gradient); color: #000;
             border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%;
+            transition: opacity 0.2s;
         }
-        .admin-btn.danger {
-            background: #ff4444; color: white;
-        }
+        .admin-btn:hover { opacity: 0.9; }
+        .admin-btn.danger { background: #ff4444; color: white; }
     </style>
 </head>
 <body>
@@ -324,7 +350,7 @@
             <a href="#">Information</a>
             <a href="https://discord.gg/Stv5rzsAsk" target="_blank">Discord</a>
         </div>
-        <input type="text" class="search-bar" placeholder="Search player...">
+        <input type="text" class="search-bar" id="search-input" placeholder="Search player..." oninput="renderLeaderboard()">
     </nav>
 
     <div class="container">
@@ -375,40 +401,27 @@
                 <!-- Add Player Form -->
                 <div class="admin-box">
                     <h4>Add / Update Player</h4>
-                    <select id="add-mode" class="admin-input">
-                        <option value="overall">Overall</option>
-                        <option value="pot">Pot</option>
-                        <option value="cpvp">CPVP</option>
-                        <option value="smp">SMP</option>
-                        <option value="sword">Sword</option>
-                        <option value="axe">Axe</option>
-                        <option value="mace">Mace</option>
-                        <option value="uhc">UHC</option>
-                        <option value="spearmace">SpearMace</option>
-                    </select>
                     <input type="text" id="add-name" class="admin-input" placeholder="Player Name (e.g. Marlowww)">
-                    <input type="text" id="add-uuid" class="admin-input" placeholder="Minecraft UUID (For Avatar)">
-                    <input type="text" id="add-title" class="admin-input" placeholder="Title (e.g. Combat Grandmaster)">
-                    <input type="number" id="add-score" class="admin-input" placeholder="Total Score/Points (For Sorting)">
-                    <input type="text" id="add-region" class="admin-input" placeholder="Region (e.g. NA, EU)">
-                    <input type="text" id="add-tiers" class="admin-input" placeholder="Tiers (e.g. pot:ht1, sword:lt2)">
-                    <button class="admin-btn" onclick="addPlayer()">Add Player to Leaderboard</button>
+                    <input type="text" id="add-uuid" class="admin-input" placeholder="Minecraft UUID (Optional, for avatar)">
+                    <select id="add-region" class="admin-input">
+                        <option value="NA">NA</option>
+                        <option value="EU">EU</option>
+                        <option value="AS">AS</option>
+                        <option value="AU">AU</option>
+                        <option value="ME">ME</option>
+                    </select>
+                    
+                    <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">Set Tiers (Points calculate automatically)</p>
+                    <div class="tier-grid" id="admin-tiers-grid">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <button class="admin-btn" onclick="addPlayer()">Save Player Record</button>
                 </div>
                 
                 <!-- Remove Player Form -->
                 <div class="admin-box">
                     <h4>Remove Player</h4>
-                    <select id="remove-mode" class="admin-input">
-                        <option value="overall">Overall</option>
-                        <option value="pot">Pot</option>
-                        <option value="cpvp">CPVP</option>
-                        <option value="smp">SMP</option>
-                        <option value="sword">Sword</option>
-                        <option value="axe">Axe</option>
-                        <option value="mace">Mace</option>
-                        <option value="uhc">UHC</option>
-                        <option value="spearmace">SpearMace</option>
-                    </select>
                     <input type="text" id="remove-name" class="admin-input" placeholder="Exact Player Name to Remove">
                     <button class="admin-btn danger" onclick="removePlayer()">Remove Player</button>
                     
@@ -418,14 +431,6 @@
             </div>
         </div>
 
-        <!-- Table Headers -->
-        <div class="list-headers">
-            <div class="h-rank">#</div>
-            <div class="h-player">PLAYER</div>
-            <div class="h-region">REGION</div>
-            <div class="h-tiers">TIERS</div>
-        </div>
-
         <!-- Dynamic Rankings Table -->
         <div class="ranking-list" id="ranking-container">
             <!-- JavaScript will populate this based on the selected mode -->
@@ -433,55 +438,123 @@
     </div>
 
     <script>
-        // Initialize Player Database in LocalStorage (Starts completely empty)
-        let db = JSON.parse(localStorage.getItem('apexTiersDB'));
-        if (!db) {
-            db = {
-                overall: [], pot: [], cpvp: [], smp: [], sword: [], 
-                axe: [], mace: [], uhc: [], spearmace: []
-            };
-            localStorage.setItem('apexTiersDB', JSON.stringify(db));
+        // System Constants
+        const ADMIN_PASS = "hitler?988";
+        const GAMEMODES = ['pot', 'cpvp', 'smp', 'sword', 'axe', 'mace', 'uhc', 'spearmace'];
+        const TIER_SCORES = {
+            'HT1': 30, 'LT1': 27,
+            'HT2': 24, 'LT2': 21,
+            'HT3': 18, 'LT3': 15,
+            'HT4': 12, 'LT4': 9,
+            'HT5': 6,  'LT5': 3,
+            'None': 0
+        };
+        const ALL_TIERS = Object.keys(TIER_SCORES);
+
+        // State
+        let currentMode = 'overall';
+        let db = JSON.parse(localStorage.getItem('apexTiersDB')) || [];
+
+        // Utility: Calculate total points for a player
+        function calculatePoints(tiersObj) {
+            let total = 0;
+            for (let gm in tiersObj) {
+                if (TIER_SCORES[tiersObj[gm]]) {
+                    total += TIER_SCORES[tiersObj[gm]];
+                }
+            }
+            return total;
         }
 
-        let currentMode = 'overall';
+        // Utility: Generate a cool title based on points
+        function getTitle(points) {
+            if (points >= 150) return "Combat Grandmaster";
+            if (points >= 100) return "Combat Master";
+            if (points >= 60) return "Combat Veteran";
+            if (points >= 30) return "Combatant";
+            if (points > 0) return "Fighter";
+            return "Unranked";
+        }
 
-        // Render Leaderboard Function
-        function renderLeaderboard(mode) {
+        // Render Admin Tier Selectors
+        function setupAdminTiers() {
+            const grid = document.getElementById('admin-tiers-grid');
+            let html = '';
+            GAMEMODES.forEach(gm => {
+                html += `
+                    <div class="tier-input-group">
+                        <img src="${gm}.webp" alt="${gm}" onerror="this.src='pot.webp'">
+                        <select id="tier-${gm}">
+                            ${ALL_TIERS.map(t => `<option value="${t}">${t}</option>`).join('')}
+                        </select>
+                    </div>
+                `;
+            });
+            grid.innerHTML = html;
+        }
+        setupAdminTiers();
+
+        // Render Leaderboard
+        function renderLeaderboard() {
             const container = document.getElementById('ranking-container');
-            container.innerHTML = ''; // Clear current
+            const searchQuery = document.getElementById('search-input').value.toLowerCase();
+            container.innerHTML = ''; 
 
-            const players = db[mode] || [];
+            let filteredPlayers = [...db];
 
-            // Sort players by score highest to lowest
-            players.sort((a, b) => b.score - a.score);
+            // 1. Filter by Search Query
+            if (searchQuery) {
+                filteredPlayers = filteredPlayers.filter(p => p.name.toLowerCase().includes(searchQuery));
+            }
 
-            if (players.length === 0) {
-                container.innerHTML = `<div class="empty-state">No players found in this category yet. Use Admin Panel to add players.</div>`;
+            // 2. Filter & Sort by Gamemode
+            if (currentMode !== 'overall') {
+                // Keep only players who have a rank in this specific gamemode
+                filteredPlayers = filteredPlayers.filter(p => p.tiers && p.tiers[currentMode] && p.tiers[currentMode] !== 'None');
+                
+                // Sort by the specific gamemode's tier score (e.g. HT1 > LT2)
+                filteredPlayers.sort((a, b) => {
+                    let scoreA = TIER_SCORES[a.tiers[currentMode]] || 0;
+                    let scoreB = TIER_SCORES[b.tiers[currentMode]] || 0;
+                    // If tied in this gamemode, use total points as tiebreaker
+                    if (scoreA === scoreB) return calculatePoints(b.tiers) - calculatePoints(a.tiers);
+                    return scoreB - scoreA;
+                });
+            } else {
+                // Sort by total overall points
+                filteredPlayers.sort((a, b) => calculatePoints(b.tiers) - calculatePoints(a.tiers));
+            }
+
+            if (filteredPlayers.length === 0) {
+                container.innerHTML = `<div class="empty-state">No players found. Use the Admin Panel to add players.</div>`;
                 return;
             }
 
-            players.forEach((player, index) => {
-                // Parse the tiers string (e.g. "pot:ht1, sword:lt2")
+            // 3. Generate HTML
+            filteredPlayers.forEach((player, index) => {
                 let tiersHTML = '';
+                let totalPoints = calculatePoints(player.tiers);
+                let title = getTitle(totalPoints);
+
+                // Build the tier badges
                 if (player.tiers) {
-                    const tierList = player.tiers.split(',');
-                    tierList.forEach(t => {
-                        const parts = t.trim().split(':');
-                        if(parts.length === 2) {
-                            const icon = parts[0].toLowerCase();
-                            const rank = parts[1].toLowerCase();
+                    for (let gm in player.tiers) {
+                        let rank = player.tiers[gm];
+                        if (rank !== 'None') {
                             tiersHTML += `
                                 <div class="tier-badge">
-                                    <img src="${icon}.webp" alt="${icon}" onerror="this.src='pot.webp'">
-                                    <span class="tier-label ${rank}">${rank.toUpperCase()}</span>
+                                    <img src="${gm}.webp" alt="${gm}" onerror="this.src='pot.webp'">
+                                    <span class="tier-label ${rank.toLowerCase()}">${rank}</span>
                                 </div>
                             `;
                         }
-                    });
+                    }
                 }
 
-                // Default Avatar if UUID is missing
-                const avatarUrl = player.uuid ? `https://crafatar.com/avatars/${player.uuid}?overlay` : `https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7?overlay`;
+                // Avatar fallback
+                const avatarUrl = player.uuid && player.uuid.trim() !== '' 
+                    ? `https://crafatar.com/avatars/${player.uuid}?overlay` 
+                    : `https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7?overlay`;
 
                 const row = `
                     <div class="rank-row">
@@ -490,7 +563,7 @@
                             <img src="${avatarUrl}" alt="${player.name}" class="player-avatar">
                             <div class="player-details">
                                 <h3>${player.name}</h3>
-                                <span>❖ ${player.title} (${player.score} points)</span>
+                                <span>❖ ${title} (${totalPoints} points)</span>
                             </div>
                         </div>
                         <div class="region">${player.region.toUpperCase()}</div>
@@ -503,34 +576,31 @@
             });
         }
 
-        // Category Selection Logic
-        const categories = document.querySelectorAll('.category');
-        categories.forEach(category => {
+        // Category Selection Click Logic
+        const categoryElements = document.querySelectorAll('.category');
+        categoryElements.forEach(category => {
             category.addEventListener('click', () => {
-                categories.forEach(c => c.classList.remove('active'));
+                categoryElements.forEach(c => c.classList.remove('active'));
                 category.classList.add('active');
                 
                 currentMode = category.getAttribute('data-mode');
-                renderLeaderboard(currentMode);
+                renderLeaderboard();
             });
         });
 
-        // Initial Render
-        renderLeaderboard('overall');
-
-        // Secret Admin Logic (Triple click the logo)
+        // Secret Admin Logic (Triple click)
         let clickCount = 0;
         let clickTimer;
         function handleLogoClick() {
             clickCount++;
             if (clickCount === 1) {
-                clickTimer = setTimeout(() => { clickCount = 0; }, 1500); 
+                clickTimer = setTimeout(() => { clickCount = 0; }, 1500);
             }
             if (clickCount === 3) {
                 clearTimeout(clickTimer);
                 clickCount = 0;
                 const password = prompt("Restricted Access. Enter Admin Password:");
-                if (password === "hitler?988") {
+                if (password === ADMIN_PASS) {
                     document.getElementById('admin-panel').style.display = 'block';
                     document.getElementById('admin-panel').scrollIntoView({ behavior: 'smooth' });
                 } else if (password !== null) {
@@ -539,53 +609,62 @@
             }
         }
 
-        // Admin Function: Add Player
+        // Admin: Add/Update Player
         function addPlayer() {
-            const mode = document.getElementById('add-mode').value;
-            const name = document.getElementById('add-name').value;
-            const uuid = document.getElementById('add-uuid').value;
-            const title = document.getElementById('add-title').value;
-            const score = parseInt(document.getElementById('add-score').value) || 0;
+            const name = document.getElementById('add-name').value.trim();
+            const uuid = document.getElementById('add-uuid').value.trim();
             const region = document.getElementById('add-region').value;
-            const tiers = document.getElementById('add-tiers').value;
 
             if (!name) return alert("Player name is required!");
 
-            // Check if player exists in this mode, remove them to update
-            db[mode] = db[mode].filter(p => p.name.toLowerCase() !== name.toLowerCase());
+            // Collect assigned tiers
+            let tiersObj = {};
+            GAMEMODES.forEach(gm => {
+                let rank = document.getElementById(`tier-${gm}`).value;
+                if (rank !== 'None') {
+                    tiersObj[gm] = rank;
+                }
+            });
 
-            db[mode].push({ name, uuid, title, score, region, tiers });
+            // Remove if exists to update
+            db = db.filter(p => p.name.toLowerCase() !== name.toLowerCase());
+
+            // Push new record
+            db.push({
+                name: name,
+                uuid: uuid,
+                region: region,
+                tiers: tiersObj
+            });
+
             localStorage.setItem('apexTiersDB', JSON.stringify(db));
+            alert(`Saved ${name}!`);
             
-            alert(`Added/Updated ${name} in ${mode.toUpperCase()} leaderboard!`);
-            
-            // Clear inputs
             document.getElementById('add-name').value = '';
-            document.getElementById('add-score').value = '';
-            
-            // Re-render if we are currently looking at that mode
-            if (currentMode === mode) renderLeaderboard(mode);
+            document.getElementById('add-uuid').value = '';
+            renderLeaderboard();
         }
 
-        // Admin Function: Remove Player
+        // Admin: Remove Player
         function removePlayer() {
-            const mode = document.getElementById('remove-mode').value;
-            const name = document.getElementById('remove-name').value;
+            const name = document.getElementById('remove-name').value.trim();
+            if (!name) return alert("Enter a name to remove.");
 
-            if (!name) return alert("Player name is required!");
+            const initialLength = db.length;
+            db = db.filter(p => p.name.toLowerCase() !== name.toLowerCase());
 
-            const initialLength = db[mode].length;
-            db[mode] = db[mode].filter(p => p.name.toLowerCase() !== name.toLowerCase());
-
-            if (db[mode].length === initialLength) {
-                alert(`Player ${name} not found in ${mode.toUpperCase()} leaderboard.`);
+            if (db.length === initialLength) {
+                alert(`Player ${name} not found.`);
             } else {
                 localStorage.setItem('apexTiersDB', JSON.stringify(db));
-                alert(`Removed ${name} from ${mode.toUpperCase()} leaderboard.`);
+                alert(`Removed ${name}.`);
                 document.getElementById('remove-name').value = '';
-                if (currentMode === mode) renderLeaderboard(mode);
+                renderLeaderboard();
             }
         }
+
+        // Initial Load
+        renderLeaderboard();
     </script>
 </body>
 </html>
