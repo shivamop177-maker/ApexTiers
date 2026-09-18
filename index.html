@@ -39,14 +39,15 @@
                         display: ['Montserrat', 'sans-serif']
                     },
                     animation: {
-                        'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
-                        'loading-bar': 'loadingBar 1s ease-in-out forwards',
-                        'slide-out-up': 'slideOutUp 0.8s cubic-bezier(0.7, 0, 0.3, 1) forwards'
+                        'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'loading-bar': 'loadingBar 1.2s ease-in-out forwards',
+                        'slide-out-up': 'slideOutUp 0.8s cubic-bezier(0.7, 0, 0.3, 1) forwards',
+                        'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
                     },
                     keyframes: {
                         fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(15px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                            '0%': { opacity: '0', transform: 'translateY(20px) scale(0.98)' },
+                            '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
                         },
                         loadingBar: {
                             '0%': { width: '0%' },
@@ -55,6 +56,10 @@
                         slideOutUp: {
                             '0%': { transform: 'translateY(0)', opacity: '1' },
                             '100%': { transform: 'translateY(-100%)', opacity: '0', visibility: 'hidden' },
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '0.4' },
+                            '50%': { opacity: '0.8' },
                         }
                     }
                 }
@@ -63,22 +68,27 @@
     </script>
     
     <style>
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         body { 
-            background-color: #070709; 
+            background: linear-gradient(135deg, #070709, #140a06, #070709, #1c1005, #070709);
+            background-size: 400% 400%;
+            animation: gradientShift 18s ease infinite;
             color: #f8fafc; 
             font-family: 'Inter', sans-serif; 
             overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 50% -20%, rgba(232, 93, 4, 0.12), transparent 50%),
-                radial-gradient(circle at 10% 80%, rgba(251, 191, 36, 0.04), transparent 40%);
-            background-attachment: fixed;
+            min-height: 100vh;
         }
         
         .glass-panel {
-            background: linear-gradient(180deg, rgba(12, 12, 15, 0.95) 0%, rgba(7, 7, 9, 0.98) 100%);
-            backdrop-filter: blur(12px);
+            background: linear-gradient(180deg, rgba(14, 14, 18, 0.92) 0%, rgba(7, 7, 9, 0.97) 100%);
+            backdrop-filter: blur(16px);
             border: 1px solid #1a1a22;
-            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
         }
         
         .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -89,10 +99,10 @@
         ::-webkit-scrollbar-thumb { background: #1a1a22; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #e85d04; }
 
-        .result-row { transition: all 0.2s ease; }
+        .result-row { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
         .result-row:hover { 
-            background: rgba(232, 93, 4, 0.03); 
-            border-left: 2px solid #e85d04;
+            background: rgba(232, 93, 4, 0.05); 
+            transform: translateX(4px);
         }
     </style>
 </head>
@@ -100,26 +110,26 @@
 
     <!-- Loading Splash -->
     <div id="entrance-overlay" class="fixed inset-0 z-[100] bg-[#070709] flex flex-col items-center justify-center">
-        <div class="relative flex flex-col items-center">
-            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-apex-orange to-apex-gold p-[2px] animate-pulse">
-                <div class="w-full h-full bg-apex-bg rounded-2xl flex items-center justify-center">
-                    <i class="fa-solid fa-shield-halved text-apex-orange text-3xl"></i>
+        <div class="relative flex flex-col items-center animate-fade-in-up">
+            <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-apex-orange via-apex-gold to-orange-600 p-[2px] animate-pulse">
+                <div class="w-full h-full bg-apex-bg rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(232,93,4,0.4)]">
+                    <i class="fa-solid fa-shield-halved text-apex-orange text-4xl"></i>
                 </div>
             </div>
             <h1 class="font-display font-black text-3xl tracking-widest text-white mt-6">APEXTIERS</h1>
-            <div class="w-48 h-1 bg-apex-border mt-6 rounded-full overflow-hidden">
-                <div class="h-full bg-apex-orange animate-loading-bar"></div>
+            <div class="w-48 h-1.5 bg-apex-border mt-6 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-apex-orange to-apex-gold animate-loading-bar"></div>
             </div>
             <p class="mt-3 text-[11px] font-heading tracking-widest uppercase text-apex-textMuted">Loading Global Rankings...</p>
         </div>
     </div>
 
     <!-- Top Navigation Bar -->
-    <header class="sticky top-0 z-40 bg-[#070709]/90 backdrop-blur-xl border-b border-apex-border shadow-lg">
+    <header class="sticky top-0 z-40 bg-[#070709]/85 backdrop-blur-xl border-b border-apex-border shadow-2xl">
         <div class="max-w-[1500px] mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
             <div class="flex items-center space-x-8">
-                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('home')">
-                    <span class="font-display font-black text-2xl tracking-wider text-white">APEX<span class="text-apex-orange">TIERS</span></span>
+                <div class="flex items-center space-x-3 cursor-pointer group" onclick="switchTab('home')">
+                    <span class="font-display font-black text-2xl tracking-wider text-white group-hover:text-apex-orange transition-colors">APEX<span class="text-apex-orange">TIERS</span></span>
                 </div>
                 <nav class="hidden md:flex items-center space-x-1">
                     <button onclick="switchTab('home')" id="nav-home" class="px-4 py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider text-apex-textMuted hover:text-white transition-all">Home</button>
@@ -130,9 +140,8 @@
             </div>
 
             <div class="flex items-center space-x-4">
-                <!-- Server IP Pill -->
-                <div class="hidden lg:flex items-center bg-apex-card border border-apex-border rounded-full px-2 py-1.5 pr-4 cursor-pointer hover:border-apex-orange transition-colors" onclick="copyIP()">
-                    <div class="w-6 h-6 rounded-full bg-red-600/20 flex items-center justify-center mr-2 text-red-500 text-xs">
+                <div class="hidden lg:flex items-center bg-apex-card border border-apex-border rounded-full px-3 py-1.5 pr-4 cursor-pointer hover:border-apex-orange transition-all shadow-inner" onclick="copyIP()">
+                    <div class="w-5 h-5 rounded-full bg-red-600/20 flex items-center justify-center mr-2 text-red-500 text-[10px]">
                         <i class="fa-solid fa-server"></i>
                     </div>
                     <span class="text-[10px] text-apex-textMuted font-heading uppercase tracking-widest mr-2">Server IP:</span>
@@ -140,58 +149,61 @@
                     <i class="fa-brands fa-discord ml-3 text-indigo-400"></i>
                 </div>
 
-                <!-- Admin Cog Button -->
-                <button onclick="openAdminModal()" class="w-10 h-10 flex items-center justify-center rounded-lg bg-apex-card border border-apex-border text-apex-textMuted hover:text-white hover:border-apex-orange transition-all" title="Admin Settings">
+                <button onclick="openAdminModal()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-apex-card border border-apex-border text-apex-textMuted hover:text-white hover:border-apex-orange transition-all shadow-md" title="Admin Settings">
                     <i class="fa-solid fa-gear"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Gamemode Category Bar (With .png / .webp support) -->
-    <div class="bg-[#0c0c0f] border-b border-apex-border sticky top-18 z-30 shadow-md">
-        <div class="max-w-[1500px] mx-auto px-4 sm:px-6 overflow-x-auto scrollbar-hide py-3 flex items-center space-x-2 sm:space-x-3" id="apex-gamemode-bar"></div>
+    <!-- Gamemode Category Bar (Auto-fetches local .webp files) -->
+    <div class="bg-[#0a0a0e]/90 border-b border-apex-border sticky top-18 z-30 shadow-lg backdrop-blur-md">
+        <div class="max-w-[1500px] mx-auto px-4 sm:px-6 overflow-x-auto scrollbar-hide py-3 flex items-center space-x-2.5 sm:space-x-3" id="apex-gamemode-bar"></div>
     </div>
 
     <!-- Main Content -->
-    <main class="flex-1 max-w-[1500px] w-full mx-auto px-4 sm:px-6 py-8">
+    <main class="flex-1 max-w-[1500px] w-full mx-auto px-4 sm:px-6 py-8 animate-fade-in-up">
 
         <!-- HOME DASHBOARD VIEW -->
         <div id="view-home" class="hidden space-y-8">
-            <div class="glass-panel p-8 rounded-2xl space-y-4">
-                <h2 class="font-display font-black text-3xl text-white">Welcome to ApexTiers</h2>
+            <div class="glass-panel p-8 sm:p-10 rounded-2xl space-y-4 relative overflow-hidden">
+                <div class="absolute -right-20 -top-20 w-96 h-96 bg-apex-orange/10 rounded-full blur-3xl pointer-events-none"></div>
+                <h2 class="font-display font-black text-3xl sm:text-4xl text-white tracking-wide">Welcome to ApexTiers</h2>
                 <p class="text-sm text-apex-textMuted max-w-3xl leading-relaxed">
                     The official competitive Minecraft PvP rankings network. Explore tier lists across multiple game modes, verified test results, and global leaderboards across 5 regions.
                 </p>
-                <div class="pt-2 flex gap-4">
-                    <button onclick="switchTab('rankings')" class="px-6 py-3 rounded-xl bg-apex-orange hover:bg-apex-orangeHover text-white font-heading font-bold uppercase tracking-wider text-xs transition-all shadow-lg shadow-orange-500/20">View Leaderboards</button>
-                    <a id="home-discord-btn" href="https://discord.gg/Stv5rzsAsk" target="_blank" class="px-6 py-3 rounded-xl bg-apex-card hover:bg-apex-border border border-apex-border text-white font-heading font-bold uppercase tracking-wider text-xs transition-all flex items-center space-x-2">
+                <div class="pt-3 flex flex-wrap gap-4">
+                    <button onclick="switchTab('rankings')" class="px-6 py-3.5 rounded-xl bg-apex-orange hover:bg-apex-orangeHover text-white font-heading font-bold uppercase tracking-wider text-xs transition-all shadow-[0_0_20px_rgba(232,93,4,0.3)] hover:scale-105">View Leaderboards</button>
+                    <a id="home-discord-btn" href="https://discord.gg/Stv5rzsAsk" target="_blank" class="px-6 py-3.5 rounded-xl bg-apex-card hover:bg-apex-border border border-apex-border text-white font-heading font-bold uppercase tracking-wider text-xs transition-all flex items-center space-x-2 hover:border-indigo-500/50">
                         <i class="fa-brands fa-discord text-indigo-400"></i><span>Join Discord</span>
                     </a>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-2 glass-panel rounded-2xl p-6 space-y-4">
-                    <h3 class="font-display font-bold text-lg text-white flex items-center space-x-2">
+                <div class="lg:col-span-2 glass-panel rounded-2xl p-6 sm:p-8 space-y-4">
+                    <h3 class="font-display font-bold text-lg text-white flex items-center space-x-2.5">
                         <i class="fa-solid fa-fire text-apex-orange"></i><span>Recent High Tier Results</span>
                     </h3>
-                    <div id="home-high-tiers" class="space-y-2"></div>
+                    <div id="home-high-tiers" class="space-y-2.5"></div>
                 </div>
-                <div class="glass-panel rounded-2xl p-6 space-y-4">
-                    <h3 class="font-display font-bold text-lg text-white flex items-center space-x-2">
+                <div class="glass-panel rounded-2xl p-6 sm:p-8 space-y-4">
+                    <h3 class="font-display font-bold text-lg text-white flex items-center space-x-2.5">
                         <i class="fa-solid fa-chart-line text-apex-gold"></i><span>Network Stats</span>
                     </h3>
                     <div class="space-y-3 pt-2">
-                        <div class="flex justify-between items-center bg-[#070709] p-3 rounded-xl border border-apex-border">
+                        <div class="flex justify-between items-center bg-[#070709] p-3.5 rounded-xl border border-apex-border">
                             <span class="text-xs font-heading uppercase text-apex-textMuted">Registered Players</span>
                             <span id="stat-total-players" class="font-bold text-white font-heading text-sm">0</span>
                         </div>
-                        <div class="flex justify-between items-center bg-[#070709] p-3 rounded-xl border border-apex-border">
+                        <div class="flex justify-between items-center bg-[#070709] p-3.5 rounded-xl border border-apex-border">
                             <span class="text-xs font-heading uppercase text-apex-textMuted">Server Status</span>
-                            <span class="px-2.5 py-0.5 rounded bg-green-500/20 text-green-400 text-xs font-heading font-bold">Online</span>
+                            <span class="px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-heading font-bold flex items-center space-x-1.5">
+                                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                <span>Online</span>
+                            </span>
                         </div>
-                        <div class="flex justify-between items-center bg-[#070709] p-3 rounded-xl border border-apex-border">
+                        <div class="flex justify-between items-center bg-[#070709] p-3.5 rounded-xl border border-apex-border">
                             <span class="text-xs font-heading uppercase text-apex-textMuted">Discord Members</span>
                             <span id="stat-discord-members" class="font-bold text-white font-heading text-sm">450</span>
                         </div>
@@ -202,8 +214,7 @@
 
         <!-- RANKINGS VIEW -->
         <div id="view-rankings" class="space-y-6">
-            <!-- Search & Filter Bar -->
-            <div class="flex flex-col md:flex-row gap-4 items-center justify-between glass-panel p-4 rounded-2xl">
+            <div class="flex flex-col md:flex-row gap-4 items-center justify-between glass-panel p-4 sm:p-6 rounded-2xl">
                 <div class="relative w-full md:w-96">
                     <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-apex-textMuted"></i>
                     <input type="text" id="player-search" oninput="renderRankings()" placeholder="Search player IGN..." class="w-full bg-[#070709] border border-apex-border rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-apex-textMuted focus:outline-none focus:border-apex-orange transition-colors">
@@ -241,7 +252,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-apex-border/50 bg-[#070709] py-8 mt-auto">
+    <footer class="border-t border-apex-border/50 bg-[#070709]/90 py-8 mt-auto backdrop-blur-md">
         <div class="max-w-[1500px] mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
             <p class="text-xs text-apex-textMuted">© 2026 ApexTiers Network. All rights reserved.</p>
             <div class="flex items-center space-x-6 text-xs font-heading font-bold uppercase text-apex-textMuted">
@@ -252,23 +263,23 @@
         </div>
     </footer>
 
-    <!-- ADMIN MODAL (Passcode: shivam?98) -->
+    <!-- ADMIN MODAL (Password: hitler?988) -->
     <div id="admin-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="glass-panel rounded-2xl max-w-3xl w-full p-6 sm:p-8 space-y-6 relative border-t-2 border-t-apex-orange">
+        <div class="glass-panel rounded-2xl max-w-3xl w-full p-6 sm:p-8 space-y-6 relative border-t-2 border-t-apex-orange shadow-[0_0_50px_rgba(232,93,4,0.15)] animate-fade-in-up">
             <button onclick="closeAdminModal()" class="absolute right-6 top-6 text-apex-textMuted hover:text-white transition-colors">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
             <div class="space-y-1">
                 <h3 class="font-display font-black text-2xl text-white">ApexTiers Admin Panel</h3>
-                <p class="text-xs text-apex-textMuted font-heading uppercase tracking-widest">Manage players, tiers (HT1 to LT5), regions, and gamemode .png/.webp icons.</p>
+                <p class="text-xs text-apex-textMuted font-heading uppercase tracking-widest">Manage players, tiers (HT1 to LT5), regions, and gamemode .webp icons.</p>
             </div>
 
             <!-- Password Gate -->
             <div id="admin-gate" class="space-y-4 pt-4">
                 <div>
-                    <input type="password" id="admin-pass-input" placeholder="Enter secure passcode (shivam?98)..." class="w-full bg-[#070709] border border-apex-border rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-apex-orange font-mono">
+                    <input type="password" id="admin-pass-input" placeholder="Enter secure passcode..." class="w-full bg-[#070709] border border-apex-border rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-apex-orange font-mono">
                 </div>
-                <button onclick="verifyAdminPassword()" class="w-full py-3.5 rounded-xl bg-apex-orange hover:bg-apex-orangeHover text-white font-heading font-bold uppercase tracking-widest transition-all">
+                <button onclick="verifyAdminPassword()" class="w-full py-3.5 rounded-xl bg-apex-orange hover:bg-apex-orangeHover text-white font-heading font-bold uppercase tracking-widest transition-all shadow-lg shadow-orange-500/20">
                     Authenticate
                 </button>
             </div>
@@ -278,7 +289,7 @@
                 <div class="flex border-b border-apex-border space-x-6 overflow-x-auto scrollbar-hide">
                     <button onclick="switchAdminTab('editor')" id="admin-tab-editor" class="pb-3 text-xs font-heading font-bold uppercase tracking-widest border-b-2 border-apex-orange text-apex-orange whitespace-nowrap">Add / Edit Player</button>
                     <button onclick="switchAdminTab('manage')" id="admin-tab-manage" class="pb-3 text-xs font-heading font-bold uppercase tracking-widest border-b-2 border-transparent text-apex-textMuted hover:text-white whitespace-nowrap">Manage Players</button>
-                    <button onclick="switchAdminTab('icons')" id="admin-tab-icons" class="pb-3 text-xs font-heading font-bold uppercase tracking-widest border-b-2 border-transparent text-apex-textMuted hover:text-white whitespace-nowrap">Gamemode .png / .webp Icons</button>
+                    <button onclick="switchAdminTab('icons')" id="admin-tab-icons" class="pb-3 text-xs font-heading font-bold uppercase tracking-widest border-b-2 border-transparent text-apex-textMuted hover:text-white whitespace-nowrap">Gamemode .webp Icons</button>
                     <button onclick="switchAdminTab('settings')" id="admin-tab-settings" class="pb-3 text-xs font-heading font-bold uppercase tracking-widest border-b-2 border-transparent text-apex-textMuted hover:text-white whitespace-nowrap">Server Settings</button>
                 </div>
 
@@ -314,12 +325,12 @@
                     <div id="admin-players-list" class="space-y-2"></div>
                 </div>
 
-                <!-- 3. Gamemode .png / .webp Icons Customizer -->
+                <!-- 3. Gamemode .webp Icons Customizer -->
                 <div id="admin-panel-icons" class="hidden space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                    <p class="text-xs text-apex-textMuted">Paste direct <strong>.png</strong> or <strong>.webp</strong> image URLs for each gamemode icon:</p>
+                    <p class="text-xs text-apex-textMuted">By default, icons load automatically from your repository's <strong>.webp</strong> files (`sword.webp`, `axe.webp`, etc.). You can also override them below if needed:</p>
                     <div id="admin-icons-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                     <button onclick="saveGamemodeIcons()" class="w-full py-3.5 rounded-xl bg-apex-orange hover:bg-apex-orangeHover text-white font-heading font-bold text-xs uppercase tracking-widest transition-all">
-                        Save Gamemode Icons (.png / .webp)
+                        Save Gamemode Icons
                     </button>
                 </div>
 
@@ -343,7 +354,7 @@
 
     <!-- PLAYER PROFILE MODAL -->
     <div id="profile-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="glass-panel rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 relative border-t-2 border-t-apex-gold">
+        <div class="glass-panel rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 relative border-t-2 border-t-apex-gold animate-fade-in-up">
             <button onclick="closeProfileModal()" class="absolute right-6 top-6 text-apex-textMuted hover:text-white transition-colors">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
@@ -352,19 +363,21 @@
     </div>
 
     <script>
-        const ADMIN_PASSCODE = "shivam?98"; 
+        const ADMIN_PASSCODE = "hitler?988"; 
         
+        // Gamemodes mapped to local .webp files in your GitHub repo
         const GAMEMODES = [
             { id: 'overall', name: 'Overall', icon: 'fa-solid fa-trophy' },
             { id: 'ltms', name: 'LTMs', icon: 'fa-solid fa-star' },
-            { id: 'vanilla', name: 'Vanilla', icon: 'fa-solid fa-seedling' },
-            { id: 'uhc', name: 'UHC', icon: 'fa-solid fa-heart' },
-            { id: 'pot', name: 'Pot', icon: 'fa-solid fa-flask' },
-            { id: 'nethop', name: 'NethOP', icon: 'fa-solid fa-shield-halved' },
-            { id: 'smp', name: 'SMP', icon: 'fa-solid fa-earth-americas' },
-            { id: 'sword', name: 'Sword', icon: 'fa-solid fa-khanda' },
-            { id: 'axe', name: 'Axe', icon: 'fa-solid fa-hammer' },
-            { id: 'mace', name: 'Mace', icon: 'fa-solid fa-gavel' }
+            { id: 'vanilla', name: 'Vanilla', file: 'vanilla.webp', icon: 'fa-solid fa-seedling' },
+            { id: 'uhc', name: 'UHC', file: 'uhc.webp', icon: 'fa-solid fa-heart' },
+            { id: 'pot', name: 'Pot', file: 'pot.webp', icon: 'fa-solid fa-flask' },
+            { id: 'nethop', name: 'NethOP', file: 'cpvp.webp', icon: 'fa-solid fa-shield-halved' },
+            { id: 'smp', name: 'SMP', file: 'smp.webp', icon: 'fa-solid fa-earth-americas' },
+            { id: 'sword', name: 'Sword', file: 'sword.webp', icon: 'fa-solid fa-khanda' },
+            { id: 'axe', name: 'Axe', file: 'axe.webp', icon: 'fa-solid fa-hammer' },
+            { id: 'mace', name: 'Mace', file: 'mace.webp', icon: 'fa-solid fa-gavel' },
+            { id: 'spearmace', name: 'SpearMace', file: 'spearmace.webp', icon: 'fa-solid fa-wand-magic-sparkles' }
         ];
 
         const TIER_SCORES = {
@@ -451,10 +464,23 @@
             document.getElementById('nav-rankings').className = "px-4 py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider text-apex-textMuted hover:text-white transition-all";
 
             document.getElementById(`view-${tabId}`).classList.remove('hidden');
+            document.getElementById(`view-${tabId}`).classList.add('animate-fade-in-up');
             document.getElementById(`nav-${tabId}`).className = "px-4 py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider bg-apex-orange/10 text-apex-orange border border-apex-orange/35 transition-all";
             
             if (tabId === 'rankings') renderRankings();
             if (tabId === 'home') renderHomeStats();
+        }
+
+        function getGamemodeIcon(gm) {
+            // Check custom admin override first
+            if (siteSettings.icons && siteSettings.icons[gm.id]) {
+                return `<img src="${siteSettings.icons[gm.id]}" class="w-4 h-4 object-contain">`;
+            }
+            // Fallback to repository .webp files if available
+            if (gm.file) {
+                return `<img src="${gm.file}" class="w-4 h-4 object-contain" onerror="this.onerror=null; this.replaceWith(Object.assign(document.createElement('i'), {className: '${gm.icon} text-sm'}));">`;
+            }
+            return `<i class="${gm.icon} text-sm"></i>`;
         }
 
         function renderGamemodeBar() {
@@ -463,15 +489,9 @@
             let html = "";
             GAMEMODES.forEach(gm => {
                 const isActive = currentGamemodeTab === gm.id;
-                const customIconUrl = siteSettings.icons && siteSettings.icons[gm.id];
-                
-                let iconHtml = customIconUrl 
-                    ? `<img src="${customIconUrl}" class="w-4 h-4 object-contain">` 
-                    : `<i class="${gm.icon} text-sm"></i>`;
-
                 html += `
-                    <button onclick="selectGamemodeTab('${gm.id}')" class="flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-heading font-bold uppercase tracking-wider transition-all whitespace-nowrap ${isActive ? 'bg-apex-orange text-white shadow-lg shadow-orange-500/20' : 'bg-[#070709] text-apex-textMuted hover:text-white border border-apex-border'}">
-                        ${iconHtml}
+                    <button onclick="selectGamemodeTab('${gm.id}')" class="flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-heading font-bold uppercase tracking-wider transition-all whitespace-nowrap ${isActive ? 'bg-apex-orange text-white shadow-lg shadow-orange-500/20 scale-105' : 'bg-[#070709] text-apex-textMuted hover:text-white border border-apex-border hover:border-apex-orange/40'}">
+                        ${getGamemodeIcon(gm)}
                         <span>${gm.name}</span>
                     </button>
                 `;
@@ -516,20 +536,29 @@
                 const rank = idx + 1;
                 const skin = `https://minotar.net/avatar/${player.username}/36.png`;
                 
+                // Gold / Silver / Bronze background & styling behind top 3 players
+                let rowBgStyle = "";
                 let rankBadge = `<span class="font-heading font-extrabold text-sm text-apex-textMuted">#${rank}</span>`;
-                if (rank === 1) rankBadge = `<span class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-400 font-heading font-extrabold text-xs border border-amber-500/40">#1</span>`;
-                if (rank === 2) rankBadge = `<span class="px-2.5 py-1 rounded-lg bg-slate-400/20 text-slate-300 font-heading font-extrabold text-xs border border-slate-400/40">#2</span>`;
-                if (rank === 3) rankBadge = `<span class="px-2.5 py-1 rounded-lg bg-amber-700/20 text-amber-600 font-heading font-extrabold text-xs border border-amber-700/40">#3</span>`;
+                
+                if (rank === 1) {
+                    rowBgStyle = "background: linear-gradient(90deg, rgba(234, 179, 8, 0.15) 0%, rgba(12, 12, 15, 0.5) 100%); border-left: 4px solid #facc15;";
+                    rankBadge = `<span class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-400 font-heading font-extrabold text-xs border border-amber-500/40 shadow-[0_0_15px_rgba(234,179,8,0.3)]">#1</span>`;
+                } else if (rank === 2) {
+                    rowBgStyle = "background: linear-gradient(90deg, rgba(148, 163, 184, 0.12) 0%, rgba(12, 12, 15, 0.5) 100%); border-left: 4px solid #cbd5e1;";
+                    rankBadge = `<span class="px-2.5 py-1 rounded-lg bg-slate-400/20 text-slate-200 font-heading font-extrabold text-xs border border-slate-400/40 shadow-[0_0_15px_rgba(148,163,184,0.2)]">#2</span>`;
+                } else if (rank === 3) {
+                    rowBgStyle = "background: linear-gradient(90deg, rgba(180, 83, 9, 0.15) 0%, rgba(12, 12, 15, 0.5) 100%); border-left: 4px solid #d97706;";
+                    rankBadge = `<span class="px-2.5 py-1 rounded-lg bg-amber-700/20 text-amber-500 font-heading font-extrabold text-xs border border-amber-700/40 shadow-[0_0_15px_rgba(180,83,9,0.2)]">#3</span>`;
+                }
 
                 let tiersHtml = '<div class="flex items-center justify-end space-x-3 sm:space-x-4 overflow-x-auto scrollbar-hide py-1">';
                 GAMEMODES.filter(g => g.id !== 'overall').forEach(gm => {
                     const tier = player.tiers && player.tiers[gm.id] ? player.tiers[gm.id] : 'None';
-                    const customIconUrl = siteSettings.icons && siteSettings.icons[gm.id];
-                    let iconElem = customIconUrl ? `<img src="${customIconUrl}" class="w-3.5 h-3.5 object-contain">` : `<i class="${gm.icon} text-xs"></i>`;
+                    let iconElem = getGamemodeIcon(gm);
 
                     tiersHtml += `
                         <div class="flex flex-col items-center min-w-[32px]" title="${gm.name}: ${tier}">
-                            <div class="text-apex-textMuted mb-1">${iconElem}</div>
+                            <div class="text-apex-textMuted mb-1 scale-90">${iconElem}</div>
                             <span class="text-[11px] font-heading ${getTierColor(tier)}">${tier}</span>
                         </div>
                     `;
@@ -537,13 +566,13 @@
                 tiersHtml += '</div>';
 
                 html += `
-                    <tr class="result-row cursor-pointer" onclick='openProfileModal(${JSON.stringify(player)})'>
+                    <tr class="result-row cursor-pointer" style="${rowBgStyle}" onclick='openProfileModal(${JSON.stringify(player)})'>
                         <td class="py-4 px-6">${rankBadge}</td>
                         <td class="py-4 px-6 flex items-center space-x-3">
-                            <img src="${skin}" class="w-9 h-9 rounded-lg border border-apex-border bg-[#070709]">
+                            <img src="${skin}" class="w-9 h-9 rounded-lg border border-apex-border bg-[#070709] shadow-md">
                             <div>
                                 <h4 class="font-bold text-white text-sm tracking-wide">${player.username}</h4>
-                                <p class="text-[10px] text-apex-textMuted font-heading uppercase">${player.title || 'Combat Master'} (${player.computedPoints} pts)</p>
+                                <p class="text-[10px] text-apex-textMuted font-heading uppercase">${player.title || 'Combat Master'} • <span class="text-apex-orange font-bold">${player.computedPoints} pts</span></p>
                             </div>
                         </td>
                         <td class="py-4 px-6 text-center">
@@ -566,7 +595,7 @@
             topPlayers.forEach((p, i) => {
                 const skin = `https://minotar.net/avatar/${p.username}/32.png`;
                 html += `
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-[#070709] border border-apex-border">
+                    <div class="flex items-center justify-between p-3.5 rounded-xl bg-[#070709] border border-apex-border hover:border-apex-orange/40 transition-colors">
                         <div class="flex items-center space-x-3">
                             <span class="font-heading font-bold text-xs text-apex-textMuted">#${i+1}</span>
                             <img src="${skin}" class="w-7 h-7 rounded border border-apex-border">
@@ -632,8 +661,8 @@
                 const currentUrl = (siteSettings.icons && siteSettings.icons[gm.id]) || '';
                 html += `
                     <div class="bg-[#070709] p-3 rounded-xl border border-apex-border space-y-1">
-                        <label class="block text-[10px] font-heading font-bold uppercase text-apex-textMuted">${gm.name} (.png / .webp URL)</label>
-                        <input type="text" id="icon-url-${gm.id}" value="${currentUrl}" placeholder="https://...png or .webp" class="w-full bg-[#0c0c0f] border border-apex-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-apex-orange">
+                        <label class="block text-[10px] font-heading font-bold uppercase text-apex-textMuted">${gm.name} (Default: ${gm.file || 'font-icon'})</label>
+                        <input type="text" id="icon-url-${gm.id}" value="${currentUrl}" placeholder="Override URL if needed..." class="w-full bg-[#0c0c0f] border border-apex-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-apex-orange">
                     </div>
                 `;
             });
@@ -650,7 +679,7 @@
             saveData();
             renderGamemodeBar();
             renderRankings();
-            alert("Gamemode .png/.webp icons updated successfully!");
+            alert("Gamemode icons updated successfully!");
         }
 
         function renderAdminPlayersList() {
@@ -740,7 +769,7 @@
 
             container.innerHTML = `
                 <div class="flex items-center space-x-4 border-b border-apex-border pb-4">
-                    <img src="${skin}" class="w-16 h-16 rounded-xl border border-apex-border bg-[#070709]">
+                    <img src="${skin}" class="w-16 h-16 rounded-xl border border-apex-border bg-[#070709] shadow-lg">
                     <div>
                         <h3 class="font-display font-black text-xl text-white">${player.username}</h3>
                         <p class="text-xs text-apex-textMuted font-heading uppercase">${player.title || 'Combat Master'} • ${player.region}</p>
