@@ -1,0 +1,14 @@
+{
+  "name": "apextiers-backend",
+  "version": "1.0.0",
+  "description": "ApexTiers Live Leaderboard Backend API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.0",
+    "cors": "^2.8.5"
+  }
+}
