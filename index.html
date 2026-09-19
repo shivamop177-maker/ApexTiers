@@ -32,6 +32,67 @@
             min-height: 100vh;
         }
 
+        /* Intro Entrance Loading Overlay */
+        #intro-loader {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #050507;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+        #intro-loader.fade-out {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .loader-logo {
+            width: 90px;
+            height: auto;
+            animation: pulseGlow 2s infinite ease-in-out;
+            margin-bottom: 20px;
+        }
+        .loader-title {
+            font-size: 32px;
+            font-weight: 900;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+        .loader-subtitle {
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 25px;
+        }
+        .loader-bar-container {
+            width: 220px;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .loader-bar {
+            width: 0%;
+            height: 100%;
+            background: var(--gold-gradient);
+            animation: fillBar 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes fillBar { 0% { width: 0%; } 100% { width: 100%; } }
+        @keyframes pulseGlow {
+            0% { filter: drop-shadow(0 0 10px rgba(255,170,0,0.3)); transform: scale(1); }
+            50% { filter: drop-shadow(0 0 30px rgba(255,170,0,0.8)); transform: scale(1.05); }
+            100% { filter: drop-shadow(0 0 10px rgba(255,170,0,0.3)); transform: scale(1); }
+        }
+
         @keyframes floatGlow {
             0% { box-shadow: 0 0 15px var(--gold-glow); }
             50% { box-shadow: 0 0 35px var(--gold-glow); }
@@ -91,7 +152,7 @@
             background: none;
             border: none;
         }
-        .nav-links a:hover, .nav-links a.active, .nav-links button:hover { color: var(--gold-primary); text-shadow: 0 0 10px rgba(255,170,0,0.3); }
+        .nav-links a:hover, .nav-links a.active, .nav-links button:hover, .nav-links button.active { color: var(--gold-primary); text-shadow: 0 0 10px rgba(255,170,0,0.3); }
 
         .nav-right-actions { display: flex; align-items: center; gap: 15px; }
 
@@ -173,17 +234,17 @@
         .hero-btn {
             padding: 12px 28px; border-radius: 12px; font-weight: 800; font-size: 14px; text-decoration: none; display: flex; align-items: center; gap: 10px; transition: all 0.3s; cursor: pointer;
         }
-        .hero-btn.primary { background: var(--gold-gradient); color: #000; box-shadow: 0 5px 20px rgba(255,170,0,0.3); }
+        .hero-btn.primary { background: var(--gold-gradient); color: #000; box-shadow: 0 5px 20px rgba(255,170,0,0.3); border: none; }
         .hero-btn.primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,170,0,0.5); }
         .hero-btn.secondary { background: rgba(88, 101, 242, 0.15); border: 1px solid rgba(88, 101, 242, 0.4); color: #c7ccff; }
         .hero-btn.secondary:hover { background: rgba(88, 101, 242, 0.3); transform: translateY(-3px); }
 
-        .home-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; }
+        .home-grid { display: grid; grid-template-columns: 2fr 1.2fr; gap: 25px; }
         .home-panel-card { background: var(--bg-panel); backdrop-filter: var(--glass-blur); border: 1px solid var(--border-color); border-radius: 20px; padding: 25px; }
         .home-panel-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: var(--gold-primary); }
 
         /* Stat row */
-        .stat-row { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--border-color); font-size: 14px; font-weight: 600; }
+        .stat-row { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--border-color); font-size: 14px; font-weight: 600; align-items: center; }
         .stat-row:last-child { border-bottom: none; }
         .stat-value { color: var(--gold-primary); font-weight: 800; }
 
@@ -212,7 +273,7 @@
         .server-icon-badge { background: linear-gradient(135deg, #e63946, #c1121f); color: white; font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
         .server-ip-text { font-size: 15px; font-weight: 800; color: #fff; letter-spacing: 0.5px; }
 
-        /* Admin Panel Section (Hidden by default, unlocked with password) */
+        /* Admin Panel Section (Password Protected) */
         .admin-panel {
             margin-bottom: 40px; padding: 30px; background: rgba(20, 20, 25, 0.95); backdrop-filter: var(--glass-blur);
             border: 2px solid rgba(255, 170, 0, 0.5); border-radius: 20px;
@@ -281,7 +342,7 @@
         .tier-badge img { width: 22px; height: 22px; object-fit: contain; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8)); }
         .tier-label { font-size: 10px; padding: 2px 0; width: 100%; text-align: center; border-radius: 4px; font-weight: 900; text-transform: uppercase; }
 
-        /* Tier Colors */
+        /* Tier Colors (HT1 down to LT5) */
         .ht1 { background: linear-gradient(135deg, #ffcc00, #ff9900); color: #000; box-shadow: 0 0 8px rgba(255,170,0,0.4); }
         .lt1 { background: linear-gradient(135deg, #cc00ff, #7700ff); color: #fff; box-shadow: 0 0 8px rgba(170,0,255,0.4); }
         .ht2 { background: linear-gradient(135deg, #e69900, #cc6600); color: #000; }
@@ -290,11 +351,23 @@
         .lt3 { background: #4444dd; color: #fff; }
         .ht4 { background: #8c5e00; color: #fff; }
         .lt4 { background: #3333bb; color: #fff; }
+        .ht5 { background: #664400; color: #fff; }
+        .lt5 { background: #222288; color: #fff; }
         .na-tier { background: rgba(255,255,255,0.05); color: #666; font-style: italic; }
 
     </style>
 </head>
 <body>
+
+    <!-- Intro Entrance Loader Animation -->
+    <div id="intro-loader">
+        <img src="apextiers.png" alt="ApexTiers" class="loader-logo" onerror="this.style.display='none'">
+        <div class="loader-title">APEXTIERS</div>
+        <div class="loader-subtitle">LOADING GLOBAL RANKINGS...</div>
+        <div class="loader-bar-container">
+            <div class="loader-bar"></div>
+        </div>
+    </div>
 
     <!-- Top Navigation -->
     <nav>
@@ -350,7 +423,7 @@
                     </div>
                     <div class="stat-row">
                         <span>Competitive Standard</span>
-                        <span class="stat-value">Strict HT1-LT4 Tiering</span>
+                        <span class="stat-value">Strict HT1 - LT5 Tiering</span>
                     </div>
                 </div>
                 <div class="home-panel-card">
@@ -363,6 +436,10 @@
                         <span>Server Status</span>
                         <span class="stat-value" style="color: #3ba55c;"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> Online</span>
                     </div>
+                    <div class="stat-row">
+                        <span>Discord Members</span>
+                        <span class="stat-value" id="home-discord-members" style="color: #5865f2;">Syncing...</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -370,7 +447,7 @@
         <!-- RANKINGS SECTION -->
         <div id="section-rankings" class="page-section">
             
-            <!-- Fully Secure Password-Protected Admin Panel -->
+            <!-- Admin Management Panel -->
             <div class="admin-panel" id="admin-panel-section">
                 <div class="admin-header">
                     <span><i class="fa-solid fa-shield-halved"></i> Admin Management Panel</span>
@@ -378,7 +455,14 @@
                 </div>
                 <div class="admin-grid">
                     <div class="admin-box">
-                        <h4>Add / Update Player</h4>
+                        <h4>Add / Edit Player Tiers</h4>
+                        
+                        <!-- Select player to edit automatically -->
+                        <label style="font-size: 12px; color: var(--text-muted); font-weight: 700; margin-bottom: 4px; display: block;">Select Existing Player to Edit:</label>
+                        <select id="admin-select-player" class="admin-input" onchange="loadPlayerToEdit()">
+                            <option value="">-- Create New Player --</option>
+                        </select>
+
                         <input type="text" id="admin-name" class="admin-input" placeholder="Player Name (e.g. Marlowww)">
                         <input type="text" id="admin-uuid" class="admin-input" placeholder="Minecraft UUID (for skin head)">
                         <select id="admin-region" class="admin-input">
@@ -411,7 +495,7 @@
                         <span style="font-size: 24px;">🏆</span>
                         <span>Overall</span>
                     </div>
-                    <!-- 8 Correct Gamemodes -->
+                    <!-- 8 Gamemodes -->
                     <div class="category" data-mode="npot">
                         <img src="npot.webp" alt="NPot" onerror="this.src='pot.webp'">
                         <span>NPot</span>
@@ -479,10 +563,25 @@
     </div>
 
     <script>
+        // Smooth Intro Loader Dismissal
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const loader = document.getElementById('intro-loader');
+                if (loader) loader.classList.add('fade-out');
+            }, 1000);
+        });
+
+        // 8 Gamemodes
         const GAMEMODES = ['npot', 'sword', 'axe', 'smp', 'cpvp', 'spearmace', 'pot', 'uhc'];
+        
+        // Tier Point System down to LT5
         const TIER_SCORES = {
-            'HT1': 30, 'LT1': 27, 'HT2': 24, 'LT2': 21,
-            'HT3': 18, 'LT3': 15, 'HT4': 12, 'LT4': 9, 'N/A': 0
+            'HT1': 30, 'LT1': 27, 
+            'HT2': 24, 'LT2': 21,
+            'HT3': 18, 'LT3': 15, 
+            'HT4': 12, 'LT4': 9,
+            'HT5': 6,  'LT5': 3, 
+            'N/A': 0
         };
 
         const defaultPlayers = [
@@ -509,11 +608,14 @@
                     const data = await response.json();
                     const onlineCount = data.presence_count;
                     document.getElementById('discord-count').innerHTML = `<span class="discord-dot"></span> ${onlineCount} Online`;
+                    document.getElementById('home-discord-members').innerText = `${onlineCount} Online Members`;
                 } else {
                     document.getElementById('discord-count').innerHTML = `<span class="discord-dot"></span> Discord Live`;
+                    document.getElementById('home-discord-members').innerText = `Live Server`;
                 }
             } catch (err) {
                 document.getElementById('discord-count').innerHTML = `<span class="discord-dot"></span> Discord Live`;
+                document.getElementById('home-discord-members').innerText = `Live Server`;
             }
         }
         fetchDiscordData();
@@ -534,7 +636,42 @@
                 `;
             });
             container.innerHTML = html;
+            populateAdminPlayerSelect();
         }
+
+        function populateAdminPlayerSelect() {
+            const select = document.getElementById('admin-select-player');
+            if (!select) return;
+            select.innerHTML = '<option value="">-- Create New Player --</option>';
+            playersDB.forEach(p => {
+                select.innerHTML += `<option value="${p.name}">${p.name} (${p.region})</option>`;
+            });
+        }
+
+        function loadPlayerToEdit() {
+            const selectName = document.getElementById('admin-select-player').value;
+            if (!selectName) {
+                document.getElementById('admin-name').value = '';
+                document.getElementById('admin-uuid').value = '';
+                document.getElementById('admin-region').value = 'NA';
+                GAMEMODES.forEach(gm => {
+                    document.getElementById(`admin-gm-${gm}`).value = 'N/A';
+                });
+                return;
+            }
+
+            const player = playersDB.find(p => p.name.toLowerCase() === selectName.toLowerCase());
+            if (player) {
+                document.getElementById('admin-name').value = player.name;
+                document.getElementById('admin-uuid').value = player.uuid || '';
+                document.getElementById('admin-region').value = player.region || 'NA';
+                GAMEMODES.forEach(gm => {
+                    const tierVal = (player.tiers && player.tiers[gm]) ? player.tiers[gm] : 'N/A';
+                    document.getElementById(`admin-gm-${gm}`).value = tierVal;
+                });
+            }
+        }
+
         setupAdminInputs();
 
         function calculatePoints(tiers) {
@@ -632,7 +769,7 @@
             });
         });
 
-        // Tab Navigation Logic (Home vs Rankings)
+        // Tab Navigation Logic
         function switchTab(tab) {
             document.getElementById('nav-home').classList.remove('active');
             document.getElementById('nav-rankings').classList.remove('active');
@@ -656,6 +793,7 @@
             const pwd = prompt("Enter Admin Password:");
             if (pwd === "hitler?988") {
                 switchTab('rankings');
+                populateAdminPlayerSelect();
                 document.getElementById('admin-panel-section').style.display = 'block';
                 document.getElementById('admin-panel-section').scrollIntoView({ behavior: 'smooth' });
             } else if (pwd !== null) {
@@ -689,6 +827,7 @@
 
             document.getElementById('admin-name').value = '';
             document.getElementById('admin-uuid').value = '';
+            populateAdminPlayerSelect();
             renderApp();
         }
 
@@ -706,6 +845,7 @@
                 localStorage.setItem('apexTiersDB', JSON.stringify(playersDB));
                 alert(`Removed ${name}`);
                 document.getElementById('admin-remove-name').value = '';
+                populateAdminPlayerSelect();
                 renderApp();
             }
         }
