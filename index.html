@@ -587,7 +587,7 @@
     </div>
 
     <!-- CUSTOM THEMED ADMIN PASSWORD MODAL -->
-    <div class="modal-overlay" id="admin-pass-modal">
+    <div class="modal-overlay" id="admin-pass-modal" onclick="if(event.target===this) closePassModal();">
         <div class="modal-card">
             <button class="modal-close-btn" onclick="closePassModal()"><i class="fa-solid fa-xmark"></i></button>
             <div class="modal-icon-badge">
@@ -730,11 +730,15 @@
                     <div class="admin-box">
                         <h4><i class="fa-solid fa-sliders" style="color: var(--gold-primary);"></i> Network Settings & Removal</h4>
                         <input type="text" id="admin-server-ip-input" class="admin-input" placeholder="Change Server IP (e.g. play.apextiers.fun)">
-                        <button class="admin-btn" style="margin-bottom: 30px;" onclick="updateServerIP()">Update Server IP</button>
+                        <button class="admin-btn" style="margin-bottom: 25px;" onclick="updateServerIP()">Update Server IP</button>
                         
-                        <h4 style="margin-top: 20px;"><i class="fa-solid fa-user-minus" style="color: #ff4444;"></i> Remove Player</h4>
+                        <h4><i class="fa-solid fa-user-minus" style="color: #ff4444;"></i> Remove Player</h4>
                         <input type="text" id="admin-remove-name" class="admin-input" placeholder="Exact Name to Remove">
                         <button class="admin-btn danger" onclick="removeAdminPlayer()">Remove Player</button>
+
+                        <button class="admin-btn danger" style="margin-top: 30px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);" onclick="resetDatabase()">
+                            <i class="fa-solid fa-rotate-left"></i> Reset Player Database to Default
+                        </button>
                     </div>
                 </div>
             </div>
@@ -819,7 +823,7 @@
             setTimeout(() => {
                 const loader = document.getElementById('intro-loader');
                 if (loader) loader.classList.add('fade-out');
-            }, 1000);
+            }, 800);
         });
 
         // 8 Gamemodes
@@ -847,7 +851,25 @@
             { name: "noobmaster69_", uuid: "069a79f4-44e9-4726-a5be-fca90e38aaf5", region: "EU", tiers: { pot: "LT5", cpvp: "LT5" } }
         ];
 
-        let playersDB = JSON.parse(localStorage.getItem('apexTiersDB')) || defaultPlayers;
+        function getSanitizedPlayers() {
+            let raw = localStorage.getItem('apexTiersDB');
+            if (!raw) return defaultPlayers;
+            try {
+                let parsed = JSON.parse(raw);
+                if (!Array.isArray(parsed) || parsed.length === 0) return defaultPlayers;
+                return parsed.map(p => ({
+                    name: p.name || "Unknown",
+                    uuid: p.uuid || "",
+                    region: p.region || "NA",
+                    tiers: (p.tiers && typeof p.tiers === 'object') ? p.tiers : {}
+                }));
+            } catch(e) {
+                console.error("Error loading localStorage DB, recovering defaults:", e);
+                return defaultPlayers;
+            }
+        }
+
+        let playersDB = getSanitizedPlayers();
         let serverIP = localStorage.getItem('apexServerIP') || 'play.apextiers.fun';
         let currentMode = 'overall';
         let adminLoggedIn = false;
@@ -874,6 +896,7 @@
 
         function setupAdminInputs() {
             const container = document.getElementById('admin-tier-inputs');
+            if (!container) return;
             let html = '';
             GAMEMODES.forEach(gm => {
                 const label = gm === 'cpvp' ? 'CPvP' : gm === 'npot' ? 'NPot' : gm.charAt(0).toUpperCase() + gm.slice(1);
@@ -907,7 +930,8 @@
                 document.getElementById('admin-uuid').value = '';
                 document.getElementById('admin-region').value = 'NA';
                 GAMEMODES.forEach(gm => {
-                    document.getElementById(`admin-gm-${gm}`).value = 'N/A';
+                    const el = document.getElementById(`admin-gm-${gm}`);
+                    if (el) el.value = 'N/A';
                 });
                 return;
             }
@@ -918,8 +942,11 @@
                 document.getElementById('admin-uuid').value = player.uuid || '';
                 document.getElementById('admin-region').value = player.region || 'NA';
                 GAMEMODES.forEach(gm => {
-                    const tierVal = (player.tiers && player.tiers[gm]) ? player.tiers[gm] : 'N/A';
-                    document.getElementById(`admin-gm-${gm}`).value = tierVal;
+                    const el = document.getElementById(`admin-gm-${gm}`);
+                    if (el) {
+                        const tierVal = (player.tiers && player.tiers[gm]) ? player.tiers[gm] : 'N/A';
+                        el.value = tierVal;
+                    }
                 });
             }
         }
@@ -930,23 +957,22 @@
         function openAdminAuth() {
             if (adminLoggedIn) {
                 switchTab('rankings');
-                populateAdminPlayerSelect();
-                document.getElementById('admin-panel-section').style.display = 'block';
-                document.getElementById('admin-panel-section').scrollIntoView({ behavior: 'smooth' });
+                showAdminPanel();
                 return;
             }
             const modal = document.getElementById('admin-pass-modal');
             const passInput = document.getElementById('modal-password-input');
             const errDiv = document.getElementById('modal-error');
             
-            passInput.value = '';
-            errDiv.style.display = 'none';
-            modal.classList.add('active');
-            setTimeout(() => passInput.focus(), 100);
+            if (passInput) passInput.value = '';
+            if (errDiv) errDiv.style.display = 'none';
+            if (modal) modal.classList.add('active');
+            setTimeout(() => { if (passInput) passInput.focus(); }, 100);
         }
 
         function closePassModal() {
-            document.getElementById('admin-pass-modal').classList.remove('active');
+            const modal = document.getElementById('admin-pass-modal');
+            if (modal) modal.classList.remove('active');
         }
 
         function handlePassKeyUp(e) {
@@ -957,25 +983,43 @@
             const passInput = document.getElementById('modal-password-input');
             const errDiv = document.getElementById('modal-error');
             
-            if (passInput.value === "hitler?988") {
+            if (passInput && passInput.value === "hitler?988") {
                 adminLoggedIn = true;
                 closePassModal();
                 switchTab('rankings');
-                populateAdminPlayerSelect();
-                document.getElementById('admin-panel-section').style.display = 'block';
-                document.getElementById('admin-panel-section').scrollIntoView({ behavior: 'smooth' });
+                showAdminPanel();
             } else {
-                errDiv.style.display = 'block';
-                passInput.focus();
-                passInput.style.borderColor = '#ff4d4d';
-                setTimeout(() => passInput.style.borderColor = 'var(--border-color)', 1500);
+                if (errDiv) errDiv.style.display = 'block';
+                if (passInput) {
+                    passInput.focus();
+                    passInput.style.borderColor = '#ff4d4d';
+                    setTimeout(() => passInput.style.borderColor = 'var(--border-color)', 1500);
+                }
+            }
+        }
+
+        function showAdminPanel() {
+            populateAdminPlayerSelect();
+            const panel = document.getElementById('admin-panel-section');
+            if (panel) {
+                panel.style.display = 'block';
+                panel.scrollIntoView({ behavior: 'smooth' });
+            }
+            const gear = document.querySelector('.admin-gear-btn');
+            if (gear) {
+                gear.style.borderColor = 'var(--gold-primary)';
+                gear.style.color = 'var(--gold-primary)';
+                gear.style.background = 'rgba(255, 170, 0, 0.2)';
             }
         }
 
         function calculatePoints(tiers) {
+            if (!tiers || typeof tiers !== 'object') return 0;
             let total = 0;
             for (let gm in tiers) {
-                total += TIER_SCORES[tiers[gm]] || 0;
+                if (tiers.hasOwnProperty(gm)) {
+                    total += TIER_SCORES[tiers[gm]] || 0;
+                }
             }
             return total;
         }
@@ -988,12 +1032,13 @@
         }
 
         function getTierGroup(tierStr) {
-            if (!tierStr || tierStr === 'N/A' || tierStr === 'None') return 0;
-            if (tierStr === 'HT1' || tierStr === 'LT1') return 1;
-            if (tierStr === 'HT2' || tierStr === 'LT2') return 2;
-            if (tierStr === 'HT3' || tierStr === 'LT3') return 3;
-            if (tierStr === 'HT4' || tierStr === 'LT4') return 4;
-            if (tierStr === 'HT5' || tierStr === 'LT5') return 5;
+            if (!tierStr || typeof tierStr !== 'string' || tierStr === 'N/A' || tierStr === 'None') return 0;
+            const t = tierStr.toUpperCase();
+            if (t === 'HT1' || t === 'LT1') return 1;
+            if (t === 'HT2' || t === 'LT2') return 2;
+            if (t === 'HT3' || t === 'LT3') return 3;
+            if (t === 'HT4' || t === 'LT4') return 4;
+            if (t === 'HT5' || t === 'LT5') return 5;
             return 0;
         }
 
@@ -1001,13 +1046,15 @@
             const container = document.getElementById('ranking-container');
             const overallHeaders = document.getElementById('overall-headers');
             const searchBarElem = document.getElementById('search-bar');
+            if (!container || !overallHeaders) return;
+
             const searchVal = searchBarElem ? searchBarElem.value.toLowerCase() : '';
             container.innerHTML = '';
 
             let list = [...playersDB];
 
             if (searchVal) {
-                list = list.filter(p => p.name.toLowerCase().includes(searchVal));
+                list = list.filter(p => p.name && p.name.toLowerCase().includes(searchVal));
             }
 
             // --- OVERALL RANKINGS (Row List View) ---
@@ -1059,7 +1106,7 @@
                                     <span>❖ ${title} • ${points} PTS</span>
                                 </div>
                             </div>
-                            <div class="region">${player.region}</div>
+                            <div class="region">${player.region || 'NA'}</div>
                             <div class="player-tiers">${tiersHTML}</div>
                         </div>
                     `;
@@ -1204,6 +1251,17 @@
                 document.getElementById('admin-remove-name').value = '';
                 populateAdminPlayerSelect();
                 renderApp();
+            }
+        }
+
+        // Reset Database
+        function resetDatabase() {
+            if (confirm("Reset player database to default sample players?")) {
+                playersDB = defaultPlayers;
+                localStorage.setItem('apexTiersDB', JSON.stringify(playersDB));
+                populateAdminPlayerSelect();
+                renderApp();
+                alert("Database reset to defaults!");
             }
         }
 
