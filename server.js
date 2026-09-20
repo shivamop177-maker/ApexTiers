@@ -36,7 +36,12 @@ app.get('/api/players', async (req, res) => {
 
 // 2. POST API - Sync tier result posted from Discord Bot
 app.post('/api/update-tier', async (req, res) => {
-    const { name, uuid, region, gamemode, newTier } = req.body;
+    // Support both standard names and Krish's BotGhost names (ign -> name, new_tier -> newTier)
+    const name = req.body.name || req.body.ign;
+    const uuid = req.body.uuid;
+    const region = req.body.region;
+    const gamemode = req.body.gamemode;
+    const newTier = req.body.newTier || req.body.new_tier;
 
     // Check key from HTTP headers OR request body (handles any format)
     const clientSecret = req.headers['x-bot-secret'] || req.headers['x-api-key'] || req.body.apiKey || req.body.secret || req.body.bot_secret;
@@ -46,7 +51,7 @@ app.post('/api/update-tier', async (req, res) => {
         return res.status(403).json({ error: "Unauthorized request" });
     }
     if (!name || !gamemode || !newTier) {
-        return res.status(400).json({ error: "Missing required fields (name, gamemode, newTier)" });
+        return res.status(400).json({ error: "Missing required fields (name/ign, gamemode, newTier/new_tier)" });
     }
 
     try {
