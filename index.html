@@ -1136,7 +1136,22 @@
             }
         }
 
-        let playersDB = getSanitizedPlayers();
+let playersDB = [];
+
+async function fetchLivePlayers() {
+    try {
+        const response = await fetch('https://apextiers-api.onrender.com/api/players');
+        if (response.ok) {
+            playersDB = await response.json();
+            if (typeof renderLeaderboard === 'function') renderLeaderboard();
+            if (typeof populateAdminPlayerSelect === 'function') populateAdminPlayerSelect();
+        }
+    } catch (err) {
+        console.error("Error fetching live player data:", err);
+    }
+}
+
+fetchLivePlayers();
         let serverIP = localStorage.getItem('apexServerIP') || 'play.apextiers.fun';
         let currentMode = 'overall';
         let adminLoggedIn = false;
