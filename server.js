@@ -36,13 +36,15 @@ app.get('/api/players', async (req, res) => {
 
 // 2. POST API - Sync tier result posted from Discord Bot
 app.post('/api/update-tier', async (req, res) => {
-    const { name, uuid, region, gamemode, newTier, apiKey } = req.body;
+    const { name, uuid, region, gamemode, newTier } = req.body;
 
-    // Basic security key check
-    if (apiKey !== process.env.BOT_SECRET_KEY) {
+    // Check key from HTTP headers OR request body (handles any format)
+    const clientSecret = req.headers['x-bot-secret'] || req.headers['x-api-key'] || req.body.apiKey || req.body.secret || req.body.bot_secret;
+    const validSecret = process.env.BOT_SECRET_KEY || process.env.BOT_SECRET;
+
+    if (!clientSecret || clientSecret !== validSecret) {
         return res.status(403).json({ error: "Unauthorized request" });
     }
-
     if (!name || !gamemode || !newTier) {
         return res.status(400).json({ error: "Missing required fields (name, gamemode, newTier)" });
     }
