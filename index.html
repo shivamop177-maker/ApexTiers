@@ -404,6 +404,20 @@
         }
         .modal-btn.secondary:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
 
+        /* PLAYER PROFILE MODAL (MCTIERS STYLE) */
+        .player-modal-card {
+            background: linear-gradient(135deg, rgba(22, 22, 28, 0.98), rgba(12, 12, 16, 0.99));
+            border: 1px solid rgba(255, 170, 0, 0.4);
+            border-radius: 24px;
+            padding: 35px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(255, 170, 0, 0.15);
+            animation: modalFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            position: relative;
+            text-align: center;
+        }
+
         /* Top Action Bar (Rankings Page) */
         .top-action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; gap: 20px; flex-wrap: wrap; }
         .categories {
@@ -416,6 +430,10 @@
             display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer;
             padding: 8px 12px; border-radius: 12px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); color: var(--text-muted);
             min-width: 68px; font-size: 12px; font-weight: 700; flex-shrink: 0;
+        }
+        /* Gap between Overall and rest of the gamemodes to fill black stripe */
+        .category[data-mode="overall"] {
+            margin-right: 22px;
         }
         .category img { width: 28px; height: 28px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6)); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         .category:hover { background: var(--bg-hover); color: var(--text-main); transform: translateY(-3px) scale(1.05); }
@@ -604,6 +622,7 @@
             padding: 16px 24px; border-radius: 16px; border: 1px solid var(--border-color); 
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
             animation: rowCascade 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+            cursor: pointer;
         }
         .rank-row:hover { transform: translateX(8px) scale(1.01); border-color: rgba(255,170,0,0.5); background: var(--bg-hover); box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 10; position: relative; }
 
@@ -707,6 +726,7 @@
             border: 1px solid var(--border-color);
             border-radius: 12px;
             transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
         }
         .tier-player-card:hover {
             background: rgba(255,170,0,0.12);
@@ -781,6 +801,36 @@
             <div class="modal-actions">
                 <button class="modal-btn secondary" onclick="closePassModal()">Cancel</button>
                 <button class="modal-btn primary" onclick="submitAdminPassword()">Unlock Panel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MCTIERS STYLE PLAYER PROFILE MODAL -->
+    <div class="modal-overlay" id="player-profile-modal" onclick="if(event.target===this) closePlayerModal();">
+        <div class="player-modal-card">
+            <button class="modal-close-btn" onclick="closePlayerModal()"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+                <div class="avatar-frame rank-1" id="modal-player-avatar-frame" style="margin-bottom: 15px;">
+                    <img src="" alt="" id="modal-player-avatar" style="width: 72px; height: 72px; border-radius: 12px; background: #000;">
+                </div>
+                <h2 id="modal-player-name" style="font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 4px;">PlayerName</h2>
+                <div id="modal-player-title" style="background: rgba(255,170,0,0.15); border: 1px solid rgba(255,170,0,0.3); color: var(--gold-primary); padding: 4px 14px; border-radius: 20px; font-size: 13px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 4px;">Combat Master</div>
+                <div id="modal-player-region" style="color: var(--text-muted); font-size: 13px; font-weight: 700; margin-bottom: 12px;">North America</div>
+                <a href="#" id="modal-namemc-link" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; transition: background 0.2s;">
+                    <span style="background: #fff; color: #000; width: 16px; height: 16px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900;">n</span> NameMC <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 10px; color: var(--text-muted);"></i>
+                </a>
+            </div>
+
+            <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; text-align: left;">Position</div>
+            <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                <span style="font-size: 16px; font-weight: 900; color: var(--gold-primary);" id="modal-player-rank-text">#1.</span>
+                <span style="font-size: 14px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-trophy" style="color: var(--gold-primary);"></i> OVERALL (<span id="modal-player-points-text">99</span> points)</span>
+            </div>
+
+            <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; text-align: left;">Tiers</div>
+            <div id="modal-player-tiers-grid" style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
+                <!-- Dynamic Tiers -->
             </div>
         </div>
     </div>
@@ -1115,11 +1165,11 @@
             { name: "janekv", uuid: "c0695026-0e9f-44e9-92b0-9c2f42a0b1bc", region: "EU", tiers: { pot: "LT3", sword: "HT4", cpvp: "HT1", smp: "HT1", uhc: "HT1", axe: "HT2", npot: "LT2", spearmace: "LT2", mace: "HT3" } },
             { name: "Enderboygamerz", uuid: "d195c898-31be-4a25-9686-2a78b7b411d9", region: "AS", tiers: { sword: "HT2", pot: "LT2", cpvp: "HT3", npot: "LT3", axe: "HT4", smp: "LT4", mace: "LT4" } },
             { name: "Noah6767", uuid: "8667ba71-b85a-4004-af54-457a9734eed7", region: "NA", tiers: { sword: "LT4", pot: "HT4", cpvp: "LT5", npot: "HT5", mace: "LT5" } },
-            { name: "Klyro81", uuid: "61699b2e-d327-4a01-9f1e-0ea8c3f06bc6", region: "AS", tiers: { sword: "HT5", axe: "LT5", smp: "HT5", mace: "HT5" } },
+            { name: "Klyro81", uuid: "61699b2e-d327-4a01-9f1e-0ea8c3f06bc6", region: "AS", tiers: { sword: "HT5", axe: "LT5", smp: "HT5", mace: "LT5" } },
             { name: "noobmaster69_", uuid: "069a79f4-44e9-4726-a5be-fca90e38aaf5", region: "EU", tiers: { pot: "LT5", cpvp: "LT5", mace: "HT4" } }
         ];
 
-        let playersDB = [];
+        let playersDB = JSON.parse(localStorage.getItem('apexTiersDB')) || defaultPlayers;
 
         async function fetchLivePlayers() {
             try {
@@ -1130,9 +1180,7 @@
                     if (typeof populateAdminPlayerSelect === 'function') populateAdminPlayerSelect();
                 }
             } catch (err) {
-                console.error("Error fetching live player data:", err);
-                playersDB = defaultPlayers;
-                renderApp();
+                console.error("Using local DB fallback:", err);
             }
         }
 
@@ -1281,6 +1329,52 @@
             }
         }
 
+        /* PLAYER PROFILE MODAL LOGIC */
+        function openPlayerModal(playerName) {
+            const player = playersDB.find(p => p.name.toLowerCase() === playerName.toLowerCase());
+            if (!player) return;
+
+            const sortedList = [...playersDB].sort((a, b) => calculatePoints(b.tiers) - calculatePoints(a.tiers));
+            const rankIndex = sortedList.findIndex(p => p.name.toLowerCase() === player.name.toLowerCase());
+            const rank = rankIndex !== -1 ? rankIndex + 1 : '-';
+            const points = calculatePoints(player.tiers);
+            const title = getTitle(points);
+
+            document.getElementById('modal-player-name').innerText = player.name;
+            document.getElementById('modal-player-title').innerHTML = `<i class="fa-solid fa-crown" style="color: var(--gold-primary);"></i> ${title}`;
+            document.getElementById('modal-player-region').innerText = player.region === 'NA' ? 'North America' : player.region === 'EU' ? 'Europe' : player.region === 'AS' ? 'Asia' : player.region === 'AU' ? 'Australia' : player.region === 'ME' ? 'Middle East' : player.region;
+            
+            const avatar = player.uuid ? `https://crafatar.com/avatars/${player.uuid}?overlay` : `https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7?overlay`;
+            document.getElementById('modal-player-avatar').src = avatar;
+            
+            const nameMcUrl = player.uuid ? `https://namemc.com/profile/${player.uuid}` : `https://namemc.com/search?q=${player.name}`;
+            document.getElementById('modal-namemc-link').href = nameMcUrl;
+
+            document.getElementById('modal-player-rank-text').innerText = `#${rank}.`;
+            document.getElementById('modal-player-points-text').innerText = points;
+
+            let modalTiersHTML = '';
+            GAMEMODES.forEach(gm => {
+                let t = (player.tiers && player.tiers[gm] && player.tiers[gm] !== 'None') ? player.tiers[gm] : 'N/A';
+                let badgeClass = t === 'N/A' ? 'na-tier' : t.toLowerCase();
+                let labelName = gm === 'cpvp' ? 'CPvP' : gm === 'npot' ? 'NPot' : gm === 'mace' ? 'Mace' : gm.charAt(0).toUpperCase() + gm.slice(1);
+                modalTiersHTML += `
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 10px; min-width: 52px;">
+                        <img src="${gm}.webp" alt="${gm}" style="width: 20px; height: 20px; object-fit: contain;" onerror="this.src='pot.webp'">
+                        <span style="font-size: 9px; font-weight: 800; color: var(--text-muted);">${labelName}</span>
+                        <span class="tier-label ${badgeClass}" style="font-size: 11px; padding: 2px 6px; border-radius: 4px;">${t}</span>
+                    </div>
+                `;
+            });
+            document.getElementById('modal-player-tiers-grid').innerHTML = modalTiersHTML;
+
+            document.getElementById('player-profile-modal').classList.add('active');
+        }
+
+        function closePlayerModal() {
+            document.getElementById('player-profile-modal').classList.remove('active');
+        }
+
         function calculatePoints(tiers) {
             if (!tiers || typeof tiers !== 'object') return 0;
             let total = 0;
@@ -1393,7 +1487,7 @@
                     const delay = (index * 0.04).toFixed(2);
 
                     html += `
-                        <div class="rank-row ${rankClass}" style="animation-delay: ${delay}s;">
+                        <div class="rank-row ${rankClass}" style="animation-delay: ${delay}s;" onclick="openPlayerModal('${player.name}')">
                             <div class="rank-number">#${rank}</div>
                             <div class="player-info">
                                 <div class="${frameClass}">
@@ -1456,7 +1550,7 @@
                         tiersMap[i].forEach(p => {
                             const avatar = p.uuid ? `https://crafatar.com/avatars/${p.uuid}?overlay` : `https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7?overlay`;
                             colsHTML += `
-                                <div class="tier-player-card">
+                                <div class="tier-player-card" onclick="openPlayerModal('${p.name}')">
                                     <img src="${avatar}" alt="${p.name}" class="tier-player-avatar">
                                     <span class="tier-player-name">${p.name}</span>
                                     <span class="tier-player-tag ${p.currentTierVal.toLowerCase()}">${p.currentTierVal}</span>
