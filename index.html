@@ -431,7 +431,6 @@
             padding: 8px 12px; border-radius: 12px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); color: var(--text-muted);
             min-width: 68px; font-size: 12px; font-weight: 700; flex-shrink: 0;
         }
-        /* Gap between Overall and rest of the gamemodes to fill black stripe */
         .category[data-mode="overall"] {
             margin-right: 22px;
         }
@@ -1144,7 +1143,7 @@
             }, 800);
         });
 
-        // 9 Gamemodes (Including Mace)
+        // 9 Gamemodes
         const GAMEMODES = ['npot', 'sword', 'axe', 'smp', 'cpvp', 'spearmace', 'pot', 'uhc', 'mace'];
         
         // Tier Point Calculations (HT1 down to LT5)
@@ -1156,6 +1155,56 @@
             'HT5': 6,  'LT5': 3, 
             'N/A': 0
         };
+
+        /**
+         * Normalizes gamemode names from Discord/API inputs (e.g., "CRYSTAL/VANILLA", "crystal", "CPvP" -> "cpvp")
+         */
+        function normalizeGamemodeKey(key) {
+            if (!key) return '';
+            let k = String(key).toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+            if (k.includes('crystal') || k.includes('vanilla') || k === 'cpvp') return 'cpvp';
+            if (k.includes('nodebuff') || k.includes('netherite') || k === 'npot') return 'npot';
+            if (k.includes('spear') || k === 'spearmace') return 'spearmace';
+            if (k.includes('potion') || k.includes('potpvp') || k === 'pot') return 'pot';
+            return k;
+        }
+
+        /**
+         * Retrieves a player's tier for a specific gamemode in a case and alias insensitive manner
+         */
+        function getPlayerTier(player, gmKey) {
+            if (!player || !player.tiers || typeof player.tiers !== 'object') return 'N/A';
+            let targetGm = normalizeGamemodeKey(gmKey);
+            for (let rawKey in player.tiers) {
+                if (Object.prototype.hasOwnProperty.call(player.tiers, rawKey)) {
+                    if (normalizeGamemodeKey(rawKey) === targetGm) {
+                        let val = player.tiers[rawKey];
+                        if (val && val !== 'None' && val !== 'N/A') {
+                            return String(val).trim().toUpperCase();
+                        }
+                    }
+                }
+            }
+            return 'N/A';
+        }
+
+        function calculatePoints(tiers) {
+            if (!tiers || typeof tiers !== 'object') return 0;
+            let total = 0;
+            let processedModes = new Set();
+            for (let rawGm in tiers) {
+                if (Object.prototype.hasOwnProperty.call(tiers, rawGm)) {
+                    let normalizedGm = normalizeGamemodeKey(rawGm);
+                    if (processedModes.has(normalizedGm)) continue;
+                    let val = String(tiers[rawGm]).trim().toUpperCase();
+                    if (TIER_SCORES[val]) {
+                        total += TIER_SCORES[val];
+                        processedModes.add(normalizedGm);
+                    }
+                }
+            }
+            return total;
+        }
 
         const defaultPlayers = [
             { name: "Marlowww", uuid: "61699b2e-d327-4a01-9f1e-0ea8c3f06bc6", region: "NA", tiers: { pot: "HT1", sword: "HT1", cpvp: "HT1", axe: "HT1", smp: "HT1", npot: "HT1", uhc: "LT1", spearmace: "LT1", mace: "HT1" } },
@@ -1260,7 +1309,7 @@
                 GAMEMODES.forEach(gm => {
                     const el = document.getElementById(`admin-gm-${gm}`);
                     if (el) {
-                        const tierVal = (player.tiers && player.tiers[gm]) ? player.tiers[gm] : 'N/A';
+                        const tierVal = getPlayerTier(player, gm);
                         el.value = tierVal;
                     }
                 });
@@ -1355,7 +1404,7 @@
 
             let modalTiersHTML = '';
             GAMEMODES.forEach(gm => {
-                let t = (player.tiers && player.tiers[gm] && player.tiers[gm] !== 'None') ? player.tiers[gm] : 'N/A';
+                let t = getPlayerTier(player, gm);
                 let badgeClass = t === 'N/A' ? 'na-tier' : t.toLowerCase();
                 let labelName = gm === 'cpvp' ? 'CPvP' : gm === 'npot' ? 'NPot' : gm === 'mace' ? 'Mace' : gm.charAt(0).toUpperCase() + gm.slice(1);
                 modalTiersHTML += `
@@ -1373,17 +1422,6 @@
 
         function closePlayerModal() {
             document.getElementById('player-profile-modal').classList.remove('active');
-        }
-
-        function calculatePoints(tiers) {
-            if (!tiers || typeof tiers !== 'object') return 0;
-            let total = 0;
-            for (let gm in tiers) {
-                if (tiers.hasOwnProperty(gm)) {
-                    total += TIER_SCORES[tiers[gm]] || 0;
-                }
-            }
-            return total;
         }
 
         function getTitle(points) {
@@ -1473,7 +1511,7 @@
 
                     let tiersHTML = '';
                     GAMEMODES.forEach(gm => {
-                        let t = (player.tiers && player.tiers[gm] && player.tiers[gm] !== 'None') ? player.tiers[gm] : 'N/A';
+                        let t = getPlayerTier(player, gm);
                         let labelClass = t === 'N/A' ? 'na-tier' : t.toLowerCase();
                         tiersHTML += `
                             <div class="tier-badge">
@@ -1515,8 +1553,8 @@
                 let tiersMap = { 1: [], 2: [], 3: [], 4: [], 5: [] };
 
                 list.forEach(player => {
-                    if (player.tiers && player.tiers[currentMode]) {
-                        let tVal = player.tiers[currentMode];
+                    let tVal = getPlayerTier(player, currentMode);
+                    if (tVal !== 'N/A') {
                         let grp = getTierGroup(tVal);
                         if (grp >= 1 && grp <= 5) {
                             tiersMap[grp].push({ ...player, currentTierVal: tVal });
