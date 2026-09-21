@@ -907,7 +907,7 @@
                         <div class="tested-players-tags">
                             <span class="p-tag">Enderboygamerz</span>
                             <span class="p-tag">Noah6767</span>
-                            <span class="p-tag">Klyro81</span>
+                            <span class="p-tag">Klyro_gamer</span>
                             <span class="p-tag">noobmaster69_</span>
                             <span class="p-tag">Marlowww</span>
                             <span class="p-tag">Swight</span>
@@ -1159,8 +1159,28 @@
         };
 
         /**
+         * Generates a custom vector initials badge when a player has no official Mojang skin.
+         */
+        function createInitialsAvatar(name) {
+            const cleanName = (name || 'P').trim();
+            let initials = 'KG';
+            if (cleanName.includes('_')) {
+                initials = cleanName.split('_').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            } else {
+                initials = cleanName.substring(0, 2).toUpperCase();
+            }
+
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+                <rect width="100" height="100" rx="20" fill="#141418"/>
+                <rect width="94" height="94" x="3" y="3" rx="17" fill="none" stroke="#ffaa00" stroke-width="2" opacity="0.5"/>
+                <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="#ffaa00" font-family="'Outfit', sans-serif" font-weight="900" font-size="38">${initials}</text>
+            </svg>`;
+            return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+        }
+
+        /**
          * Multi-Source Avatar Fallback Engine.
-         * If MC-Heads fails, sequentially fallback to Minotar -> MineSkin -> CraftHead -> Steve.
+         * If MC-Heads fails, sequentially fallback to Minotar -> MineSkin -> CraftHead -> Custom Initials Badge.
          */
         function handleAvatarError(img, playerName) {
             const step = parseInt(img.getAttribute('data-fallback-step') || '0');
@@ -1176,18 +1196,17 @@
                 img.setAttribute('data-fallback-step', '3');
                 img.src = `https://crafthead.net/avatar/${safeName}/100`;
             } else {
-                img.src = 'https://mc-heads.net/avatar/Steve/100';
+                img.onerror = null; // Prevent loop
+                img.src = createInitialsAvatar(playerName);
             }
         }
 
         /**
          * Helper to get avatar head URL.
-         * Checks for explicit custom avatarUrl first, then falls back to avatar services.
          */
         function getPlayerAvatarUrl(player) {
             if (!player) return 'https://mc-heads.net/avatar/Steve/100';
             
-            // Check for explicit custom Avatar URL set via admin panel
             if (player.avatarUrl && player.avatarUrl.trim().length > 0) {
                 return player.avatarUrl.trim();
             }
@@ -1254,7 +1273,7 @@
             { name: "janekv", uuid: "c0695026-0e9f-44e9-92b0-9c2f42a0b1bc", region: "EU", tiers: { pot: "LT3", sword: "HT4", cpvp: "HT1", smp: "HT1", uhc: "HT1", axe: "HT2", npot: "LT2", spearmace: "LT2", mace: "HT3" } },
             { name: "Enderboygamerz", uuid: "d195c898-31be-4a25-9686-2a78b7b411d9", region: "AS", tiers: { sword: "HT2", pot: "LT2", cpvp: "HT3", npot: "LT3", axe: "HT4", smp: "LT4", mace: "LT4" } },
             { name: "Noah6767", uuid: "", region: "NA", tiers: { sword: "LT4", pot: "HT4", cpvp: "LT5", npot: "HT5", mace: "LT5" } },
-            { name: "Klyro_gamer", uuid: "", avatarUrl: "https://mc-heads.net/avatar/Klyro81/100", region: "AS", tiers: { sword: "HT5", axe: "LT5", smp: "HT5", mace: "LT5" } },
+            { name: "Klyro_gamer", uuid: "", avatarUrl: createInitialsAvatar('Klyro_gamer'), region: "AS", tiers: { sword: "HT5", axe: "LT5", smp: "HT5", mace: "LT5" } },
             { name: "noobmaster69_", uuid: "", region: "EU", tiers: { pot: "LT5", cpvp: "LT5", mace: "HT4" } }
         ];
 
