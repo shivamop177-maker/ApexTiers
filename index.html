@@ -942,7 +942,7 @@
                         </select>
 
                         <input type="text" id="admin-name" class="admin-input" placeholder="Player Name (e.g. Marlowww)">
-                        <input type="text" id="admin-uuid" class="admin-input" placeholder="Minecraft UUID (for skin head)">
+                        <input type="text" id="admin-uuid" class="admin-input" placeholder="Minecraft UUID (Optional)">
                         <select id="admin-region" class="admin-input">
                             <option value="NA">NA</option>
                             <option value="EU">EU</option>
@@ -1157,6 +1157,16 @@
         };
 
         /**
+         * Helper to get avatar head URL.
+         * mc-heads.net supports BOTH Minecraft UUIDs and usernames directly!
+         */
+        function getPlayerAvatarUrl(player) {
+            if (!player) return 'https://mc-heads.net/avatar/Steve/100';
+            const identifier = (player.uuid && player.uuid.trim().length > 5) ? player.uuid.trim() : (player.name ? player.name.trim() : 'Steve');
+            return `https://mc-heads.net/avatar/${encodeURIComponent(identifier)}/100`;
+        }
+
+        /**
          * Normalizes gamemode names from Discord/API inputs (e.g., "CRYSTAL/VANILLA", "crystal", "CPvP" -> "cpvp")
          */
         function normalizeGamemodeKey(key) {
@@ -1213,9 +1223,9 @@
             { name: "Swight", uuid: "1a82d658-7512-4217-9104-1bbf6e5f1d46", region: "NA", tiers: { pot: "LT3", sword: "HT1", cpvp: "HT1", smp: "HT1", uhc: "HT2", npot: "LT2", spearmace: "LT2", mace: "HT2" } },
             { name: "janekv", uuid: "c0695026-0e9f-44e9-92b0-9c2f42a0b1bc", region: "EU", tiers: { pot: "LT3", sword: "HT4", cpvp: "HT1", smp: "HT1", uhc: "HT1", axe: "HT2", npot: "LT2", spearmace: "LT2", mace: "HT3" } },
             { name: "Enderboygamerz", uuid: "d195c898-31be-4a25-9686-2a78b7b411d9", region: "AS", tiers: { sword: "HT2", pot: "LT2", cpvp: "HT3", npot: "LT3", axe: "HT4", smp: "LT4", mace: "LT4" } },
-            { name: "Noah6767", uuid: "8667ba71-b85a-4004-af54-457a9734eed7", region: "NA", tiers: { sword: "LT4", pot: "HT4", cpvp: "LT5", npot: "HT5", mace: "LT5" } },
-            { name: "Klyro81", uuid: "61699b2e-d327-4a01-9f1e-0ea8c3f06bc6", region: "AS", tiers: { sword: "HT5", axe: "LT5", smp: "HT5", mace: "LT5" } },
-            { name: "noobmaster69_", uuid: "069a79f4-44e9-4726-a5be-fca90e38aaf5", region: "EU", tiers: { pot: "LT5", cpvp: "LT5", mace: "HT4" } }
+            { name: "Noah6767", uuid: "", region: "NA", tiers: { sword: "LT4", pot: "HT4", cpvp: "LT5", npot: "HT5", mace: "LT5" } },
+            { name: "Klyro_gamer", uuid: "", region: "AS", tiers: { sword: "HT5", axe: "LT5", smp: "HT5", mace: "LT5" } },
+            { name: "noobmaster69_", uuid: "", region: "EU", tiers: { pot: "LT5", cpvp: "LT5", mace: "HT4" } }
         ];
 
         let playersDB = JSON.parse(localStorage.getItem('apexTiersDB')) || defaultPlayers;
@@ -1393,10 +1403,9 @@
             document.getElementById('modal-player-title').innerHTML = `<i class="fa-solid fa-crown" style="color: var(--gold-primary);"></i> ${title}`;
             document.getElementById('modal-player-region').innerText = player.region === 'NA' ? 'North America' : player.region === 'EU' ? 'Europe' : player.region === 'AS' ? 'Asia' : player.region === 'AU' ? 'Australia' : player.region === 'ME' ? 'Middle East' : player.region;
             
-            const avatar = player.uuid ? `https://crafatar.com/avatars/${player.uuid}?overlay` : `https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7?overlay`;
-            document.getElementById('modal-player-avatar').src = avatar;
+            document.getElementById('modal-player-avatar').src = getPlayerAvatarUrl(player);
             
-            const nameMcUrl = player.uuid ? `https://namemc.com/profile/${player.uuid}` : `https://namemc.com/search?q=${player.name}`;
+            const nameMcUrl = `https://namemc.com/profile/${encodeURIComponent(player.name)}`;
             document.getElementById('modal-namemc-link').href = nameMcUrl;
 
             document.getElementById('modal-player-rank-text').innerText = `#${rank}.`;
@@ -1521,7 +1530,7 @@
                         `;
                     });
 
-                    const avatar = player.uuid ? `https://crafatar.com/avatars/${player.uuid}?overlay` : `https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7?overlay`;
+                    const avatar = getPlayerAvatarUrl(player);
                     const delay = (index * 0.04).toFixed(2);
 
                     html += `
@@ -1586,7 +1595,7 @@
                         tiersMap[i].sort((a, b) => (a.currentTierVal.startsWith('HT') ? -1 : 1));
 
                         tiersMap[i].forEach(p => {
-                            const avatar = p.uuid ? `https://crafatar.com/avatars/${p.uuid}?overlay` : `https://crafatar.com/avatars/8667ba71-b85a-4004-af54-457a9734eed7?overlay`;
+                            const avatar = getPlayerAvatarUrl(p);
                             colsHTML += `
                                 <div class="tier-player-card" onclick="openPlayerModal('${p.name}')">
                                     <img src="${avatar}" alt="${p.name}" class="tier-player-avatar">
