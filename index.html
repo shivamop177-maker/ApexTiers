@@ -660,7 +660,7 @@
 
         .rank-number { font-size: 18px; font-weight: 900; width: 60px; color: var(--text-muted); font-style: italic; }
         .player-info { display: flex; align-items: center; gap: 14px; flex: 1; }
-        .player-avatar { width: 40px; height: 40px; border-radius: 10px; background: #000; display: block; }
+        .player-avatar { width: 40px; height: 40px; border-radius: 10px; background: #000; display: block; object-fit: cover; }
         .player-details h3 { font-size: 16px; font-weight: 800; margin-bottom: 3px; letter-spacing: 0.5px; }
         .player-details span { font-size: 11px; color: var(--gold-primary); font-weight: 700; background: rgba(255,170,0,0.1); padding: 2px 7px; border-radius: 6px; }
         
@@ -738,6 +738,7 @@
             height: 32px;
             border-radius: 8px;
             background: #000;
+            object-fit: cover;
         }
         .tier-player-name {
             font-size: 14px;
@@ -811,7 +812,7 @@
             
             <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
                 <div class="avatar-frame rank-1" id="modal-player-avatar-frame" style="margin-bottom: 15px;">
-                    <img src="" alt="" id="modal-player-avatar" style="width: 72px; height: 72px; border-radius: 12px; background: #000;">
+                    <img src="" alt="" id="modal-player-avatar" style="width: 72px; height: 72px; border-radius: 12px; background: #000; object-fit: cover;">
                 </div>
                 <h2 id="modal-player-name" style="font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 4px;">PlayerName</h2>
                 <div id="modal-player-title" style="background: rgba(255,170,0,0.15); border: 1px solid rgba(255,170,0,0.3); color: var(--gold-primary); padding: 4px 14px; border-radius: 20px; font-size: 13px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 4px;">Combat Master</div>
@@ -943,6 +944,7 @@
 
                         <input type="text" id="admin-name" class="admin-input" placeholder="Player Name (e.g. Marlowww)">
                         <input type="text" id="admin-uuid" class="admin-input" placeholder="Minecraft UUID (Optional)">
+                        <input type="text" id="admin-avatar-url" class="admin-input" placeholder="Custom Avatar Image URL (Optional)">
                         <select id="admin-region" class="admin-input">
                             <option value="NA">NA</option>
                             <option value="EU">EU</option>
@@ -1157,17 +1159,48 @@
         };
 
         /**
+         * Multi-Source Avatar Fallback Engine.
+         * If MC-Heads fails, sequentially fallback to Minotar -> MineSkin -> CraftHead -> Steve.
+         */
+        function handleAvatarError(img, playerName) {
+            const step = parseInt(img.getAttribute('data-fallback-step') || '0');
+            const safeName = encodeURIComponent(playerName || 'Steve');
+
+            if (step === 0) {
+                img.setAttribute('data-fallback-step', '1');
+                img.src = `https://minotar.net/helm/${safeName}/100`;
+            } else if (step === 1) {
+                img.setAttribute('data-fallback-step', '2');
+                img.src = `https://mineskin.eu/helm/${safeName}/100`;
+            } else if (step === 2) {
+                img.setAttribute('data-fallback-step', '3');
+                img.src = `https://crafthead.net/avatar/${safeName}/100`;
+            } else {
+                img.src = 'https://mc-heads.net/avatar/Steve/100';
+            }
+        }
+
+        /**
          * Helper to get avatar head URL.
-         * mc-heads.net supports BOTH Minecraft UUIDs and usernames directly!
+         * Checks for explicit custom avatarUrl first, then falls back to avatar services.
          */
         function getPlayerAvatarUrl(player) {
             if (!player) return 'https://mc-heads.net/avatar/Steve/100';
-            const identifier = (player.uuid && player.uuid.trim().length > 5) ? player.uuid.trim() : (player.name ? player.name.trim() : 'Steve');
+            
+            // Check for explicit custom Avatar URL set via admin panel
+            if (player.avatarUrl && player.avatarUrl.trim().length > 0) {
+                return player.avatarUrl.trim();
+            }
+
+            const identifier = (player.uuid && player.uuid.trim().length > 5) 
+                ? player.uuid.trim() 
+                : (player.name ? player.name.trim() : 'Steve');
+
             return `https://mc-heads.net/avatar/${encodeURIComponent(identifier)}/100`;
         }
 
         /**
-         * Normalizes gamemode names from Discord/API inputs (e.g., "CRYSTAL/VANILLA", "crystal", "CPvP" -> "cpvp")
+         * Normalizes gamemode names from Discord/API inputs
          */
         function normalizeGamemodeKey(key) {
             if (!key) return '';
@@ -1179,9 +1212,6 @@
             return k;
         }
 
-        /**
-         * Retrieves a player's tier for a specific gamemode in a case and alias insensitive manner
-         */
         function getPlayerTier(player, gmKey) {
             if (!player || !player.tiers || typeof player.tiers !== 'object') return 'N/A';
             let targetGm = normalizeGamemodeKey(gmKey);
@@ -1224,7 +1254,7 @@
             { name: "janekv", uuid: "c0695026-0e9f-44e9-92b0-9c2f42a0b1bc", region: "EU", tiers: { pot: "LT3", sword: "HT4", cpvp: "HT1", smp: "HT1", uhc: "HT1", axe: "HT2", npot: "LT2", spearmace: "LT2", mace: "HT3" } },
             { name: "Enderboygamerz", uuid: "d195c898-31be-4a25-9686-2a78b7b411d9", region: "AS", tiers: { sword: "HT2", pot: "LT2", cpvp: "HT3", npot: "LT3", axe: "HT4", smp: "LT4", mace: "LT4" } },
             { name: "Noah6767", uuid: "", region: "NA", tiers: { sword: "LT4", pot: "HT4", cpvp: "LT5", npot: "HT5", mace: "LT5" } },
-            { name: "Klyro_gamer", uuid: "", region: "AS", tiers: { sword: "HT5", axe: "LT5", smp: "HT5", mace: "LT5" } },
+            { name: "Klyro_gamer", uuid: "", avatarUrl: "https://mc-heads.net/avatar/Klyro81/100", region: "AS", tiers: { sword: "HT5", axe: "LT5", smp: "HT5", mace: "LT5" } },
             { name: "noobmaster69_", uuid: "", region: "EU", tiers: { pot: "LT5", cpvp: "LT5", mace: "HT4" } }
         ];
 
@@ -1303,6 +1333,7 @@
             if (!selectName) {
                 document.getElementById('admin-name').value = '';
                 document.getElementById('admin-uuid').value = '';
+                document.getElementById('admin-avatar-url').value = '';
                 document.getElementById('admin-region').value = 'NA';
                 GAMEMODES.forEach(gm => {
                     const el = document.getElementById(`admin-gm-${gm}`);
@@ -1315,6 +1346,7 @@
             if (player) {
                 document.getElementById('admin-name').value = player.name;
                 document.getElementById('admin-uuid').value = player.uuid || '';
+                document.getElementById('admin-avatar-url').value = player.avatarUrl || '';
                 document.getElementById('admin-region').value = player.region || 'NA';
                 GAMEMODES.forEach(gm => {
                     const el = document.getElementById(`admin-gm-${gm}`);
@@ -1403,8 +1435,10 @@
             document.getElementById('modal-player-title').innerHTML = `<i class="fa-solid fa-crown" style="color: var(--gold-primary);"></i> ${title}`;
             document.getElementById('modal-player-region').innerText = player.region === 'NA' ? 'North America' : player.region === 'EU' ? 'Europe' : player.region === 'AS' ? 'Asia' : player.region === 'AU' ? 'Australia' : player.region === 'ME' ? 'Middle East' : player.region;
             
-            document.getElementById('modal-player-avatar').src = getPlayerAvatarUrl(player);
-            
+            const modalImg = document.getElementById('modal-player-avatar');
+            modalImg.src = getPlayerAvatarUrl(player);
+            modalImg.setAttribute('onerror', `handleAvatarError(this, '${player.name}')`);
+
             const nameMcUrl = `https://namemc.com/profile/${encodeURIComponent(player.name)}`;
             document.getElementById('modal-namemc-link').href = nameMcUrl;
 
@@ -1538,7 +1572,7 @@
                             <div class="rank-number">#${rank}</div>
                             <div class="player-info">
                                 <div class="${frameClass}">
-                                    <img src="${avatar}" alt="${player.name}" class="player-avatar">
+                                    <img src="${avatar}" alt="${player.name}" class="player-avatar" onerror="handleAvatarError(this, '${player.name}')">
                                 </div>
                                 <div class="player-details">
                                     <h3>${player.name}</h3>
@@ -1598,7 +1632,7 @@
                             const avatar = getPlayerAvatarUrl(p);
                             colsHTML += `
                                 <div class="tier-player-card" onclick="openPlayerModal('${p.name}')">
-                                    <img src="${avatar}" alt="${p.name}" class="tier-player-avatar">
+                                    <img src="${avatar}" alt="${p.name}" class="tier-player-avatar" onerror="handleAvatarError(this, '${p.name}')">
                                     <span class="tier-player-name">${p.name}</span>
                                     <span class="tier-player-tag ${p.currentTierVal.toLowerCase()}">${p.currentTierVal}</span>
                                 </div>
@@ -1659,6 +1693,7 @@
         function saveAdminPlayer() {
             const name = document.getElementById('admin-name').value.trim();
             const uuid = document.getElementById('admin-uuid').value.trim();
+            const avatarUrl = document.getElementById('admin-avatar-url').value.trim();
             const region = document.getElementById('admin-region').value;
 
             if (!name) return alert("Player Name is required.");
@@ -1670,13 +1705,14 @@
             });
 
             playersDB = playersDB.filter(p => p.name.toLowerCase() !== name.toLowerCase());
-            playersDB.push({ name, uuid, region, tiers: tiersObj });
+            playersDB.push({ name, uuid, avatarUrl, region, tiers: tiersObj });
 
             localStorage.setItem('apexTiersDB', JSON.stringify(playersDB));
             alert(`Successfully saved ${name}!`);
 
             document.getElementById('admin-name').value = '';
             document.getElementById('admin-uuid').value = '';
+            document.getElementById('admin-avatar-url').value = '';
             populateAdminPlayerSelect();
             renderApp();
         }
