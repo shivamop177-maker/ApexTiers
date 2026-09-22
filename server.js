@@ -64,7 +64,23 @@ function calculateOverallTier(tiers) {
 
 const standardModes = ['npot', 'sword', 'axe', 'smp', 'cpvp', 'spearmace', 'pot', 'uhc', 'mace'];
 
-// 1. GET API - Fetch single player (case-insensitive keys) or all players
+// Helper to sanitize tier object keys and map gamemode aliases
+function mapPlayerTiers(rawTiers) {
+    let tiersObj = {};
+    standardModes.forEach(gm => {
+        let val = rawTiers[gm];
+        if (!val && gm === 'npot') {
+            val = rawTiers['nethpot'] || rawTiers['netheritepot'];
+        }
+        if (!val && gm === 'cpvp') {
+            val = rawTiers['crystalvanilla'] || rawTiers['crystal'] || rawTiers['vanilla'] || rawTiers['cvp'];
+        }
+        tiersObj[gm] = (val && val !== 'None' && val !== 'N/A' && val !== '') ? val : "N/A";
+    });
+    return tiersObj;
+}
+
+// 1. GET API - Fetch single player or all players
 app.get('/api/players', async (req, res) => {
     try {
         const playerName = req.query.name || req.query.ign || req.query.player;
@@ -91,16 +107,7 @@ app.get('/api/players', async (req, res) => {
                 }
             }
 
-            // Map standard modes with fallbacks
-            let tiersObj = {};
-            standardModes.forEach(gm => {
-                let val = rawTiers[gm];
-                if (!val && gm === 'npot') {
-                    val = rawTiers['nethpot'] || rawTiers['netheritepot'];
-                }
-                tiersObj[gm] = (val && val !== 'None' && val !== 'N/A' && val !== '') ? val : "N/A";
-            });
-
+            let tiersObj = mapPlayerTiers(rawTiers);
             player.tiers = tiersObj;
             player.overall = calculateOverallTier(tiersObj);
             return res.json(player);
@@ -122,14 +129,7 @@ app.get('/api/players', async (req, res) => {
                     });
                 }
             }
-            let tiersObj = {};
-            standardModes.forEach(gm => {
-                let val = rawTiers[gm];
-                if (!val && gm === 'npot') {
-                    val = rawTiers['nethpot'] || rawTiers['netheritepot'];
-                }
-                tiersObj[gm] = (val && val !== 'None' && val !== 'N/A' && val !== '') ? val : "N/A";
-            });
+            let tiersObj = mapPlayerTiers(rawTiers);
             obj.tiers = tiersObj;
             obj.overall = calculateOverallTier(tiersObj);
             return obj;
@@ -175,9 +175,11 @@ app.post('/api/update-tier', async (req, res) => {
         if (region) player.region = region;
         if (uuid) player.uuid = uuid;
 
+        // Clean key & map gamemode aliases
         let gmKey = gamemode.toLowerCase().replace(/[^a-z0-9]/g, '');
         if (gmKey === 'nethpot' || gmKey === 'netheritepot') gmKey = 'npot';
-        
+        if (gmKey === 'crystalvanilla' || gmKey === 'crystal' || gmKey === 'vanilla' || gmKey === 'cvp') gmKey = 'cpvp';
+
         player.tiers.set(gmKey, newTier.toUpperCase());
         await player.save();
 
