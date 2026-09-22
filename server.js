@@ -24,12 +24,55 @@ if (MONGO_URI) {
         .catch(err => console.error('MongoDB connection error:', err));
 }
 
-// 1. GET API - Fetch all players for website OR a single player for Discord Bot (with N/A fallbacks)
+// --------------------------------------------------------------------------
+// Helper Function: Calculates Overall Tier based on player's active tiers
+// --------------------------------------------------------------------------
+function calculateOverallTier(tiers) {
+    const tierPoints = {
+        'HT1': 10, 'LT1': 9,
+        'HT2': 8,  'LT2': 7,
+        'HT3': 6,  'LT3': 5,
+        'HT4': 4,  'LT4': 3,
+        'HT5': 2,  'LT5': 1,
+        'T1': 10,  'T2': 8,  'T3': 6,  'T4': 4,  'T5': 2
+    };
+
+    let totalScore = 0;
+    let count = 0;
+
+    for (const gm in tiers) {
+        const tierVal = tiers[gm] ? tiers[gm].toUpperCase() : 'N/A';
+        if (tierPoints[tierVal] !== undefined) {
+            totalScore += tierPoints[tierVal];
+            count++;
+        }
+    }
+
+    if (count === 0 || totalScore === 0) return 'Unranked';
+
+    // Average tier rating across placed gamemodes
+    const avg = totalScore / count;
+
+    if (avg >= 9.5) return 'HT1';
+    if (avg >= 8.5) return 'LT1';
+    if (avg >= 7.5) return 'HT2';
+    if (avg >= 6.5) return 'LT2';
+    if (avg >= 5.5) return 'HT3';
+    if (avg >= 4.5) return 'LT3';
+    if (avg >= 3.5) return 'HT4';
+    if (avg >= 2.5) return 'LT4';
+    if (avg >= 1.5) return 'HT5';
+    return 'LT5';
+}
+
+const standardModes = ['npot', 'sword', 'axe', 'smp', 'cpvp', 'spearmace', 'pot', 'uhc', 'mace'];
+
+// 1. GET API - Fetch all players for website OR a single player for Discord Bot (with N/A fallbacks & Overall tier)
 app.get('/api/players', async (req, res) => {
     try {
         const playerName = req.query.name;
 
-        // If Discord requests a specific player (?name=...), return a SINGLE object with N/A fallbacks
+        // If Discord requests a specific player (?name=...), return a SINGLE object with N/A fallbacks & overall tier
         if (playerName) {
             let playerDoc = await Player.findOne({ name: new RegExp(`^${playerName}$`, 'i') });
             if (!playerDoc) {
@@ -39,10 +82,7 @@ app.get('/api/players', async (req, res) => {
             // Convert Mongoose document to a clean plain JavaScript object
             let player = playerDoc.toObject();
 
-            // Explicitly define all 9 gamemodes so none of them can ever be missing
-            const standardModes = ['npot', 'sword', 'axe', 'smp', 'cpvp', 'spearmace', 'pot', 'uhc', 'mace'];
             let tiersObj = {};
-
             standardModes.forEach(gm => {
                 let val = null;
                 if (playerDoc.tiers) {
@@ -56,12 +96,32 @@ app.get('/api/players', async (req, res) => {
             });
 
             player.tiers = tiersObj;
+            player.overall = calculateOverallTier(tiersObj); // 👈 Calculates and adds overall rank
             return res.json(player);
         }
 
-        // Otherwise, return all players in an array [...] for your website leaderboard
+        // Otherwise, return all players in an array [...] with overall calculation for website leaderboard
         const players = await Player.find({});
-        res.json(players);
+        const updatedPlayers = players.map(p => {
+            let obj = p.toObject();
+            let tiersObj = {};
+            standardModes.forEach(gm => {
+                let val = null;
+                if (p.tiers) {
+                    if (typeof p.tiers.get === 'function') {
+                        val = p.tiers.get(gm);
+                    } else {
+                        val = p.tiers[gm];
+                    }
+                }
+                tiersObj[gm] = (val && val !== 'None' && val !== 'N/A' && val !== '') ? val : "N/A";
+            });
+            obj.tiers = tiersObj;
+            obj.overall = calculateOverallTier(tiersObj);
+            return obj;
+        });
+
+        res.json(updatedPlayers);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Failed to fetch players" });
