@@ -6,6 +6,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// List of players hidden from tierlist until retested (case-insensitive)
+const EXCLUDED_PLAYERS = [
+    'enderboygamerz',
+    'flewtop',
+    'klyro_gamer',
+    'iamshiviii',
+    'bluxxyblux9',
+    'haryana_boy',
+    'trxxd_op'
+];
+
 // MongoDB Player Schema
 const playerSchema = new mongoose.Schema({
     name: { type: String, required: true, unique: true },
@@ -86,6 +97,11 @@ app.get('/api/players', async (req, res) => {
         const playerName = req.query.name || req.query.ign || req.query.player;
 
         if (playerName) {
+            // Check if requested player is pending retest
+            if (EXCLUDED_PLAYERS.includes(playerName.toLowerCase())) {
+                return res.status(404).json({ error: "Player pending retest" });
+            }
+
             let playerDoc = await Player.findOne({ name: new RegExp(`^${playerName}$`, 'i') });
             if (!playerDoc) {
                 return res.status(404).json({ error: "Player not found" });
@@ -113,27 +129,29 @@ app.get('/api/players', async (req, res) => {
             return res.json(player);
         }
 
-        // Return all players for website
+        // Return all players for website (excluding players pending retest)
         const players = await Player.find({});
-        const updatedPlayers = players.map(p => {
-            let obj = p.toObject();
-            let rawTiers = {};
-            if (p.tiers) {
-                if (typeof p.tiers.forEach === 'function') {
-                    p.tiers.forEach((value, key) => {
-                        rawTiers[key.toLowerCase().replace(/[^a-z0-9]/g, '')] = value;
-                    });
-                } else {
-                    Object.keys(p.tiers).forEach(key => {
-                        rawTiers[key.toLowerCase().replace(/[^a-z0-9]/g, '')] = p.tiers[key];
-                    });
+        const updatedPlayers = players
+            .filter(p => p.name && !EXCLUDED_PLAYERS.includes(p.name.toLowerCase()))
+            .map(p => {
+                let obj = p.toObject();
+                let rawTiers = {};
+                if (p.tiers) {
+                    if (typeof p.tiers.forEach === 'function') {
+                        p.tiers.forEach((value, key) => {
+                            rawTiers[key.toLowerCase().replace(/[^a-z0-9]/g, '')] = value;
+                        });
+                    } else {
+                        Object.keys(p.tiers).forEach(key => {
+                            rawTiers[key.toLowerCase().replace(/[^a-z0-9]/g, '')] = p.tiers[key];
+                        });
+                    }
                 }
-            }
-            let tiersObj = mapPlayerTiers(rawTiers);
-            obj.tiers = tiersObj;
-            obj.overall = calculateOverallTier(tiersObj);
-            return obj;
-        });
+                let tiersObj = mapPlayerTiers(rawTiers);
+                obj.tiers = tiersObj;
+                obj.overall = calculateOverallTier(tiersObj);
+                return obj;
+            });
 
         res.json(updatedPlayers);
     } catch (err) {
