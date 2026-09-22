@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
-const app = express(); // 👈 Must be right here at the top!
+const app = express();
 app.use(cors());
 app.use(express.json());
 
@@ -24,9 +24,7 @@ if (MONGO_URI) {
         .catch(err => console.error('MongoDB connection error:', err));
 }
 
-// --------------------------------------------------------------------------
 // Helper Function: Calculates Overall Tier based on player's active tiers
-// --------------------------------------------------------------------------
 function calculateOverallTier(tiers) {
     const tierPoints = {
         'HT1': 10, 'LT1': 9,
@@ -50,7 +48,6 @@ function calculateOverallTier(tiers) {
 
     if (count === 0 || totalScore === 0) return 'Unranked';
 
-    // Average tier rating across placed gamemodes
     const avg = totalScore / count;
 
     if (avg >= 9.5) return 'HT1';
@@ -67,19 +64,18 @@ function calculateOverallTier(tiers) {
 
 const standardModes = ['npot', 'sword', 'axe', 'smp', 'cpvp', 'spearmace', 'pot', 'uhc', 'mace'];
 
-// 1. GET API - Fetch all players for website OR a single player for Discord Bot (with N/A fallbacks & Overall tier)
+// 1. GET API - Fetch single player (supports BOTH ?name= and ?ign=)
 app.get('/api/players', async (req, res) => {
     try {
-        const playerName = req.query.name;
+        // 👈 Accepts EITHER ?name= OR ?ign= parameter from BotGhost
+        const playerName = req.query.name || req.query.ign || req.query.player;
 
-        // If Discord requests a specific player (?name=...), return a SINGLE object with N/A fallbacks & overall tier
         if (playerName) {
             let playerDoc = await Player.findOne({ name: new RegExp(`^${playerName}$`, 'i') });
             if (!playerDoc) {
                 return res.status(404).json({ error: "Player not found" });
             }
 
-            // Convert Mongoose document to a clean plain JavaScript object
             let player = playerDoc.toObject();
 
             let tiersObj = {};
@@ -96,11 +92,10 @@ app.get('/api/players', async (req, res) => {
             });
 
             player.tiers = tiersObj;
-            player.overall = calculateOverallTier(tiersObj); // 👈 Calculates and adds overall rank
+            player.overall = calculateOverallTier(tiersObj);
             return res.json(player);
         }
 
-        // Otherwise, return all players in an array [...] with overall calculation for website leaderboard
         const players = await Player.find({});
         const updatedPlayers = players.map(p => {
             let obj = p.toObject();
