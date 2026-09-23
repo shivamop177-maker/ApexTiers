@@ -8,12 +8,10 @@ app.use(express.json());
 
 // List of players hidden from tierlist until retested (case-insensitive)
 const EXCLUDED_PLAYERS = [
-    'enderboygamerz',
     'flewtop',
     'klyro_gamer',
     'iamshiviii',
     'bluxxyblux9',
-    'haryana_boy',
     'trxxd_op',
     'savvywtf_'
 ];
