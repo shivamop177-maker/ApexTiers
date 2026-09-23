@@ -14,7 +14,7 @@ const EXCLUDED_PLAYERS = [
     'iamshiviii',
     'bluxxyblux9',
     'haryana_boy',
-    'trxxd_op'
+    'trxxd_op',
     'savvywtf_'
 ];
 
