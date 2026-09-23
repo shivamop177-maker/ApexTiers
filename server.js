@@ -15,7 +15,7 @@ const EXCLUDED_PLAYERS = [
     'bluxxyblux9',
     'haryana_boy',
     'trxxd_op'
-    'SavvYwtf_'
+    'savvywtf_'
 ];
 
 // MongoDB Player Schema
