@@ -682,14 +682,14 @@
         }
         .rank-row:hover { transform: translateX(8px) scale(1.01); border-color: rgba(255,170,0,0.5); background: var(--bg-hover); box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 10; position: relative; }
 
-        /* 1:1 MCTIERS HORIZONTAL RANK BADGE */
+        /* PERFECT 1:1 MCTIERS HORIZONTAL RANK BADGE */
         .mctiers-badge {
-            width: 145px;
+            width: 150px;
             height: 52px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 12px;
+            padding: 0 28px 0 16px; /* Right padding shifted left to offset bottom-right polygon slant */
             position: relative;
             clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%);
             border-radius: 8px 0 0 8px;
@@ -735,20 +735,20 @@
             z-index: 2;
         }
 
-        /* 3D ISOMETRIC AVATAR CONTAINER */
+        /* CENTERED 3D AVATAR CONTAINER */
         .mctiers-badge-avatar-container {
-            width: 52px;
+            width: 48px;
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 2px;
+            margin: 0 auto;
         }
 
         .mctiers-badge-avatar {
-            height: 52px;
+            height: 48px;
             width: auto;
-            max-width: 52px;
+            max-width: 48px;
             object-fit: contain;
             object-position: center;
             filter: drop-shadow(2px 3px 6px rgba(0, 0, 0, 0.85));
@@ -912,9 +912,9 @@
             <button class="modal-close-btn" onclick="closePlayerModal()"><i class="fa-solid fa-xmark"></i></button>
             
             <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
-                <div class="mctiers-badge rank-1" id="modal-player-avatar-frame" style="margin-bottom: 15px; height: 75px; width: 170px; clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%); padding: 0 16px;">
+                <div class="mctiers-badge rank-1" id="modal-player-avatar-frame" style="margin-bottom: 15px; height: 75px; width: 175px; clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%); padding: 0 32px 0 18px;">
                     <span class="mctiers-badge-rank" id="modal-player-rank-badge-text" style="font-size: 32px;">#1.</span>
-                    <div class="mctiers-badge-avatar-container" style="width: 60px; margin-right: 10px;">
+                    <div class="mctiers-badge-avatar-container" style="width: 60px;">
                         <img src="" alt="" id="modal-player-avatar" style="height: 68px; width: auto; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.8));">
                     </div>
                 </div>
