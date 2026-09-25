@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ApexTiers - Global Rankings</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
@@ -20,7 +20,7 @@
             --glass-blur: blur(14px);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Fredoka', sans-serif; }
         
         body { 
             background-color: var(--bg-base); 
@@ -57,7 +57,7 @@
         }
         .loader-title {
             font-size: 32px;
-            font-weight: 900;
+            font-weight: 700;
             background: var(--gold-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -66,8 +66,8 @@
         }
         .loader-subtitle {
             color: var(--text-muted);
-            font-size: 12px;
-            font-weight: 700;
+            font-size: 13px;
+            font-weight: 600;
             letter-spacing: 3px;
             text-transform: uppercase;
             margin-bottom: 25px;
@@ -125,7 +125,7 @@
         }
 
         .title-badge {
-            font-weight: 900;
+            font-weight: 700;
             display: inline-flex;
             align-items: center;
             gap: 5px;
@@ -215,7 +215,7 @@
         
         .logo-text {
             font-size: 28px;
-            font-weight: 900;
+            font-weight: 700;
             background: var(--gold-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -227,8 +227,8 @@
         .nav-links a, .nav-links button {
             color: var(--text-muted);
             text-decoration: none;
-            font-size: 15px;
-            font-weight: 700;
+            font-size: 16px;
+            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -258,10 +258,10 @@
             background: rgba(88, 101, 242, 0.15);
             border: 1px solid rgba(88, 101, 242, 0.4);
             color: #c7ccff;
-            padding: 4px 12px;
+            padding: 5px 14px;
             border-radius: 20px;
-            font-size: 12px;
-            font-weight: 800;
+            font-size: 13px;
+            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -334,13 +334,13 @@
             background: radial-gradient(circle, rgba(255,170,0,0.08) 0%, transparent 70%);
             pointer-events: none;
         }
-        .home-hero h1 { font-size: 42px; font-weight: 900; margin-bottom: 15px; letter-spacing: 0.5px; }
+        .home-hero h1 { font-size: 44px; font-weight: 700; margin-bottom: 15px; letter-spacing: 0.5px; }
         .home-hero h1 span { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .home-hero p { color: var(--text-muted); font-size: 16px; max-width: 600px; line-height: 1.6; margin-bottom: 30px; }
+        .home-hero p { color: var(--text-muted); font-size: 17px; max-width: 600px; line-height: 1.6; margin-bottom: 30px; }
         
         .hero-buttons { display: flex; gap: 15px; }
         .hero-btn {
-            padding: 12px 28px; border-radius: 12px; font-weight: 800; font-size: 14px; text-decoration: none; display: flex; align-items: center; gap: 10px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer;
+            padding: 12px 28px; border-radius: 12px; font-weight: 700; font-size: 15px; text-decoration: none; display: flex; align-items: center; gap: 10px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer;
         }
         .hero-btn.primary { background: var(--gold-gradient); color: #000; box-shadow: 0 5px 20px rgba(255,170,0,0.3); border: none; }
         .hero-btn.primary:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 28px rgba(255,170,0,0.5); }
@@ -353,22 +353,22 @@
         .home-grid { display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 25px; }
         .home-panel-card { background: var(--bg-panel); backdrop-filter: var(--glass-blur); border: 1px solid var(--border-color); border-radius: 20px; padding: 25px; transition: border-color 0.3s ease; }
         .home-panel-card:hover { border-color: rgba(255,170,0,0.3); }
-        .home-panel-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: var(--gold-primary); }
+        .home-panel-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: var(--gold-primary); }
 
         /* Stat row */
-        .stat-row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border-color); font-size: 14px; font-weight: 600; align-items: center; }
+        .stat-row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border-color); font-size: 15px; font-weight: 600; align-items: center; }
         .stat-row:last-child { border-bottom: none; }
-        .stat-value { color: var(--gold-primary); font-weight: 800; }
+        .stat-value { color: var(--gold-primary); font-weight: 700; }
 
         /* Tested Players Badge List */
         .tested-players-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
         .p-tag {
             background: rgba(255, 170, 0, 0.1);
             border: 1px solid rgba(255, 170, 0, 0.25);
-            padding: 3px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
             color: var(--gold-primary);
             transition: transform 0.2s ease;
         }
@@ -377,6 +377,7 @@
             background: var(--gold-gradient);
             color: #000;
             border: none;
+            font-weight: 700;
             box-shadow: 0 0 10px rgba(255, 170, 0, 0.3);
         }
 
@@ -422,8 +423,8 @@
             margin-bottom: 20px;
             box-shadow: 0 0 15px rgba(255, 170, 0, 0.2);
         }
-        .modal-title { font-size: 22px; font-weight: 900; color: #fff; margin-bottom: 6px; }
-        .modal-subtitle { font-size: 13px; color: var(--text-muted); font-weight: 500; margin-bottom: 22px; }
+        .modal-title { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+        .modal-subtitle { font-size: 14px; color: var(--text-muted); font-weight: 500; margin-bottom: 22px; }
         .modal-input-group { position: relative; margin-bottom: 18px; }
         .modal-input-group i {
             position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
@@ -442,13 +443,13 @@
             background: rgba(255, 170, 0, 0.02);
         }
         .modal-error-msg {
-            color: #ff4d4d; font-size: 12px; font-weight: 700;
+            color: #ff4d4d; font-size: 13px; font-weight: 600;
             margin-top: -10px; margin-bottom: 15px; display: none;
         }
         .modal-actions { display: flex; gap: 12px; }
         .modal-btn {
             flex: 1; padding: 13px; border-radius: 10px;
-            font-weight: 800; font-size: 14px; border: none;
+            font-weight: 700; font-size: 14px; border: none;
             cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .modal-btn:active { transform: scale(0.95); }
@@ -486,8 +487,8 @@
             color: var(--gold-primary);
             padding: 4px 12px;
             border-radius: 20px;
-            font-size: 12px;
-            font-weight: 800;
+            font-size: 13px;
+            font-weight: 700;
             margin-bottom: 12px;
         }
 
@@ -502,7 +503,7 @@
         .category {
             display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer;
             padding: 8px 12px; border-radius: 12px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); color: var(--text-muted);
-            min-width: 68px; font-size: 12px; font-weight: 700; flex-shrink: 0;
+            min-width: 68px; font-size: 13px; font-weight: 600; flex-shrink: 0;
         }
         .category[data-mode="overall"] { margin-right: 22px; }
         .category img { width: 28px; height: 28px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6)); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -516,8 +517,8 @@
         .server-ip-box { display: flex; align-items: center; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); border-radius: 10px; padding: 6px 16px; gap: 12px; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         .server-ip-box:hover { border-color: var(--gold-primary); background: rgba(255,170,0,0.08); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,170,0,0.15); }
         .server-ip-box:active { transform: scale(0.96); }
-        .server-icon-badge { background: linear-gradient(135deg, #e63946, #c1121f); color: white; font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
-        .server-ip-text { font-size: 15px; font-weight: 800; color: #fff; letter-spacing: 0.5px; }
+        .server-icon-badge { background: linear-gradient(135deg, #e63946, #c1121f); color: white; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
+        .server-ip-text { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
 
         /* Admin Panel Section */
         .admin-panel {
@@ -527,10 +528,10 @@
             display: none;
             animation: contentPop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        .admin-header { color: var(--gold-primary); margin-bottom: 25px; font-size: 22px; font-weight: 900; display: flex; justify-between: align-items: center; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
+        .admin-header { color: var(--gold-primary); margin-bottom: 25px; font-size: 22px; font-weight: 700; display: flex; justify-between: align-items: center; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
         .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
         .admin-box { background: rgba(0,0,0,0.5); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); }
-        .admin-box h4 { margin-bottom: 15px; color: #fff; font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        .admin-box h4 { margin-bottom: 15px; color: #fff; font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
         .admin-input {
             width: 100%; padding: 12px 16px; margin-bottom: 12px;
             background: rgba(255,255,255,0.04); color: #fff; border: 1px solid var(--border-color); border-radius: 10px; font-size: 14px; font-weight: 600; outline: none; transition: all 0.3s ease;
@@ -540,12 +541,12 @@
         .tier-inputs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .tier-input-row { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.02); padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border-color); }
         .tier-input-row img { width: 22px; height: 22px; }
-        .tier-input-row select { background: transparent; color: white; border: none; outline: none; width: 100%; font-size: 13px; font-weight: 800; cursor: pointer; }
+        .tier-input-row select { background: transparent; color: white; border: none; outline: none; width: 100%; font-size: 14px; font-weight: 600; cursor: pointer; }
         .tier-input-row select option { background: #111; color: #fff; }
 
         .admin-btn {
             padding: 12px; background: var(--gold-gradient); color: #000; text-transform: uppercase; letter-spacing: 1px;
-            border: none; border-radius: 10px; cursor: pointer; font-weight: 900; width: 100%; font-size: 14px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border: none; border-radius: 10px; cursor: pointer; font-weight: 700; width: 100%; font-size: 15px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .admin-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(255, 170, 0, 0.4); }
         .admin-btn:active { transform: scale(0.96); }
@@ -576,8 +577,8 @@
             animation: contentPop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         .info-widget-title {
-            font-size: 16px;
-            font-weight: 900;
+            font-size: 18px;
+            font-weight: 700;
             color: #fff;
             display: flex;
             align-items: center;
@@ -600,8 +601,8 @@
             border: none;
             background: transparent;
             color: var(--text-muted);
-            font-size: 13px;
-            font-weight: 800;
+            font-size: 14px;
+            font-weight: 700;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -616,7 +617,7 @@
 
         .info-subtitle {
             font-size: 13px;
-            font-weight: 800;
+            font-weight: 600;
             color: var(--text-muted);
             margin-bottom: 12px;
         }
@@ -633,17 +634,17 @@
         }
         .info-list-item:hover { transform: translateX(3px); border-color: rgba(255,170,0,0.3); }
         .info-title-name {
-            font-size: 14px;
-            font-weight: 900;
+            font-size: 15px;
+            font-weight: 700;
             color: #fff;
             display: flex;
             align-items: center;
             gap: 6px;
         }
         .info-title-desc {
-            font-size: 11px;
+            font-size: 12px;
             color: var(--text-muted);
-            font-weight: 600;
+            font-weight: 500;
         }
 
         .points-row {
@@ -657,16 +658,16 @@
             margin-bottom: 8px;
         }
         .points-tier-badge {
-            font-size: 12px;
-            font-weight: 900;
+            font-size: 13px;
+            font-weight: 700;
             color: #fff;
             display: flex;
             align-items: center;
             gap: 6px;
         }
         .points-val {
-            font-size: 11px;
-            font-weight: 800;
+            font-size: 12px;
+            font-weight: 600;
             color: var(--gold-primary);
             background: rgba(255,170,0,0.1);
             padding: 3px 8px;
@@ -674,7 +675,7 @@
         }
 
         /* Overall Table Headers */
-        .list-headers { display: flex; padding: 0 30px 12px 30px; color: var(--text-muted); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; }
+        .list-headers { display: flex; padding: 0 30px 12px 30px; color: var(--text-muted); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; }
         .h-rank { width: 165px; }
         .h-player { flex: 1; }
         .h-region { width: 90px; text-align: center; }
@@ -741,7 +742,7 @@
 
         .mctiers-badge-rank {
             font-size: 26px;
-            font-weight: 900;
+            font-weight: 700;
             font-style: italic;
             color: #ffffff;
             text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
@@ -774,16 +775,16 @@
         .rank-row.rank-3 { background: linear-gradient(90deg, rgba(212, 123, 51, 0.1) 0%, var(--bg-panel) 50%); border-color: rgba(212, 123, 51, 0.4); }
 
         .player-info { display: flex; align-items: center; gap: 14px; flex: 1; }
-        .player-details h3 { font-size: 16px; font-weight: 800; margin-bottom: 3px; letter-spacing: 0.5px; color: #fff; }
-        .player-details span { font-size: 12px; font-weight: 700; }
+        .player-details h3 { font-size: 17px; font-weight: 700; margin-bottom: 3px; letter-spacing: 0.5px; color: #fff; }
+        .player-details span { font-size: 13px; font-weight: 600; }
         
-        .region { width: 90px; text-align: center; color: #ff4d4d; font-weight: 900; font-size: 13px; background: rgba(255,77,77,0.1); padding: 5px 0; border-radius: 8px; }
+        .region { width: 90px; text-align: center; color: #ff4d4d; font-weight: 700; font-size: 14px; background: rgba(255,77,77,0.1); padding: 5px 0; border-radius: 8px; }
 
         .player-tiers { width: 440px; display: flex; gap: 4px; justify-content: center; flex-wrap: nowrap; }
         .tier-badge { display: flex; flex-direction: column; align-items: center; gap: 3px; background: rgba(0,0,0,0.4); padding: 4px 2px; border-radius: 6px; width: 38px; border: 1px solid var(--border-color); transition: transform 0.2s; flex-shrink: 0; }
         .tier-badge:hover { transform: translateY(-3px) scale(1.08); }
         .tier-badge img { width: 18px; height: 18px; object-fit: contain; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8)); }
-        .tier-label { font-size: 8px; padding: 1px 0; width: 100%; text-align: center; border-radius: 3px; font-weight: 900; text-transform: uppercase; }
+        .tier-label { font-size: 9px; padding: 1px 0; width: 100%; text-align: center; border-radius: 3px; font-weight: 700; text-transform: uppercase; }
 
         /* Specific Gamemode Column Tier View */
         .tier-columns-grid {
@@ -805,8 +806,8 @@
         }
         .tier-column-header {
             padding: 16px;
-            font-weight: 900;
-            font-size: 17px;
+            font-weight: 700;
+            font-size: 18px;
             text-align: center;
             display: flex;
             align-items: center;
@@ -856,8 +857,8 @@
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
         }
         .tier-player-name {
-            font-size: 14px;
-            font-weight: 800;
+            font-size: 15px;
+            font-weight: 700;
             color: #fff;
             flex: 1;
             white-space: nowrap;
@@ -865,8 +866,8 @@
             text-overflow: ellipsis;
         }
         .tier-player-tag {
-            font-size: 10px;
-            font-weight: 900;
+            font-size: 11px;
+            font-weight: 700;
             padding: 3px 6px;
             border-radius: 4px;
             text-transform: uppercase;
@@ -932,27 +933,27 @@
                         <img src="" alt="" id="modal-player-avatar" style="height: 68px; width: auto; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.8));">
                     </div>
                 </div>
-                <h2 id="modal-player-name" style="font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 4px;">PlayerName</h2>
+                <h2 id="modal-player-name" style="font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 4px;">PlayerName</h2>
                 
                 <div id="modal-player-title-box" style="margin-bottom: 6px;">
                     <span id="modal-player-title" class="title-badge title-master" style="font-size: 15px; padding: 4px 14px; border-radius: 20px;">Combat Master</span>
                 </div>
 
-                <div id="modal-player-region" style="color: var(--text-muted); font-size: 13px; font-weight: 700; margin-bottom: 6px;">North America</div>
+                <div id="modal-player-region" style="color: var(--text-muted); font-size: 14px; font-weight: 600; margin-bottom: 6px;">North America</div>
                 <div id="modal-player-device" class="device-badge-tag"><i class="fa-solid fa-laptop"></i> Java - PC</div>
 
-                <a href="#" id="modal-namemc-link" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; transition: background 0.2s;">
-                    <span style="background: #fff; color: #000; width: 16px; height: 16px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900;">n</span> NameMC <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 10px; color: var(--text-muted);"></i>
+                <a href="#" id="modal-namemc-link" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; transition: background 0.2s;">
+                    <span style="background: #fff; color: #000; width: 16px; height: 16px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">n</span> NameMC <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 11px; color: var(--text-muted);"></i>
                 </a>
             </div>
 
-            <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; text-align: left;">Position</div>
+            <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; text-align: left;">Position</div>
             <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-                <span style="font-size: 16px; font-weight: 900; color: var(--gold-primary);" id="modal-player-rank-text">#1.</span>
-                <span style="font-size: 14px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-trophy" style="color: var(--gold-primary);"></i> OVERALL (<span id="modal-player-points-text">99</span> points)</span>
+                <span style="font-size: 18px; font-weight: 700; color: var(--gold-primary);" id="modal-player-rank-text">#1.</span>
+                <span style="font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-trophy" style="color: var(--gold-primary);"></i> OVERALL (<span id="modal-player-points-text">99</span> points)</span>
             </div>
 
-            <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; text-align: left;">Tiers</div>
+            <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; text-align: left;">Tiers</div>
             <div id="modal-player-tiers-grid" style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
                 <!-- Dynamic Tiers -->
             </div>
@@ -1027,7 +1028,7 @@
                         <span class="stat-value" style="color: #3ba55c;"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> Online</span>
                     </div>
                     <div class="stat-row" style="flex-direction: column; align-items: flex-start; gap: 8px;">
-                        <span style="color: var(--text-muted); font-size: 13px; font-weight: 700;"><i class="fa-solid fa-user-check" style="color: var(--gold-primary);"></i> Tested Players</span>
+                        <span style="color: var(--text-muted); font-size: 14px; font-weight: 600;"><i class="fa-solid fa-user-check" style="color: var(--gold-primary);"></i> Tested Players</span>
                         <div class="tested-players-tags">
                             <span class="p-tag">Enderboygamerz</span>
                             <span class="p-tag">Noah6767</span>
@@ -1061,7 +1062,7 @@
                     <div class="admin-box">
                         <h4><i class="fa-solid fa-user-pen" style="color: var(--gold-primary);"></i> Add / Edit Player Profile</h4>
                         
-                        <label style="font-size: 12px; color: var(--text-muted); font-weight: 700; margin-bottom: 4px; display: block;">Select Existing Player to Edit:</label>
+                        <label style="font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; display: block;">Select Existing Player to Edit:</label>
                         <select id="admin-select-player" class="admin-input" onchange="loadPlayerToEdit()">
                             <option value="">-- Create New Player --</option>
                         </select>
@@ -1083,7 +1084,7 @@
                             <option value="Bedrock - PC">Bedrock - PC</option>
                             <option value="Bedrock - Console">Bedrock - Console</option>
                         </select>
-                        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">Assign Tiers (Points calculate automatically):</p>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">Assign Tiers (Points calculate automatically):</p>
                         <div class="tier-inputs-grid" id="admin-tier-inputs"></div>
                         <button class="admin-btn" onclick="saveAdminPlayer()">Save / Update Player</button>
                     </div>
@@ -1584,7 +1585,7 @@
             document.getElementById('modal-player-title').innerHTML = `<i class="fa-solid fa-crown"></i> ${title}`;
             document.getElementById('modal-player-region').innerText = player.region === 'NA' ? 'North America' : player.region === 'EU' ? 'Europe' : player.region === 'AS' ? 'Asia' : player.region === 'AU' ? 'Australia' : player.region === 'ME' ? 'Middle East' : player.region;
             
-            // Set Device Badge inside profile modal ONLY
+            // Device Tag ONLY inside player profile modal
             const dev = player.device || 'Java - PC';
             let devIcon = 'fa-laptop';
             if (dev.toLowerCase().includes('mobile')) devIcon = 'fa-mobile-screen-button';
@@ -1620,7 +1621,7 @@
                 modalTiersHTML += `
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 10px; min-width: 52px;">
                         <img src="${gm}.webp" alt="${gm}" style="width: 20px; height: 20px; object-fit: contain;" onerror="this.src='pot.webp'">
-                        <span style="font-size: 9px; font-weight: 800; color: var(--text-muted);">${labelName}</span>
+                        <span style="font-size: 10px; font-weight: 600; color: var(--text-muted);">${labelName}</span>
                         <span class="tier-label ${badgeClass}" style="font-size: 11px; padding: 2px 6px; border-radius: 4px;">${t}</span>
                     </div>
                 `;
@@ -1746,7 +1747,7 @@
                             <div class="player-info">
                                 <div class="player-details">
                                     <h3>${player.name}</h3>
-                                    <span><span class="${titleClass}">❖ ${title}</span> • <span style="color: var(--gold-primary); font-weight: 800;">${points} PTS</span></span>
+                                    <span><span class="${titleClass}">❖ ${title}</span> • <span style="color: var(--gold-primary); font-weight: 700;">${points} PTS</span></span>
                                 </div>
                             </div>
                             <div class="region">${player.region || 'NA'}</div>
@@ -1794,7 +1795,7 @@
                     `;
 
                     if (tiersMap[i].length === 0) {
-                        colsHTML += `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:12px;">No Players</div>`;
+                        colsHTML += `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">No Players</div>`;
                     } else {
                         tiersMap[i].sort((a, b) => (a.currentTierVal.startsWith('HT') ? -1 : 1));
 
