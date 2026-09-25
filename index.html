@@ -105,6 +105,65 @@
             100% { background-position: 0% 50%; }
         }
 
+        /* ANIMATED TITLES & SHIMMER EFFECTS (MCTIERS STYLE) */
+        @keyframes titleShimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes grandmasterPulse {
+            0% { filter: drop-shadow(0 0 6px rgba(255, 170, 0, 0.6)); }
+            50% { filter: drop-shadow(0 0 16px rgba(255, 85, 0, 0.9)); }
+            100% { filter: drop-shadow(0 0 6px rgba(255, 170, 0, 0.6)); }
+        }
+
+        @keyframes masterGlow {
+            0% { filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.5)); }
+            50% { filter: drop-shadow(0 0 14px rgba(129, 140, 248, 0.8)); }
+            100% { filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.5)); }
+        }
+
+        .title-badge {
+            font-weight: 900;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .title-grandmaster {
+            background-image: linear-gradient(135deg, #ffaa00 0%, #fff066 30%, #ff3300 70%, #ffaa00 100%);
+            animation: titleShimmer 2.5s linear infinite, grandmasterPulse 2s ease-in-out infinite;
+        }
+
+        .title-master {
+            background-image: linear-gradient(135deg, #ffffff 0%, #38bdf8 40%, #818cf8 70%, #ffffff 100%);
+            animation: titleShimmer 3s linear infinite, masterGlow 2.5s ease-in-out infinite;
+        }
+
+        .title-veteran {
+            background-image: linear-gradient(135deg, #f97316 0%, #ff4500 50%, #fbbf24 100%);
+            animation: titleShimmer 3.5s linear infinite;
+            filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.4));
+        }
+
+        .title-cadet {
+            background-image: linear-gradient(135deg, #a5b4fc 0%, #c084fc 100%);
+            filter: drop-shadow(0 0 3px rgba(165, 180, 252, 0.3));
+        }
+
+        .title-fighter {
+            background-image: linear-gradient(135deg, #38bdf8 0%, #22d3ee 100%);
+        }
+
+        .title-rookie {
+            color: var(--text-muted);
+            -webkit-text-fill-color: var(--text-muted);
+        }
+
         /* Fluid Page Section Transition */
         @keyframes sectionEnter {
             0% { opacity: 0; transform: translateY(22px) scale(0.97); filter: blur(4px); }
@@ -618,19 +677,24 @@
         .ranking-list { display: flex; flex-direction: column; gap: 12px; }
         .rank-row { 
             display: flex; align-items: center; background: var(--bg-panel); backdrop-filter: var(--glass-blur); 
-            padding: 16px 24px; border-radius: 16px; border: 1px solid var(--border-color); 
+            padding: 14px 24px; border-radius: 16px; border: 1px solid var(--border-color); 
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
             animation: rowCascade 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
             cursor: pointer;
         }
         .rank-row:hover { transform: translateX(8px) scale(1.01); border-color: rgba(255,170,0,0.5); background: var(--bg-hover); box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 10; position: relative; }
 
-        /* Animated Gradient Frames for Top 3 Players */
+        /* Animated Gradient Frames for Top 3 Players (Supports MCTiers Torso Bust Renders) */
         .avatar-frame {
-            padding: 3px;
+            padding: 2px;
             border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
+            display: flex; align-items: flex-start; justify-content: center;
             background-size: 200% 200%;
+            height: 52px;
+            width: 48px;
+            overflow: hidden;
+            background-color: rgba(0,0,0,0.4);
+            flex-shrink: 0;
         }
         .avatar-frame.rank-1 {
             background: linear-gradient(135deg, #ffaa00, #ff0055, #00f0ff, #ffaa00);
@@ -651,6 +715,18 @@
             background: rgba(255,255,255,0.08);
         }
 
+        .player-avatar { 
+            width: 44px; 
+            height: 56px; 
+            border-radius: 8px; 
+            background: transparent; 
+            display: block; 
+            object-fit: contain; 
+            object-position: top center;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.7));
+            margin-top: 2px;
+        }
+
         .rank-row.rank-1 { background: linear-gradient(90deg, rgba(255, 170, 0, 0.15) 0%, var(--bg-panel) 40%); border-color: rgba(255, 170, 0, 0.6); animation: floatGlow 3s infinite; }
         .rank-row.rank-1 .rank-number { color: #ffcc00; text-shadow: 0 0 15px rgba(255, 204, 0, 0.8); font-size: 26px; }
         .rank-row.rank-2 { background: linear-gradient(90deg, rgba(200, 200, 220, 0.1) 0%, var(--bg-panel) 40%); border-color: rgba(200, 200, 220, 0.4); }
@@ -660,9 +736,8 @@
 
         .rank-number { font-size: 18px; font-weight: 900; width: 60px; color: var(--text-muted); font-style: italic; }
         .player-info { display: flex; align-items: center; gap: 14px; flex: 1; }
-        .player-avatar { width: 40px; height: 40px; border-radius: 10px; background: #000; display: block; object-fit: cover; }
-        .player-details h3 { font-size: 16px; font-weight: 800; margin-bottom: 3px; letter-spacing: 0.5px; }
-        .player-details span { font-size: 11px; color: var(--gold-primary); font-weight: 700; background: rgba(255,170,0,0.1); padding: 2px 7px; border-radius: 6px; }
+        .player-details h3 { font-size: 16px; font-weight: 800; margin-bottom: 3px; letter-spacing: 0.5px; color: #fff; }
+        .player-details span { font-size: 12px; font-weight: 700; }
         
         .region { width: 90px; text-align: center; color: #ff4d4d; font-weight: 900; font-size: 13px; background: rgba(255,77,77,0.1); padding: 5px 0; border-radius: 8px; }
 
@@ -720,7 +795,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 10px 14px;
+            padding: 8px 12px;
             background: rgba(0,0,0,0.4);
             border: 1px solid var(--border-color);
             border-radius: 12px;
@@ -735,10 +810,12 @@
         }
         .tier-player-avatar {
             width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            background: #000;
-            object-fit: cover;
+            height: 42px;
+            border-radius: 6px;
+            background: transparent;
+            object-fit: contain;
+            object-position: top center;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
         }
         .tier-player-name {
             font-size: 14px;
@@ -811,11 +888,16 @@
             <button class="modal-close-btn" onclick="closePlayerModal()"><i class="fa-solid fa-xmark"></i></button>
             
             <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
-                <div class="avatar-frame rank-1" id="modal-player-avatar-frame" style="margin-bottom: 15px;">
-                    <img src="" alt="" id="modal-player-avatar" style="width: 72px; height: 72px; border-radius: 12px; background: #000; object-fit: cover;">
+                <div class="avatar-frame rank-1" id="modal-player-avatar-frame" style="margin-bottom: 15px; height: 110px; width: 90px; overflow: hidden;">
+                    <img src="" alt="" id="modal-player-avatar" style="width: 85px; height: 115px; border-radius: 10px; background: transparent; object-fit: contain; object-position: top center; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.8));">
                 </div>
                 <h2 id="modal-player-name" style="font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 4px;">PlayerName</h2>
-                <div id="modal-player-title" style="background: rgba(255,170,0,0.15); border: 1px solid rgba(255,170,0,0.3); color: var(--gold-primary); padding: 4px 14px; border-radius: 20px; font-size: 13px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 4px;">Combat Master</div>
+                
+                <!-- Dynamic Title Badge Container -->
+                <div id="modal-player-title-box" style="margin-bottom: 6px;">
+                    <span id="modal-player-title" class="title-badge title-master" style="font-size: 15px; padding: 4px 14px; border-radius: 20px;">Combat Master</span>
+                </div>
+
                 <div id="modal-player-region" style="color: var(--text-muted); font-size: 13px; font-weight: 700; margin-bottom: 12px;">North America</div>
                 <a href="#" id="modal-namemc-link" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; transition: background 0.2s;">
                     <span style="background: #fff; color: #000; width: 16px; height: 16px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900;">n</span> NameMC <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 10px; color: var(--text-muted);"></i>
@@ -1068,32 +1150,32 @@
                         <div class="info-subtitle">How to obtain Achievement Titles</div>
                         
                         <div class="info-list-item">
-                            <span class="info-title-name"><i class="fa-solid fa-crown" style="color: #ffaa00;"></i> Combat Grandmaster</span>
+                            <span class="info-title-name"><i class="fa-solid fa-crown title-badge title-grandmaster"></i> <span class="title-badge title-grandmaster">Combat Grandmaster</span></span>
                             <span class="info-title-desc">Obtained 200+ total points.</span>
                         </div>
 
                         <div class="info-list-item">
-                            <span class="info-title-name"><i class="fa-solid fa-gem" style="color: #e2e8f0;"></i> Combat Master</span>
+                            <span class="info-title-name"><i class="fa-solid fa-gem title-badge title-master"></i> <span class="title-badge title-master">Combat Master</span></span>
                             <span class="info-title-desc">Obtained 120+ total points.</span>
                         </div>
 
                         <div class="info-list-item">
-                            <span class="info-title-name"><i class="fa-solid fa-shield-halved" style="color: #f97316;"></i> Combat Veteran</span>
+                            <span class="info-title-name"><i class="fa-solid fa-shield-halved title-badge title-veteran"></i> <span class="title-badge title-veteran">Combat Veteran</span></span>
                             <span class="info-title-desc">Obtained 60+ total points.</span>
                         </div>
 
                         <div class="info-list-item">
-                            <span class="info-title-name"><i class="fa-solid fa-crosshairs" style="color: #a5b4fc;"></i> Combat Cadet</span>
+                            <span class="info-title-name"><i class="fa-solid fa-crosshairs title-badge title-cadet"></i> <span class="title-badge title-cadet">Combat Cadet</span></span>
                             <span class="info-title-desc">Obtained 30+ total points.</span>
                         </div>
 
                         <div class="info-list-item">
-                            <span class="info-title-name"><i class="fa-solid fa-user-ninja" style="color: #38bdf8;"></i> Fighter</span>
+                            <span class="info-title-name"><i class="fa-solid fa-user-ninja title-badge title-fighter"></i> <span class="title-badge title-fighter">Fighter</span></span>
                             <span class="info-title-desc">Obtained 10+ total points.</span>
                         </div>
 
                         <div class="info-list-item">
-                            <span class="info-title-name"><i class="fa-solid fa-user" style="color: var(--text-muted);"></i> Rookie</span>
+                            <span class="info-title-name"><i class="fa-solid fa-user" style="color: var(--text-muted);"></i> <span class="title-badge title-rookie">Rookie</span></span>
                             <span class="info-title-desc">Starting rank for players with less than 10 points.</span>
                         </div>
                     </div>
@@ -1179,8 +1261,8 @@
         }
 
         /**
-         * Multi-Source Avatar Fallback Engine.
-         * If MC-Heads fails, sequentially fallback to Minotar -> MineSkin -> CraftHead -> Custom Initials Badge.
+         * Multi-Source Bust Avatar Fallback Engine (MCTiers Style).
+         * Fallbacks sequentially: MC-Heads Bust -> Visage Bust -> CraftHead Bust -> Minotar Bust -> Custom Badge.
          */
         function handleAvatarError(img, playerName) {
             const step = parseInt(img.getAttribute('data-fallback-step') || '0');
@@ -1188,24 +1270,24 @@
 
             if (step === 0) {
                 img.setAttribute('data-fallback-step', '1');
-                img.src = `https://minotar.net/helm/${safeName}/100`;
+                img.src = `https://visage.surgeplay.com/bust/100/${safeName}`;
             } else if (step === 1) {
                 img.setAttribute('data-fallback-step', '2');
-                img.src = `https://mineskin.eu/helm/${safeName}/100`;
+                img.src = `https://crafthead.net/bust/${safeName}/100`;
             } else if (step === 2) {
                 img.setAttribute('data-fallback-step', '3');
-                img.src = `https://crafthead.net/avatar/${safeName}/100`;
+                img.src = `https://minotar.net/armor/bust/${safeName}/100`;
             } else {
-                img.onerror = null; // Prevent loop
+                img.onerror = null; // Prevent infinite loop
                 img.src = createInitialsAvatar(playerName);
             }
         }
 
         /**
-         * Helper to get avatar head URL.
+         * Helper to get 3D Torso Bust render URL (MCTiers style).
          */
         function getPlayerAvatarUrl(player) {
-            if (!player) return 'https://mc-heads.net/avatar/Steve/100';
+            if (!player) return 'https://mc-heads.net/bust/Steve/100';
             
             if (player.avatarUrl && player.avatarUrl.trim().length > 0) {
                 return player.avatarUrl.trim();
@@ -1215,7 +1297,19 @@
                 ? player.uuid.trim() 
                 : (player.name ? player.name.trim() : 'Steve');
 
-            return `https://mc-heads.net/avatar/${encodeURIComponent(identifier)}/100`;
+            return `https://mc-heads.net/bust/${encodeURIComponent(identifier)}/100`;
+        }
+
+        /**
+         * Helper to get CSS animation classes for Achievement Titles
+         */
+        function getTitleClass(title) {
+            if (title === "Combat Grandmaster") return "title-badge title-grandmaster";
+            if (title === "Combat Master") return "title-badge title-master";
+            if (title === "Combat Veteran") return "title-badge title-veteran";
+            if (title === "Combat Cadet") return "title-badge title-cadet";
+            if (title === "Fighter") return "title-badge title-fighter";
+            return "title-badge title-rookie";
         }
 
         /**
@@ -1449,9 +1543,11 @@
             const rank = rankIndex !== -1 ? rankIndex + 1 : '-';
             const points = calculatePoints(player.tiers);
             const title = getTitle(points);
+            const titleClass = getTitleClass(title);
 
             document.getElementById('modal-player-name').innerText = player.name;
-            document.getElementById('modal-player-title').innerHTML = `<i class="fa-solid fa-crown" style="color: var(--gold-primary);"></i> ${title}`;
+            document.getElementById('modal-player-title').className = titleClass;
+            document.getElementById('modal-player-title').innerHTML = `<i class="fa-solid fa-crown"></i> ${title}`;
             document.getElementById('modal-player-region').innerText = player.region === 'NA' ? 'North America' : player.region === 'EU' ? 'Europe' : player.region === 'AS' ? 'Asia' : player.region === 'AU' ? 'Australia' : player.region === 'ME' ? 'Middle East' : player.region;
             
             const modalImg = document.getElementById('modal-player-avatar');
@@ -1570,6 +1666,7 @@
 
                     const points = calculatePoints(player.tiers);
                     const title = getTitle(points);
+                    const titleClass = getTitleClass(title);
 
                     let tiersHTML = '';
                     GAMEMODES.forEach(gm => {
@@ -1595,7 +1692,7 @@
                                 </div>
                                 <div class="player-details">
                                     <h3>${player.name}</h3>
-                                    <span>❖ ${title} • ${points} PTS</span>
+                                    <span><span class="${titleClass}">❖ ${title}</span> • <span style="color: var(--gold-primary); font-weight: 800;">${points} PTS</span></span>
                                 </div>
                             </div>
                             <div class="region">${player.region || 'NA'}</div>
