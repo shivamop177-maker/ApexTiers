@@ -682,7 +682,7 @@
         }
         .rank-row:hover { transform: translateX(8px) scale(1.01); border-color: rgba(255,170,0,0.5); background: var(--bg-hover); box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 10; position: relative; }
 
-        /* 1:1 MCTIERS HORIZONTAL RANK BADGE WITH CENTERED SKIN CONTAINER */
+        /* 1:1 MCTIERS HORIZONTAL RANK BADGE */
         .mctiers-badge {
             width: 145px;
             height: 52px;
@@ -735,7 +735,7 @@
             z-index: 2;
         }
 
-        /* Center-aligned container for 3D Bust to prevent edge cutoffs */
+        /* Center-aligned container for 3D Bust */
         .mctiers-badge-avatar-container {
             width: 48px;
             height: 100%;
@@ -1263,37 +1263,54 @@
             'N/A': 0
         };
 
-        // Official 3D Steve Bust Fallback URL
-        const STEVE_3D_BUST_URL = 'https://mc-heads.net/bust/Steve/100';
-
         /**
-         * Fallback Handler: strictly forces 3D Steve if any avatar image fails to load.
+         * MULTI-STAGE BULLETPROOF CASCADING AVATAR FALLBACK SYSTEM
+         * Retries across MC-Heads -> Minotar Armor Bust -> MC-API -> Minotar Steve -> Embedded SVG.
+         * Guarantees images never display as broken [x] icons.
          */
         function handleAvatarError(img, playerName) {
-            img.onerror = null; // Prevents infinite loops
-            img.src = STEVE_3D_BUST_URL;
+            let step = parseInt(img.dataset.failStep || '0');
+            step++;
+            img.dataset.failStep = step;
+
+            const cleanName = encodeURIComponent(playerName || 'Steve');
+
+            if (step === 1) {
+                // Retry 1: Minotar 3D Armor Bust (Supports Usernames & UUIDs)
+                img.src = `https://minotar.net/armor/bust/${cleanName}/100.png`;
+            } else if (step === 2) {
+                // Retry 2: MC-API 3D Bust
+                img.src = `https://mc-api.io/render/BUST/${cleanName}/JAVA?size=100`;
+            } else if (step === 3) {
+                // Retry 3: Universal 3D Steve Armor Bust Fallback
+                img.src = `https://minotar.net/armor/bust/Steve/100.png`;
+            } else {
+                // Final Fail-Safe: Standalone Inline Vector SVG (Never Fails)
+                img.onerror = null;
+                img.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231d232a'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='%23ffaa00' font-size='32' font-weight='900' font-family='Outfit, sans-serif'>S</text></svg>";
+            }
         }
 
         /**
-         * Helper to get 3D Torso Bust render URL.
-         * PREMIUM PLAYERS: Fetched via valid Mojang UUID.
-         * CRACKED / NON-PREMIUM PLAYERS: Strictly assigned 3D Steve's skin.
+         * Returns the primary 3D skin URL.
          */
         function getPlayerAvatarUrl(player) {
-            if (!player) return STEVE_3D_BUST_URL;
+            if (!player) return 'https://minotar.net/armor/bust/Steve/100.png';
             
-            // 1. Custom Avatar URL if explicitly assigned in Admin Panel
+            // Custom explicitly assigned avatar URL
             if (player.avatarUrl && player.avatarUrl.trim().length > 0) {
                 return player.avatarUrl.trim();
             }
 
-            // 2. Paid Premium Minecraft Account with valid Mojang UUID
+            // Target UUID or Player Username
+            let targetIdentifier = 'Steve';
             if (player.uuid && player.uuid.trim().length >= 30) {
-                return `https://mc-heads.net/bust/${encodeURIComponent(player.uuid.trim())}/100`;
+                targetIdentifier = player.uuid.trim();
+            } else if (player.name && player.name.trim().length > 0) {
+                targetIdentifier = player.name.trim();
             }
 
-            // 3. Cracked / Non-Premium Player -> STRICTLY USE 3D STEVE
-            return STEVE_3D_BUST_URL;
+            return `https://mc-heads.net/bust/${encodeURIComponent(targetIdentifier)}/100`;
         }
 
         function getTitleClass(title) {
@@ -1551,6 +1568,7 @@
             if (badgeTextElem) badgeTextElem.innerText = `${rank}.`;
 
             const modalImg = document.getElementById('modal-player-avatar');
+            delete modalImg.dataset.failStep;
             modalImg.src = getPlayerAvatarUrl(player);
             modalImg.setAttribute('onerror', `handleAvatarError(this, '${player.name}')`);
 
