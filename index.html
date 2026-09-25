@@ -689,7 +689,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 14px;
+            padding: 0 12px;
             position: relative;
             clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%);
             border-radius: 8px 0 0 8px;
@@ -735,23 +735,23 @@
             z-index: 2;
         }
 
-        /* Center-aligned container for 3D Bust */
+        /* 3D ISOMETRIC AVATAR CONTAINER */
         .mctiers-badge-avatar-container {
-            width: 48px;
+            width: 52px;
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 6px;
+            margin-right: 2px;
         }
 
         .mctiers-badge-avatar {
-            height: 48px;
+            height: 52px;
             width: auto;
-            max-width: 48px;
+            max-width: 52px;
             object-fit: contain;
             object-position: center;
-            filter: drop-shadow(2px 3px 5px rgba(0, 0, 0, 0.75));
+            filter: drop-shadow(2px 3px 6px rgba(0, 0, 0, 0.85));
             z-index: 2;
         }
 
@@ -1264,9 +1264,30 @@
         };
 
         /**
-         * MULTI-STAGE BULLETPROOF CASCADING AVATAR FALLBACK SYSTEM
-         * Retries across MC-Heads -> Minotar Armor Bust -> MC-API -> Minotar Steve -> Embedded SVG.
-         * Guarantees images never display as broken [x] icons.
+         * TRUE 3D ISOMETRIC AVATAR RENDERER (Visage API Engine)
+         * Generates exact 3D angled isometric bust renders like MCTiers.
+         */
+        function getPlayerAvatarUrl(player) {
+            if (!player) return 'https://visage.surgeplay.com/bust/120/Steve';
+            
+            // Custom avatar URL assigned in Admin Panel
+            if (player.avatarUrl && player.avatarUrl.trim().length > 0) {
+                return player.avatarUrl.trim();
+            }
+
+            let identifier = 'Steve';
+            if (player.uuid && player.uuid.trim().length >= 30) {
+                identifier = player.uuid.trim().replace(/-/g, '');
+            } else if (player.name && player.name.trim().length > 0) {
+                identifier = player.name.trim();
+            }
+
+            // Visage gives the exact 3D isometric bust model seen on MCTiers
+            return `https://visage.surgeplay.com/bust/120/${encodeURIComponent(identifier)}`;
+        }
+
+        /**
+         * Cascading Fallback System for 3D Renders
          */
         function handleAvatarError(img, playerName) {
             let step = parseInt(img.dataset.failStep || '0');
@@ -1276,41 +1297,18 @@
             const cleanName = encodeURIComponent(playerName || 'Steve');
 
             if (step === 1) {
-                // Retry 1: Minotar 3D Armor Bust (Supports Usernames & UUIDs)
-                img.src = `https://minotar.net/armor/bust/${cleanName}/100.png`;
+                // Fallback 1: Crafthead 3D Isometric Bust Render
+                img.src = `https://render.crafthead.net/bust/${cleanName}`;
             } else if (step === 2) {
-                // Retry 2: MC-API 3D Bust
-                img.src = `https://mc-api.io/render/BUST/${cleanName}/JAVA?size=100`;
+                // Fallback 2: MC-Heads 3D Bust
+                img.src = `https://mc-heads.net/bust/${cleanName}/100`;
             } else if (step === 3) {
-                // Retry 3: Universal 3D Steve Armor Bust Fallback
-                img.src = `https://minotar.net/armor/bust/Steve/100.png`;
+                // Fallback 3: Visage 3D Steve Model
+                img.src = `https://visage.surgeplay.com/bust/120/Steve`;
             } else {
-                // Final Fail-Safe: Standalone Inline Vector SVG (Never Fails)
-                img.onerror = null;
-                img.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231d232a'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='%23ffaa00' font-size='32' font-weight='900' font-family='Outfit, sans-serif'>S</text></svg>";
+                // Fallback 4: Minotar 3D Bust
+                img.src = `https://minotar.net/armor/bust/Steve/100.png`;
             }
-        }
-
-        /**
-         * Returns the primary 3D skin URL.
-         */
-        function getPlayerAvatarUrl(player) {
-            if (!player) return 'https://minotar.net/armor/bust/Steve/100.png';
-            
-            // Custom explicitly assigned avatar URL
-            if (player.avatarUrl && player.avatarUrl.trim().length > 0) {
-                return player.avatarUrl.trim();
-            }
-
-            // Target UUID or Player Username
-            let targetIdentifier = 'Steve';
-            if (player.uuid && player.uuid.trim().length >= 30) {
-                targetIdentifier = player.uuid.trim();
-            } else if (player.name && player.name.trim().length > 0) {
-                targetIdentifier = player.name.trim();
-            }
-
-            return `https://mc-heads.net/bust/${encodeURIComponent(targetIdentifier)}/100`;
         }
 
         function getTitleClass(title) {
