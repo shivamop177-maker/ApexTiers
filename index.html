@@ -477,6 +477,20 @@
             text-align: center;
         }
 
+        .device-badge-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 170, 0, 0.12);
+            border: 1px solid rgba(255, 170, 0, 0.3);
+            color: var(--gold-primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
         /* Top Action Bar (Rankings Page) */
         .top-action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; gap: 20px; flex-wrap: wrap; }
         .categories {
@@ -689,7 +703,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 28px 0 16px; /* Right padding shifted left to offset bottom-right polygon slant */
+            padding: 0 28px 0 16px;
             position: relative;
             clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%);
             border-radius: 8px 0 0 8px;
@@ -924,7 +938,9 @@
                     <span id="modal-player-title" class="title-badge title-master" style="font-size: 15px; padding: 4px 14px; border-radius: 20px;">Combat Master</span>
                 </div>
 
-                <div id="modal-player-region" style="color: var(--text-muted); font-size: 13px; font-weight: 700; margin-bottom: 12px;">North America</div>
+                <div id="modal-player-region" style="color: var(--text-muted); font-size: 13px; font-weight: 700; margin-bottom: 6px;">North America</div>
+                <div id="modal-player-device" class="device-badge-tag"><i class="fa-solid fa-laptop"></i> Java - PC</div>
+
                 <a href="#" id="modal-namemc-link" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; transition: background 0.2s;">
                     <span style="background: #fff; color: #000; width: 16px; height: 16px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900;">n</span> NameMC <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 10px; color: var(--text-muted);"></i>
                 </a>
@@ -1059,6 +1075,13 @@
                             <option value="AS">AS</option>
                             <option value="AU">AU</option>
                             <option value="ME">ME</option>
+                        </select>
+                        <select id="admin-device" class="admin-input">
+                            <option value="Java - PC">Java - PC</option>
+                            <option value="Java - Mobile">Java - Mobile (Pojav)</option>
+                            <option value="Bedrock - Mobile">Bedrock - Mobile</option>
+                            <option value="Bedrock - PC">Bedrock - PC</option>
+                            <option value="Bedrock - Console">Bedrock - Console</option>
                         </select>
                         <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">Assign Tiers (Points calculate automatically):</p>
                         <div class="tier-inputs-grid" id="admin-tier-inputs"></div>
@@ -1365,15 +1388,15 @@
         }
 
         const defaultPlayers = [
-            { name: "Marlowww", uuid: "61699b2e-d327-4a01-9f1e-0ea8c3f06bc6", region: "NA", tiers: { pot: "HT1", sword: "HT1", cpvp: "HT1", axe: "HT1", smp: "HT1", npot: "HT1", uhc: "LT1", spearmace: "LT1", mace: "HT1" } },
-            { name: "ItzRealMe", uuid: "8667ba71-b85a-4004-af54-457a9734eed7", region: "NA", tiers: { sword: "HT3", pot: "HT1", cpvp: "HT1", smp: "HT1", uhc: "LT2", npot: "LT2", mace: "LT2" } },
-            { name: "coldified", uuid: "069a79f4-44e9-4726-a5be-fca90e38aaf5", region: "EU", tiers: { pot: "LT1", sword: "LT3", cpvp: "HT1", smp: "HT1", uhc: "LT1", axe: "HT1", npot: "LT2", mace: "HT1" } },
-            { name: "Swight", uuid: "1a82d658-7512-4217-9104-1bbf6e5f1d46", region: "NA", tiers: { pot: "LT3", sword: "HT1", cpvp: "HT1", smp: "HT1", uhc: "HT2", npot: "LT2", spearmace: "LT2", mace: "HT2" } },
-            { name: "janekv", uuid: "c0695026-0e9f-44e9-92b0-9c2f42a0b1bc", region: "EU", tiers: { pot: "LT3", sword: "HT4", cpvp: "HT1", smp: "HT1", uhc: "HT1", axe: "HT2", npot: "LT2", spearmace: "LT2", mace: "HT3" } },
-            { name: "Enderboygamerz", uuid: "", region: "AS", tiers: { sword: "HT2", pot: "LT2", cpvp: "HT3", npot: "LT3", axe: "HT4", smp: "LT4", mace: "LT4" } },
-            { name: "Noah6767", uuid: "", region: "NA", tiers: { sword: "LT4", pot: "HT4", cpvp: "LT5", npot: "HT5", mace: "LT5" } },
-            { name: "Klyro_gamer", uuid: "", region: "AS", tiers: { sword: "HT5", axe: "LT5", smp: "HT5", mace: "LT5" } },
-            { name: "noobmaster69_", uuid: "", region: "EU", tiers: { pot: "LT5", cpvp: "LT5", mace: "HT4" } }
+            { name: "Marlowww", uuid: "61699b2e-d327-4a01-9f1e-0ea8c3f06bc6", region: "NA", device: "Java - PC", tiers: { pot: "HT1", sword: "HT1", cpvp: "HT1", axe: "HT1", smp: "HT1", npot: "HT1", uhc: "LT1", spearmace: "LT1", mace: "HT1" } },
+            { name: "ItzRealMe", uuid: "8667ba71-b85a-4004-af54-457a9734eed7", region: "NA", device: "Java - PC", tiers: { sword: "HT3", pot: "HT1", cpvp: "HT1", smp: "HT1", uhc: "LT2", npot: "LT2", mace: "LT2" } },
+            { name: "coldified", uuid: "069a79f4-44e9-4726-a5be-fca90e38aaf5", region: "EU", device: "Java - PC", tiers: { pot: "LT1", sword: "LT3", cpvp: "HT1", smp: "HT1", uhc: "LT1", axe: "HT1", npot: "LT2", mace: "HT1" } },
+            { name: "Swight", uuid: "1a82d658-7512-4217-9104-1bbf6e5f1d46", region: "NA", device: "Java - PC", tiers: { pot: "LT3", sword: "HT1", cpvp: "HT1", smp: "HT1", uhc: "HT2", npot: "LT2", spearmace: "LT2", mace: "HT2" } },
+            { name: "janekv", uuid: "c0695026-0e9f-44e9-92b0-9c2f42a0b1bc", region: "EU", device: "Java - PC", tiers: { pot: "LT3", sword: "HT4", cpvp: "HT1", smp: "HT1", uhc: "HT1", axe: "HT2", npot: "LT2", spearmace: "LT2", mace: "HT3" } },
+            { name: "Enderboygamerz", uuid: "", region: "AS", device: "Java - Mobile", tiers: { sword: "HT2", pot: "LT2", cpvp: "HT3", npot: "LT3", axe: "HT4", smp: "LT4", mace: "LT4" } },
+            { name: "Noah6767", uuid: "", region: "NA", device: "Java - PC", tiers: { sword: "LT4", pot: "HT4", cpvp: "LT5", npot: "HT5", mace: "LT5" } },
+            { name: "Klyro_gamer", uuid: "", region: "AS", device: "Java - Mobile", tiers: { sword: "HT5", axe: "LT5", smp: "HT5", mace: "LT5" } },
+            { name: "noobmaster69_", uuid: "", region: "EU", device: "Java - PC", tiers: { pot: "LT5", cpvp: "LT5", mace: "HT4" } }
         ];
 
         let playersDB = JSON.parse(localStorage.getItem('apexTiersDB')) || defaultPlayers;
@@ -1452,6 +1475,7 @@
                 document.getElementById('admin-uuid').value = '';
                 document.getElementById('admin-avatar-url').value = '';
                 document.getElementById('admin-region').value = 'NA';
+                document.getElementById('admin-device').value = 'Java - PC';
                 GAMEMODES.forEach(gm => {
                     const el = document.getElementById(`admin-gm-${gm}`);
                     if (el) el.value = 'N/A';
@@ -1465,6 +1489,7 @@
                 document.getElementById('admin-uuid').value = player.uuid || '';
                 document.getElementById('admin-avatar-url').value = player.avatarUrl || '';
                 document.getElementById('admin-region').value = player.region || 'NA';
+                document.getElementById('admin-device').value = player.device || 'Java - PC';
                 GAMEMODES.forEach(gm => {
                     const el = document.getElementById(`admin-gm-${gm}`);
                     if (el) {
@@ -1559,6 +1584,17 @@
             document.getElementById('modal-player-title').innerHTML = `<i class="fa-solid fa-crown"></i> ${title}`;
             document.getElementById('modal-player-region').innerText = player.region === 'NA' ? 'North America' : player.region === 'EU' ? 'Europe' : player.region === 'AS' ? 'Asia' : player.region === 'AU' ? 'Australia' : player.region === 'ME' ? 'Middle East' : player.region;
             
+            // Set Device Badge
+            const dev = player.device || 'Java - PC';
+            let devIcon = 'fa-laptop';
+            if (dev.toLowerCase().includes('mobile')) devIcon = 'fa-mobile-screen-button';
+            else if (dev.toLowerCase().includes('console')) devIcon = 'fa-gamepad';
+
+            const devElem = document.getElementById('modal-player-device');
+            if (devElem) {
+                devElem.innerHTML = `<i class="fa-solid ${devIcon}"></i> ${dev}`;
+            }
+
             const frameElem = document.getElementById('modal-player-avatar-frame');
             if (frameElem) frameElem.className = `mctiers-badge ${badgeClass}`;
 
@@ -1684,6 +1720,11 @@
                     const title = getTitle(points);
                     const titleClass = getTitleClass(title);
 
+                    const dev = player.device || 'Java - PC';
+                    let devIcon = 'fa-laptop';
+                    if (dev.toLowerCase().includes('mobile')) devIcon = 'fa-mobile-screen-button';
+                    else if (dev.toLowerCase().includes('console')) devIcon = 'fa-gamepad';
+
                     let tiersHTML = '';
                     GAMEMODES.forEach(gm => {
                         let t = getPlayerTier(player, gm);
@@ -1710,7 +1751,7 @@
                             <div class="player-info">
                                 <div class="player-details">
                                     <h3>${player.name}</h3>
-                                    <span><span class="${titleClass}">❖ ${title}</span> • <span style="color: var(--gold-primary); font-weight: 800;">${points} PTS</span></span>
+                                    <span><span class="${titleClass}">❖ ${title}</span> • <span style="color: var(--gold-primary); font-weight: 800;">${points} PTS</span> • <span style="color: var(--text-muted); font-size: 11px;"><i class="fa-solid ${devIcon}"></i> ${dev}</span></span>
                                 </div>
                             </div>
                             <div class="region">${player.region || 'NA'}</div>
@@ -1828,6 +1869,7 @@
             const uuid = document.getElementById('admin-uuid').value.trim();
             const avatarUrl = document.getElementById('admin-avatar-url').value.trim();
             const region = document.getElementById('admin-region').value;
+            const device = document.getElementById('admin-device').value;
 
             if (!name) return alert("Player Name is required.");
 
@@ -1838,7 +1880,7 @@
             });
 
             playersDB = playersDB.filter(p => p.name.toLowerCase() !== name.toLowerCase());
-            playersDB.push({ name, uuid, avatarUrl, region, tiers: tiersObj });
+            playersDB.push({ name, uuid, avatarUrl, region, device, tiers: tiersObj });
 
             localStorage.setItem('apexTiersDB', JSON.stringify(playersDB));
             alert(`Successfully saved ${name}!`);
