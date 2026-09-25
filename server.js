@@ -20,6 +20,7 @@ const playerSchema = new mongoose.Schema({
     name: { type: String, required: true, unique: true },
     uuid: { type: String, default: "" },
     region: { type: String, default: "NA" },
+    device: { type: String, default: "Java - PC" },
     tiers: { type: Map, of: String, default: {} }
 });
 
@@ -123,6 +124,7 @@ app.get('/api/players', async (req, res) => {
 
             let tiersObj = mapPlayerTiers(rawTiers);
             player.tiers = tiersObj;
+            player.device = player.device || "Java - PC";
             player.overall = calculateOverallTier(tiersObj);
             return res.json(player);
         }
@@ -147,6 +149,7 @@ app.get('/api/players', async (req, res) => {
                 }
                 let tiersObj = mapPlayerTiers(rawTiers);
                 obj.tiers = tiersObj;
+                obj.device = obj.device || "Java - PC";
                 obj.overall = calculateOverallTier(tiersObj);
                 return obj;
             });
@@ -163,6 +166,7 @@ app.post('/api/update-tier', async (req, res) => {
     const name = req.body.name || req.body.ign;
     const uuid = req.body.uuid;
     const region = req.body.region;
+    const device = req.body.device;
     const gamemode = req.body.gamemode;
     const newTier = req.body.newTier || req.body.new_tier;
 
@@ -184,12 +188,14 @@ app.post('/api/update-tier', async (req, res) => {
                 name: name,
                 uuid: uuid || "",
                 region: region || "NA",
+                device: device || "Java - PC",
                 tiers: {}
             });
         }
 
         if (region) player.region = region;
         if (uuid) player.uuid = uuid;
+        if (device) player.device = device;
 
         // Clean key & map gamemode aliases
         let gmKey = gamemode.toLowerCase().replace(/[^a-z0-9]/g, '');
