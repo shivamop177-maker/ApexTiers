@@ -527,7 +527,7 @@
             display: none;
             animation: contentPop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        .admin-header { color: var(--gold-primary); margin-bottom: 25px; font-size: 22px; font-weight: 900; display: flex; justify-content: space-between; align-items: center; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
+        .admin-header { color: var(--gold-primary); margin-bottom: 25px; font-size: 22px; font-weight: 900; display: flex; justify-between: align-items: center; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
         .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
         .admin-box { background: rgba(0,0,0,0.5); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); }
         .admin-box h4 { margin-bottom: 15px; color: #fff; font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
@@ -1584,7 +1584,7 @@
             document.getElementById('modal-player-title').innerHTML = `<i class="fa-solid fa-crown"></i> ${title}`;
             document.getElementById('modal-player-region').innerText = player.region === 'NA' ? 'North America' : player.region === 'EU' ? 'Europe' : player.region === 'AS' ? 'Asia' : player.region === 'AU' ? 'Australia' : player.region === 'ME' ? 'Middle East' : player.region;
             
-            // Set Device Badge
+            // Set Device Badge inside profile modal ONLY
             const dev = player.device || 'Java - PC';
             let devIcon = 'fa-laptop';
             if (dev.toLowerCase().includes('mobile')) devIcon = 'fa-mobile-screen-button';
@@ -1720,11 +1720,6 @@
                     const title = getTitle(points);
                     const titleClass = getTitleClass(title);
 
-                    const dev = player.device || 'Java - PC';
-                    let devIcon = 'fa-laptop';
-                    if (dev.toLowerCase().includes('mobile')) devIcon = 'fa-mobile-screen-button';
-                    else if (dev.toLowerCase().includes('console')) devIcon = 'fa-gamepad';
-
                     let tiersHTML = '';
                     GAMEMODES.forEach(gm => {
                         let t = getPlayerTier(player, gm);
@@ -1751,7 +1746,7 @@
                             <div class="player-info">
                                 <div class="player-details">
                                     <h3>${player.name}</h3>
-                                    <span><span class="${titleClass}">❖ ${title}</span> • <span style="color: var(--gold-primary); font-weight: 800;">${points} PTS</span> • <span style="color: var(--text-muted); font-size: 11px;"><i class="fa-solid ${devIcon}"></i> ${dev}</span></span>
+                                    <span><span class="${titleClass}">❖ ${title}</span> • <span style="color: var(--gold-primary); font-weight: 800;">${points} PTS</span></span>
                                 </div>
                             </div>
                             <div class="region">${player.region || 'NA'}</div>
