@@ -10,7 +10,6 @@ app.use(express.json());
 const EXCLUDED_PLAYERS = [
     'flewtop',
     'klyro_gamer',
-    'iamshiviii',
     'bluxxyblux9',
     'trxxd_op',
     'savvywtf_'
