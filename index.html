@@ -99,12 +99,6 @@
             100% { box-shadow: 0 0 15px var(--gold-glow); }
         }
 
-        @keyframes avatarGradientSpin {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
         /* ANIMATED TITLES & SHIMMER EFFECTS (MCTIERS STYLE) */
         @keyframes titleShimmer {
             0% { background-position: 0% 50%; }
@@ -663,7 +657,7 @@
 
         /* Overall Table Headers */
         .list-headers { display: flex; padding: 0 30px 12px 30px; color: var(--text-muted); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; }
-        .h-rank { width: 70px; }
+        .h-rank { width: 165px; }
         .h-player { flex: 1; }
         .h-region { width: 90px; text-align: center; }
         .h-tiers { width: 440px; text-align: center; }
@@ -677,64 +671,67 @@
         .ranking-list { display: flex; flex-direction: column; gap: 12px; }
         .rank-row { 
             display: flex; align-items: center; background: var(--bg-panel); backdrop-filter: var(--glass-blur); 
-            padding: 14px 24px; border-radius: 16px; border: 1px solid var(--border-color); 
+            padding: 12px 24px 12px 14px; border-radius: 16px; border: 1px solid var(--border-color); 
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
             animation: rowCascade 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
             cursor: pointer;
         }
         .rank-row:hover { transform: translateX(8px) scale(1.01); border-color: rgba(255,170,0,0.5); background: var(--bg-hover); box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 10; position: relative; }
 
-        /* Animated Gradient Frames for Top 3 Players (Supports MCTiers Torso Bust Renders) */
-        .avatar-frame {
-            padding: 2px;
-            border-radius: 14px;
-            display: flex; align-items: flex-start; justify-content: center;
-            background-size: 200% 200%;
+        /* 1:1 MCTIERS COMBINED HORIZONTAL RANK & BUST BADGE */
+        .mctiers-badge {
+            width: 145px;
             height: 52px;
-            width: 48px;
-            overflow: hidden;
-            background-color: rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px 0 18px;
+            position: relative;
+            clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%);
+            border-radius: 8px 0 0 8px;
             flex-shrink: 0;
-        }
-        .avatar-frame.rank-1 {
-            background: linear-gradient(135deg, #ffaa00, #ff0055, #00f0ff, #ffaa00);
-            animation: avatarGradientSpin 3s ease infinite;
-            box-shadow: 0 0 15px rgba(255, 170, 0, 0.6);
-        }
-        .avatar-frame.rank-2 {
-            background: linear-gradient(135deg, #e2e8f0, #38bdf8, #818cf8, #e2e8f0);
-            animation: avatarGradientSpin 4s ease infinite;
-            box-shadow: 0 0 12px rgba(226, 232, 240, 0.5);
-        }
-        .avatar-frame.rank-3 {
-            background: linear-gradient(135deg, #f97316, #e11d48, #fbbf24, #f97316);
-            animation: avatarGradientSpin 4s ease infinite;
-            box-shadow: 0 0 12px rgba(249, 115, 22, 0.5);
-        }
-        .avatar-frame.rank-other {
-            background: rgba(255,255,255,0.08);
+            margin-right: 18px;
+            overflow: hidden;
         }
 
-        .player-avatar { 
-            width: 44px; 
-            height: 56px; 
-            border-radius: 8px; 
-            background: transparent; 
-            display: block; 
-            object-fit: contain; 
+        .mctiers-badge.rank-1 {
+            background: linear-gradient(135deg, #f5b72b 0%, #e09204 100%);
+            box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.3);
+        }
+        .mctiers-badge.rank-2 {
+            background: linear-gradient(135deg, #8da0ac 0%, #5a6c77 100%);
+        }
+        .mctiers-badge.rank-3 {
+            background: linear-gradient(135deg, #d47b33 0%, #9e4c0e 100%);
+        }
+        .mctiers-badge.rank-other {
+            background: linear-gradient(135deg, #24313d 0%, #151e26 100%);
+        }
+
+        .mctiers-badge-rank {
+            font-size: 26px;
+            font-weight: 900;
+            font-style: italic;
+            color: #ffffff;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+            letter-spacing: -1px;
+            z-index: 2;
+        }
+
+        .mctiers-badge-avatar {
+            width: 52px;
+            height: 62px;
+            object-fit: contain;
             object-position: top center;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.7));
-            margin-top: 2px;
+            filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.75));
+            z-index: 2;
+            margin-right: 10px;
         }
 
-        .rank-row.rank-1 { background: linear-gradient(90deg, rgba(255, 170, 0, 0.15) 0%, var(--bg-panel) 40%); border-color: rgba(255, 170, 0, 0.6); animation: floatGlow 3s infinite; }
-        .rank-row.rank-1 .rank-number { color: #ffcc00; text-shadow: 0 0 15px rgba(255, 204, 0, 0.8); font-size: 26px; }
-        .rank-row.rank-2 { background: linear-gradient(90deg, rgba(200, 200, 220, 0.1) 0%, var(--bg-panel) 40%); border-color: rgba(200, 200, 220, 0.4); }
-        .rank-row.rank-2 .rank-number { color: #e2e8f0; font-size: 22px; }
-        .rank-row.rank-3 { background: linear-gradient(90deg, rgba(205, 127, 50, 0.15) 0%, var(--bg-panel) 40%); border-color: rgba(205, 127, 50, 0.5); }
-        .rank-row.rank-3 .rank-number { color: #f97316; font-size: 20px; }
+        .rank-row.rank-1 { background: linear-gradient(90deg, rgba(245, 183, 43, 0.12) 0%, var(--bg-panel) 50%); border-color: rgba(245, 183, 43, 0.5); animation: floatGlow 3s infinite; }
+        .rank-row.rank-2 { background: linear-gradient(90deg, rgba(141, 160, 172, 0.1) 0%, var(--bg-panel) 50%); border-color: rgba(141, 160, 172, 0.3); }
+        .rank-row.rank-3 { background: linear-gradient(90deg, rgba(212, 123, 51, 0.1) 0%, var(--bg-panel) 50%); border-color: rgba(212, 123, 51, 0.4); }
 
-        .rank-number { font-size: 18px; font-weight: 900; width: 60px; color: var(--text-muted); font-style: italic; }
         .player-info { display: flex; align-items: center; gap: 14px; flex: 1; }
         .player-details h3 { font-size: 16px; font-weight: 800; margin-bottom: 3px; letter-spacing: 0.5px; color: #fff; }
         .player-details span { font-size: 12px; font-weight: 700; }
@@ -888,8 +885,9 @@
             <button class="modal-close-btn" onclick="closePlayerModal()"><i class="fa-solid fa-xmark"></i></button>
             
             <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
-                <div class="avatar-frame rank-1" id="modal-player-avatar-frame" style="margin-bottom: 15px; height: 110px; width: 90px; overflow: hidden;">
-                    <img src="" alt="" id="modal-player-avatar" style="width: 85px; height: 115px; border-radius: 10px; background: transparent; object-fit: contain; object-position: top center; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.8));">
+                <div class="mctiers-badge rank-1" id="modal-player-avatar-frame" style="margin-bottom: 15px; height: 75px; width: 170px; clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%);">
+                    <span class="mctiers-badge-rank" id="modal-player-rank-badge-text" style="font-size: 32px;">#1.</span>
+                    <img src="" alt="" id="modal-player-avatar" style="width: 70px; height: 85px; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.8));">
                 </div>
                 <h2 id="modal-player-name" style="font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 4px;">PlayerName</h2>
                 
@@ -1545,11 +1543,22 @@
             const title = getTitle(points);
             const titleClass = getTitleClass(title);
 
+            let badgeClass = 'rank-other';
+            if (rank === 1) badgeClass = 'rank-1';
+            else if (rank === 2) badgeClass = 'rank-2';
+            else if (rank === 3) badgeClass = 'rank-3';
+
             document.getElementById('modal-player-name').innerText = player.name;
             document.getElementById('modal-player-title').className = titleClass;
             document.getElementById('modal-player-title').innerHTML = `<i class="fa-solid fa-crown"></i> ${title}`;
             document.getElementById('modal-player-region').innerText = player.region === 'NA' ? 'North America' : player.region === 'EU' ? 'Europe' : player.region === 'AS' ? 'Asia' : player.region === 'AU' ? 'Australia' : player.region === 'ME' ? 'Middle East' : player.region;
             
+            const frameElem = document.getElementById('modal-player-avatar-frame');
+            if (frameElem) frameElem.className = `mctiers-badge ${badgeClass}`;
+
+            const badgeTextElem = document.getElementById('modal-player-rank-badge-text');
+            if (badgeTextElem) badgeTextElem.innerText = `${rank}.`;
+
             const modalImg = document.getElementById('modal-player-avatar');
             modalImg.src = getPlayerAvatarUrl(player);
             modalImg.setAttribute('onerror', `handleAvatarError(this, '${player.name}')`);
@@ -1657,12 +1666,12 @@
                 let html = '<div class="ranking-list">';
                 list.forEach((player, index) => {
                     const rank = index + 1;
-                    let rankClass = '';
-                    let frameClass = 'avatar-frame rank-other';
+                    let badgeClass = 'rank-other';
+                    let rowClass = '';
 
-                    if (rank === 1) { rankClass = 'rank-1'; frameClass = 'avatar-frame rank-1'; }
-                    else if (rank === 2) { rankClass = 'rank-2'; frameClass = 'avatar-frame rank-2'; }
-                    else if (rank === 3) { rankClass = 'rank-3'; frameClass = 'avatar-frame rank-3'; }
+                    if (rank === 1) { badgeClass = 'rank-1'; rowClass = 'rank-1'; }
+                    else if (rank === 2) { badgeClass = 'rank-2'; rowClass = 'rank-2'; }
+                    else if (rank === 3) { badgeClass = 'rank-3'; rowClass = 'rank-3'; }
 
                     const points = calculatePoints(player.tiers);
                     const title = getTitle(points);
@@ -1684,12 +1693,12 @@
                     const delay = (index * 0.04).toFixed(2);
 
                     html += `
-                        <div class="rank-row ${rankClass}" style="animation-delay: ${delay}s;" onclick="openPlayerModal('${player.name}')">
-                            <div class="rank-number">#${rank}</div>
+                        <div class="rank-row ${rowClass}" style="animation-delay: ${delay}s;" onclick="openPlayerModal('${player.name}')">
+                            <div class="mctiers-badge ${badgeClass}">
+                                <span class="mctiers-badge-rank">${rank}.</span>
+                                <img src="${avatar}" alt="${player.name}" class="mctiers-badge-avatar" onerror="handleAvatarError(this, '${player.name}')">
+                            </div>
                             <div class="player-info">
-                                <div class="${frameClass}">
-                                    <img src="${avatar}" alt="${player.name}" class="player-avatar" onerror="handleAvatarError(this, '${player.name}')">
-                                </div>
                                 <div class="player-details">
                                     <h3>${player.name}</h3>
                                     <span><span class="${titleClass}">❖ ${title}</span> • <span style="color: var(--gold-primary); font-weight: 800;">${points} PTS</span></span>
