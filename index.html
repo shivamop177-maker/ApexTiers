@@ -99,7 +99,7 @@
             100% { box-shadow: 0 0 15px var(--gold-glow); }
         }
 
-        /* SHINING ANIMATION FOR #1, #2, #3 GRADIENTS */
+        /* SHINING ANIMATION FOR RANK BADGES */
         @keyframes shineSweep {
             0% { background-position: -200% 0; }
             100% { background-position: 200% 0; }
@@ -682,14 +682,14 @@
         }
         .rank-row:hover { transform: translateX(8px) scale(1.01); border-color: rgba(255,170,0,0.5); background: var(--bg-hover); box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 10; position: relative; }
 
-        /* 1:1 MCTIERS HORIZONTAL RANK BADGE WITH ZERO SPACING & SHINING GRADIENTS */
+        /* 1:1 MCTIERS HORIZONTAL RANK BADGE WITH CENTERED SKIN CONTAINER */
         .mctiers-badge {
             width: 145px;
             height: 52px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 0 0 18px; /* Removed right padding so avatar touches slanted edge */
+            padding: 0 14px;
             position: relative;
             clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%);
             border-radius: 8px 0 0 8px;
@@ -735,14 +735,24 @@
             z-index: 2;
         }
 
+        /* Center-aligned container for 3D Bust to prevent edge cutoffs */
+        .mctiers-badge-avatar-container {
+            width: 48px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 6px;
+        }
+
         .mctiers-badge-avatar {
-            width: 58px;
-            height: 68px;
+            height: 48px;
+            width: auto;
+            max-width: 48px;
             object-fit: contain;
-            object-position: top center;
-            filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.75));
+            object-position: center;
+            filter: drop-shadow(2px 3px 5px rgba(0, 0, 0, 0.75));
             z-index: 2;
-            margin-right: -6px; /* Pushes bust flush to the slanted parallelogram end */
         }
 
         .rank-row.rank-1 { background: linear-gradient(90deg, rgba(245, 183, 43, 0.12) 0%, var(--bg-panel) 50%); border-color: rgba(245, 183, 43, 0.5); animation: floatGlow 3s infinite; }
@@ -902,9 +912,11 @@
             <button class="modal-close-btn" onclick="closePlayerModal()"><i class="fa-solid fa-xmark"></i></button>
             
             <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
-                <div class="mctiers-badge rank-1" id="modal-player-avatar-frame" style="margin-bottom: 15px; height: 75px; width: 170px; clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%); padding-left: 20px;">
+                <div class="mctiers-badge rank-1" id="modal-player-avatar-frame" style="margin-bottom: 15px; height: 75px; width: 170px; clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%); padding: 0 16px;">
                     <span class="mctiers-badge-rank" id="modal-player-rank-badge-text" style="font-size: 32px;">#1.</span>
-                    <img src="" alt="" id="modal-player-avatar" style="width: 70px; height: 85px; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.8)); margin-right: -8px;">
+                    <div class="mctiers-badge-avatar-container" style="width: 60px; margin-right: 10px;">
+                        <img src="" alt="" id="modal-player-avatar" style="height: 68px; width: auto; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.8));">
+                    </div>
                 </div>
                 <h2 id="modal-player-name" style="font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 4px;">PlayerName</h2>
                 
@@ -1240,10 +1252,8 @@
             }, 800);
         });
 
-        // 9 Gamemodes
         const GAMEMODES = ['npot', 'sword', 'axe', 'smp', 'cpvp', 'spearmace', 'pot', 'uhc', 'mace'];
         
-        // Tier Point Calculations
         const TIER_SCORES = {
             'HT1': 30, 'LT1': 27, 
             'HT2': 24, 'LT2': 21,
@@ -1253,52 +1263,39 @@
             'N/A': 0
         };
 
-        // Official 3D Steve Bust Fallback for Cracked / Skinless Players
+        // Official 3D Steve Bust Fallback URL
         const STEVE_3D_BUST_URL = 'https://mc-heads.net/bust/Steve/100';
 
         /**
-         * Multi-Source 3D Bust Avatar Fallback Engine.
-         * Sequentially tries: MC-Heads -> Visage -> CraftHead -> Minotar -> Official 3D Steve Bust.
+         * Fallback Handler: strictly forces 3D Steve if any avatar image fails to load.
          */
         function handleAvatarError(img, playerName) {
-            const step = parseInt(img.getAttribute('data-fallback-step') || '0');
-            const safeName = encodeURIComponent(playerName || 'Steve');
-
-            if (step === 0) {
-                img.setAttribute('data-fallback-step', '1');
-                img.src = `https://visage.surgeplay.com/bust/100/${safeName}`;
-            } else if (step === 1) {
-                img.setAttribute('data-fallback-step', '2');
-                img.src = `https://crafthead.net/bust/${safeName}/100`;
-            } else if (step === 2) {
-                img.setAttribute('data-fallback-step', '3');
-                img.src = `https://minotar.net/armor/bust/${safeName}/100`;
-            } else {
-                img.onerror = null; // Prevents infinite loop
-                img.src = STEVE_3D_BUST_URL; // ALWAYS fallback strictly to Steve 3D Skin
-            }
+            img.onerror = null; // Prevents infinite loops
+            img.src = STEVE_3D_BUST_URL;
         }
 
         /**
          * Helper to get 3D Torso Bust render URL.
+         * PREMIUM PLAYERS: Fetched via valid Mojang UUID.
+         * CRACKED / NON-PREMIUM PLAYERS: Strictly assigned 3D Steve's skin.
          */
         function getPlayerAvatarUrl(player) {
             if (!player) return STEVE_3D_BUST_URL;
             
+            // 1. Custom Avatar URL if explicitly assigned in Admin Panel
             if (player.avatarUrl && player.avatarUrl.trim().length > 0) {
                 return player.avatarUrl.trim();
             }
 
-            const identifier = (player.uuid && player.uuid.trim().length > 5) 
-                ? player.uuid.trim() 
-                : (player.name ? player.name.trim() : 'Steve');
+            // 2. Paid Premium Minecraft Account with valid Mojang UUID
+            if (player.uuid && player.uuid.trim().length >= 30) {
+                return `https://mc-heads.net/bust/${encodeURIComponent(player.uuid.trim())}/100`;
+            }
 
-            return `https://mc-heads.net/bust/${encodeURIComponent(identifier)}/100`;
+            // 3. Cracked / Non-Premium Player -> STRICTLY USE 3D STEVE
+            return STEVE_3D_BUST_URL;
         }
 
-        /**
-         * Helper to get CSS animation classes for Achievement Titles
-         */
         function getTitleClass(title) {
             if (title === "Combat Grandmaster") return "title-badge title-grandmaster";
             if (title === "Combat Master") return "title-badge title-master";
@@ -1358,7 +1355,7 @@
             { name: "coldified", uuid: "069a79f4-44e9-4726-a5be-fca90e38aaf5", region: "EU", tiers: { pot: "LT1", sword: "LT3", cpvp: "HT1", smp: "HT1", uhc: "LT1", axe: "HT1", npot: "LT2", mace: "HT1" } },
             { name: "Swight", uuid: "1a82d658-7512-4217-9104-1bbf6e5f1d46", region: "NA", tiers: { pot: "LT3", sword: "HT1", cpvp: "HT1", smp: "HT1", uhc: "HT2", npot: "LT2", spearmace: "LT2", mace: "HT2" } },
             { name: "janekv", uuid: "c0695026-0e9f-44e9-92b0-9c2f42a0b1bc", region: "EU", tiers: { pot: "LT3", sword: "HT4", cpvp: "HT1", smp: "HT1", uhc: "HT1", axe: "HT2", npot: "LT2", spearmace: "LT2", mace: "HT3" } },
-            { name: "Enderboygamerz", uuid: "d195c898-31be-4a25-9686-2a78b7b411d9", region: "AS", tiers: { sword: "HT2", pot: "LT2", cpvp: "HT3", npot: "LT3", axe: "HT4", smp: "LT4", mace: "LT4" } },
+            { name: "Enderboygamerz", uuid: "", region: "AS", tiers: { sword: "HT2", pot: "LT2", cpvp: "HT3", npot: "LT3", axe: "HT4", smp: "LT4", mace: "LT4" } },
             { name: "Noah6767", uuid: "", region: "NA", tiers: { sword: "LT4", pot: "HT4", cpvp: "LT5", npot: "HT5", mace: "LT5" } },
             { name: "Klyro_gamer", uuid: "", region: "AS", tiers: { sword: "HT5", axe: "LT5", smp: "HT5", mace: "LT5" } },
             { name: "noobmaster69_", uuid: "", region: "EU", tiers: { pot: "LT5", cpvp: "LT5", mace: "HT4" } }
@@ -1644,7 +1641,7 @@
                 list = list.filter(p => p.name && p.name.toLowerCase().includes(searchVal));
             }
 
-            // --- OVERALL RANKINGS (Row List View) ---
+            // --- OVERALL RANKINGS ---
             if (currentMode === 'overall') {
                 overallHeaders.style.display = 'flex';
                 if (infoWidget) infoWidget.style.display = 'block';
@@ -1690,7 +1687,9 @@
                         <div class="rank-row ${rowClass}" style="animation-delay: ${delay}s;" onclick="openPlayerModal('${player.name}')">
                             <div class="mctiers-badge ${badgeClass}">
                                 <span class="mctiers-badge-rank">${rank}.</span>
-                                <img src="${avatar}" alt="${player.name}" class="mctiers-badge-avatar" onerror="handleAvatarError(this, '${player.name}')">
+                                <div class="mctiers-badge-avatar-container">
+                                    <img src="${avatar}" alt="${player.name}" class="mctiers-badge-avatar" onerror="handleAvatarError(this, '${player.name}')">
+                                </div>
                             </div>
                             <div class="player-info">
                                 <div class="player-details">
