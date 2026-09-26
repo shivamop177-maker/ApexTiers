@@ -19,6 +19,7 @@ const EXCLUDED_PLAYERS = [
 const playerSchema = new mongoose.Schema({
     name: { type: String, required: true, unique: true },
     uuid: { type: String, default: "" },
+    avatarUrl: { type: String, default: "" },
     region: { type: String, default: "NA" },
     device: { type: String, default: "Java - PC" },
     tiers: { type: Map, of: String, default: {} }
@@ -96,7 +97,6 @@ app.get('/api/players', async (req, res) => {
         const playerName = req.query.name || req.query.ign || req.query.player;
 
         if (playerName) {
-            // Check if requested player is pending retest
             if (EXCLUDED_PLAYERS.includes(playerName.toLowerCase())) {
                 return res.status(404).json({ error: "Player pending retest" });
             }
@@ -107,8 +107,6 @@ app.get('/api/players', async (req, res) => {
             }
 
             let player = playerDoc.toObject();
-
-            // Convert DB tier keys to lowercase & clean special chars
             let rawTiers = {};
             if (playerDoc.tiers) {
                 if (typeof playerDoc.tiers.forEach === 'function') {
@@ -129,7 +127,6 @@ app.get('/api/players', async (req, res) => {
             return res.json(player);
         }
 
-        // Return all players for website (excluding players pending retest)
         const players = await Player.find({});
         const updatedPlayers = players
             .filter(p => p.name && !EXCLUDED_PLAYERS.includes(p.name.toLowerCase()))
@@ -177,7 +174,7 @@ app.post('/api/update-tier', async (req, res) => {
         return res.status(403).json({ error: "Unauthorized request" });
     }
     if (!name || !gamemode || !newTier) {
-        return res.status(400).json({ error: "Missing required fields (name/ign, gamemode, newTier/new_tier)" });
+        return res.status(400).json({ error: "Missing required fields" });
     }
 
     try {
@@ -197,12 +194,10 @@ app.post('/api/update-tier', async (req, res) => {
         if (uuid) player.uuid = uuid;
         if (device) player.device = device;
 
-        // Clean key & map gamemode aliases
         let gmKey = gamemode.toLowerCase().replace(/[^a-z0-9]/g, '');
         if (gmKey === 'nethpot' || gmKey === 'netheritepot') gmKey = 'npot';
         if (gmKey === 'crystalvanilla' || gmKey === 'crystal' || gmKey === 'vanilla' || gmKey === 'cvp') gmKey = 'cpvp';
 
-        // Extract clean tier code (e.g., "LT5" from input string)
         let cleanedTier = String(newTier).trim().toUpperCase();
         const tierMatch = String(newTier).match(/(HT[1-5]|LT[1-5]|T[1-5])/i);
         if (tierMatch) {
@@ -210,13 +205,69 @@ app.post('/api/update-tier', async (req, res) => {
         }
 
         player.tiers.set(gmKey, cleanedTier);
-        player.markModified('tiers'); // Ensures Mongoose safely commits Map changes
+        player.markModified('tiers');
         await player.save();
 
         res.json({ message: `Successfully updated ${name}'s ${gmKey} tier to ${cleanedTier}`, player });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Server error updating player tier" });
+    }
+});
+
+// 3. POST API - Admin Save / Create Player Endpoint
+app.post('/api/admin/save-player', async (req, res) => {
+    const { name, ign, uuid, avatarUrl, region, device, tiers } = req.body;
+    const playerName = name || ign;
+
+    if (!playerName) {
+        return res.status(400).json({ error: "Player name is required" });
+    }
+
+    try {
+        let player = await Player.findOne({ name: new RegExp(`^${playerName}$`, 'i') });
+
+        if (!player) {
+            player = new Player({ name: playerName });
+        }
+
+        if (uuid !== undefined) player.uuid = uuid;
+        if (avatarUrl !== undefined) player.avatarUrl = avatarUrl;
+        if (region !== undefined) player.region = region;
+        if (device !== undefined) player.device = device;
+
+        if (tiers && typeof tiers === 'object') {
+            for (const gm in tiers) {
+                let gmKey = gm.toLowerCase().replace(/[^a-z0-9]/g, '');
+                if (gmKey === 'nethpot' || gmKey === 'netheritepot') gmKey = 'npot';
+                if (gmKey === 'crystalvanilla' || gmKey === 'crystal' || gmKey === 'vanilla' || gmKey === 'cvp') gmKey = 'cpvp';
+                
+                let val = String(tiers[gm]).trim().toUpperCase();
+                player.tiers.set(gmKey, val);
+            }
+            player.markModified('tiers');
+        }
+
+        await player.save();
+        res.json({ message: `Successfully saved player ${playerName}`, player });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error saving player" });
+    }
+});
+
+// 4. DELETE API - Remove Player from MongoDB
+app.delete('/api/players/:name', async (req, res) => {
+    const playerName = req.params.name;
+    try {
+        const result = await Player.deleteOne({ name: new RegExp(`^${playerName}$`, 'i') });
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: "Player not found" });
+        }
+        res.json({ message: `Successfully deleted ${playerName}` });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error deleting player" });
     }
 });
 
