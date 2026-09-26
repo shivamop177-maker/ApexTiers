@@ -202,7 +202,7 @@ app.post('/api/update-tier', async (req, res) => {
         if (gmKey === 'nethpot' || gmKey === 'netheritepot') gmKey = 'npot';
         if (gmKey === 'crystalvanilla' || gmKey === 'crystal' || gmKey === 'vanilla' || gmKey === 'cvp') gmKey = 'cpvp';
 
-        // Extract clean tier code (e.g., "LT5" from "UHC LT5")
+        // Extract clean tier code (e.g., "LT5" from input string)
         let cleanedTier = String(newTier).trim().toUpperCase();
         const tierMatch = String(newTier).match(/(HT[1-5]|LT[1-5]|T[1-5])/i);
         if (tierMatch) {
@@ -210,6 +210,7 @@ app.post('/api/update-tier', async (req, res) => {
         }
 
         player.tiers.set(gmKey, cleanedTier);
+        player.markModified('tiers'); // Ensures Mongoose safely commits Map changes
         await player.save();
 
         res.json({ message: `Successfully updated ${name}'s ${gmKey} tier to ${cleanedTier}`, player });
