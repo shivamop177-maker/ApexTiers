@@ -202,10 +202,17 @@ app.post('/api/update-tier', async (req, res) => {
         if (gmKey === 'nethpot' || gmKey === 'netheritepot') gmKey = 'npot';
         if (gmKey === 'crystalvanilla' || gmKey === 'crystal' || gmKey === 'vanilla' || gmKey === 'cvp') gmKey = 'cpvp';
 
-        player.tiers.set(gmKey, newTier.toUpperCase());
+        // Extract clean tier code (e.g., "LT5" from "UHC LT5")
+        let cleanedTier = String(newTier).trim().toUpperCase();
+        const tierMatch = String(newTier).match(/(HT[1-5]|LT[1-5]|T[1-5])/i);
+        if (tierMatch) {
+            cleanedTier = tierMatch[0].toUpperCase();
+        }
+
+        player.tiers.set(gmKey, cleanedTier);
         await player.save();
 
-        res.json({ message: `Successfully updated ${name}'s ${gmKey} tier to ${newTier}`, player });
+        res.json({ message: `Successfully updated ${name}'s ${gmKey} tier to ${cleanedTier}`, player });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Server error updating player tier" });
