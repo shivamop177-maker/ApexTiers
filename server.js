@@ -8,11 +8,6 @@ app.use(express.json());
 
 // List of players hidden from tierlist until retested (case-insensitive)
 const EXCLUDED_PLAYERS = [
-    'flewtop',
-    'klyro_gamer',
-    'bluxxyblux9',
-    'trxxd_op',
-    'savvywtf_'
 ];
 
 // MongoDB Player Schema
