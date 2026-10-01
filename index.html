@@ -701,7 +701,6 @@
         }
         function closeAdminPanel() { document.getElementById('admin-panel-section').style.display = 'none'; }
 
-        // --- FIXED ADMIN SAVE (Syncs to MongoDB API) ---
         async function saveAdminPlayer() {
             const name = document.getElementById('admin-name').value.trim();
             const uuid = document.getElementById('admin-uuid').value.trim();
@@ -740,7 +739,6 @@
             }
         }
 
-        // --- FIXED ADMIN REMOVE (Syncs deletion to MongoDB API) ---
         async function removeAdminPlayer() {
             const name = document.getElementById('admin-remove-name').value.trim();
             if (!name) return alert("Enter name to remove.");
@@ -773,6 +771,13 @@
             const rank = sortedList.findIndex(p => p.name.toLowerCase() === player.name.toLowerCase()) + 1;
             const points = calculatePoints(player.tiers);
             const title = points >= 200 ? "Combat Grandmaster" : points >= 120 ? "Combat Master" : points >= 60 ? "Combat Veteran" : points >= 30 ? "Combat Cadet" : points >= 10 ? "Fighter" : "Rookie";
+
+            const badgeClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
+            const frameElem = document.getElementById('modal-player-avatar-frame');
+            if (frameElem) frameElem.className = `mctiers-badge ${badgeClass}`;
+
+            const badgeTextElem = document.getElementById('modal-player-rank-badge-text');
+            if (badgeTextElem) badgeTextElem.innerText = `#${rank}.`;
 
             document.getElementById('modal-player-name').innerText = player.name;
             document.getElementById('modal-player-title').innerHTML = `<i class="fa-solid fa-crown"></i> ${title}`;
@@ -859,7 +864,7 @@
                 if (infoWidget) infoWidget.style.display = 'none';
                 if (mainLayout) mainLayout.style.gridTemplateColumns = '1fr';
 
-                let tiersMap = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+                let tiersMap = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [], 10: [] };
                 list.forEach(player => {
                     let tVal = getPlayerTier(player, currentMode);
                     if (tVal !== 'N/A') {
@@ -869,7 +874,7 @@
                 });
 
                 let colsHTML = '<div class="tier-columns-grid">';
-                const tierTitles = { 1: '🏆 Tier 1', 2: '🥈 Tier 2', 3: '🥉 Tier 3', 4: '⚡ Tier 4', 5: '🛡️ Tier 5' };
+                const tierTitles = { 1: '🏆 Tier 1', 2: '🥈 Tier 2', 3: '🥉 Tier 3', 4: '⚡ Tier 4', 5: '🛡️️ Tier 5' };
 
                 for (let i = 1; i <= 5; i++) {
                     colsHTML += `<div class="tier-column t${i}"><div class="tier-column-header">${tierTitles[i]}</div><div class="tier-player-list">`;
