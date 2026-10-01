@@ -1,937 +1,272 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ApexTiers - Global Rankings</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@700;800;900;1000&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        :root {
-            --bg-base: #050507;
-            --bg-panel: rgba(20, 20, 24, 0.75);
-            --bg-hover: rgba(35, 35, 42, 0.85);
-            --gold-primary: #ffaa00;
-            --gold-glow: rgba(255, 170, 0, 0.4);
-            --gold-gradient: linear-gradient(135deg, #ffaa00 0%, #ff5500 100%);
-            --text-main: #f0f0f5;
-            --text-muted: #9494a0;
-            --border-color: rgba(255, 255, 255, 0.08);
-            --glass-blur: blur(14px);
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// List of players hidden from tierlist until retested (case-insensitive)
+const EXCLUDED_PLAYERS = [
+];
+
+// MongoDB Player Schema
+const playerSchema = new mongoose.Schema({
+    name: { type: String, required: true, unique: true },
+    uuid: { type: String, default: "" },
+    avatarUrl: { type: String, default: "" },
+    region: { type: String, default: "NA" },
+    device: { type: String, default: "Java - PC" },
+    tiers: { type: Map, of: String, default: {} }
+});
+
+const Player = mongoose.model('Player', playerSchema);
+
+// Connect to MongoDB
+const MONGO_URI = process.env.MONGO_URI;
+if (MONGO_URI) {
+    mongoose.connect(MONGO_URI)
+        .then(() => console.log('Connected to MongoDB successfully!'))
+        .catch(err => console.error('MongoDB connection error:', err));
+}
+
+// Helper Function: Calculates Overall Tier based on player's active tiers
+function calculateOverallTier(tiers) {
+    const tierPoints = {
+        'HT1': 10, 'LT1': 9,
+        'HT2': 8,  'LT2': 7,
+        'HT3': 6,  'LT3': 5,
+        'HT4': 4,  'LT4': 3,
+        'HT5': 2,  'LT5': 1,
+        'T1': 10,  'T2': 8,  'T3': 6,  'T4': 4,  'T5': 2
+    };
+
+    let totalScore = 0;
+    let count = 0;
+
+    for (const gm in tiers) {
+        const tierVal = tiers[gm] ? tiers[gm].toUpperCase() : 'N/A';
+        if (tierPoints[tierVal] !== undefined) {
+            totalScore += tierPoints[tierVal];
+            count++;
         }
+    }
 
-        * { 
-            margin: 0; padding: 0; box-sizing: border-box; 
-            font-family: 'Nunito', 'Fredoka', sans-serif; 
-            font-weight: 800; letter-spacing: -0.01em;
+    if (count === 0 || totalScore === 0) return 'Unranked';
+
+    const avg = totalScore / count;
+
+    if (avg >= 9.5) return 'HT1';
+    if (avg >= 8.5) return 'LT1';
+    if (avg >= 7.5) return 'HT2';
+    if (avg >= 6.5) return 'LT2';
+    if (avg >= 5.5) return 'HT3';
+    if (avg >= 4.5) return 'LT3';
+    if (avg >= 3.5) return 'HT4';
+    if (avg >= 2.5) return 'LT4';
+    if (avg >= 1.5) return 'HT5';
+    return 'LT5';
+}
+
+const standardModes = ['npot', 'sword', 'axe', 'smp', 'cpvp', 'spearmace', 'pot', 'uhc', 'mace'];
+
+// Helper to sanitize tier object keys and map gamemode aliases
+function mapPlayerTiers(rawTiers) {
+    let tiersObj = {};
+    standardModes.forEach(gm => {
+        let val = rawTiers[gm];
+        if (!val && gm === 'npot') {
+            val = rawTiers['nethpot'] || rawTiers['netheritepot'];
         }
-        
-        body { 
-            background-color: var(--bg-base); 
-            background-image: 
-                radial-gradient(circle at 15% 50%, rgba(255, 170, 0, 0.04) 0%, transparent 50%),
-                radial-gradient(circle at 85% 30%, rgba(170, 0, 255, 0.04) 0%, transparent 50%);
-            color: var(--text-main); overflow-x: hidden; min-height: 100vh;
+        if (!val && gm === 'cpvp') {
+            val = rawTiers['crystalvanilla'] || rawTiers['crystal'] || rawTiers['vanilla'] || rawTiers['cvp'];
         }
+        tiersObj[gm] = (val && val !== 'None' && val !== 'N/A' && val !== '') ? val : "N/A";
+    });
+    return tiersObj;
+}
 
-        #intro-loader {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #050507; z-index: 9999; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; transition: opacity 0.6s ease, visibility 0.6s ease;
-        }
-        #intro-loader.fade-out { opacity: 0; visibility: hidden; pointer-events: none; }
-        .loader-logo { width: 90px; height: auto; animation: pulseGlow 2s infinite ease-in-out; margin-bottom: 20px; }
-        .loader-title { font-size: 34px; font-weight: 900; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
-        .loader-subtitle { color: var(--text-muted); font-size: 13px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 25px; }
-        .loader-bar-container { width: 220px; height: 5px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
-        .loader-bar { width: 0%; height: 100%; background: var(--gold-gradient); animation: fillBar 1.2s forwards; }
+// 1. GET API - Fetch single player or all players
+app.get('/api/players', async (req, res) => {
+    try {
+        const playerName = req.query.name || req.query.ign || req.query.player;
 
-        @keyframes fillBar { 0% { width: 0%; } 100% { width: 100%; } }
-        @keyframes pulseGlow {
-            0% { filter: drop-shadow(0 0 10px rgba(255,170,0,0.3)); transform: scale(1); }
-            50% { filter: drop-shadow(0 0 30px rgba(255,170,0,0.8)); transform: scale(1.05); }
-            100% { filter: drop-shadow(0 0 10px rgba(255,170,0,0.3)); transform: scale(1); }
-        }
-        @keyframes floatGlow {
-            0% { box-shadow: 0 0 15px var(--gold-glow); }
-            50% { box-shadow: 0 0 35px var(--gold-glow); }
-            100% { box-shadow: 0 0 15px var(--gold-glow); }
-        }
-        @keyframes shineSweep {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        @keyframes titleShimmer {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        @keyframes grandmasterPulse {
-            0% { filter: drop-shadow(0 0 6px rgba(255, 170, 0, 0.6)); }
-            50% { filter: drop-shadow(0 0 16px rgba(255, 85, 0, 0.9)); }
-            100% { filter: drop-shadow(0 0 6px rgba(255, 170, 0, 0.6)); }
-        }
-        @keyframes masterGlow {
-            0% { filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.5)); }
-            50% { filter: drop-shadow(0 0 14px rgba(129, 140, 248, 0.8)); }
-            100% { filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.5)); }
-        }
-
-        .title-badge { font-weight: 900; display: inline-flex; align-items: center; gap: 5px; background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .title-grandmaster { background-image: linear-gradient(135deg, #ffaa00 0%, #fff066 30%, #ff3300 70%, #ffaa00 100%); animation: titleShimmer 2.5s linear infinite, grandmasterPulse 2s ease-in-out infinite; }
-        .title-master { background-image: linear-gradient(135deg, #ffffff 0%, #38bdf8 40%, #818cf8 70%, #ffffff 100%); animation: titleShimmer 3s linear infinite, masterGlow 2.5s ease-in-out infinite; }
-        .title-veteran { background-image: linear-gradient(135deg, #f97316 0%, #ff4500 50%, #fbbf24 100%); animation: titleShimmer 3.5s linear infinite; filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.4)); }
-        .title-cadet { background-image: linear-gradient(135deg, #a5b4fc 0%, #c084fc 100%); filter: drop-shadow(0 0 3px rgba(165, 180, 252, 0.3)); }
-        .title-fighter { background-image: linear-gradient(135deg, #38bdf8 0%, #22d3ee 100%); }
-        .title-rookie { color: var(--text-muted); -webkit-text-fill-color: var(--text-muted); }
-
-        @keyframes sectionEnter { 0% { opacity: 0; transform: translateY(22px) scale(0.97); filter: blur(4px); } 100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
-        @keyframes contentPop { 0% { opacity: 0; transform: translateY(18px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-        @keyframes rowCascade { 0% { opacity: 0; transform: translateY(16px); } 100% { opacity: 1; transform: translateY(0); } }
-        @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.88) translateY(-20px); filter: blur(8px); } to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); } }
-
-        nav {
-            display: flex; justify-content: space-between; align-items: center; padding: 15px 40px;
-            background: rgba(10, 10, 12, 0.85); backdrop-filter: var(--glass-blur); border-bottom: 1px solid var(--border-color);
-            position: sticky; top: 0; z-index: 100;
-        }
-        .logo-container { display: flex; align-items: center; gap: 12px; cursor: pointer; transition: transform 0.3s ease; }
-        .logo-container:hover { transform: scale(1.04); }
-        .logo-img { height: 40px; width: auto; filter: drop-shadow(0 0 8px rgba(255,170,0,0.3)); }
-        .logo-text { font-size: 28px; font-weight: 900; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; }
-
-        .nav-links { display: flex; gap: 30px; align-items: center; }
-        .nav-links a, .nav-links button {
-            color: var(--text-muted); text-decoration: none; font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px;
-            transition: all 0.3s ease; cursor: pointer; background: none; border: none; position: relative; padding: 6px 0;
-        }
-        .nav-links a::after, .nav-links button::after {
-            content: ''; position: absolute; bottom: 0; left: 0; width: 0%; height: 3px; background: var(--gold-gradient); transition: width 0.3s ease; border-radius: 3px;
-        }
-        .nav-links a:hover, .nav-links a.active, .nav-links button:hover, .nav-links button.active { color: var(--gold-primary); text-shadow: 0 0 10px rgba(255,170,0,0.3); }
-        .nav-links a.active::after, .nav-links button.active::after { width: 100%; }
-
-        .nav-right-actions { display: flex; align-items: center; gap: 15px; }
-        .discord-badge {
-            background: rgba(88, 101, 242, 0.15); border: 1px solid rgba(88, 101, 242, 0.4); color: #c7ccff;
-            padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; text-decoration: none;
-        }
-        .discord-dot { width: 7px; height: 7px; background-color: #3ba55c; border-radius: 50%; box-shadow: 0 0 6px #3ba55c; }
-        .admin-gear-btn {
-            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); color: var(--text-muted);
-            width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease;
-        }
-        .admin-gear-btn:hover { border-color: var(--gold-primary); color: var(--gold-primary); background: rgba(255,170,0,0.1); transform: rotate(45deg); }
-
-        .search-container {
-            position: relative; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-color); border-radius: 12px; padding: 8px 18px; display: flex; align-items: center; gap: 10px; width: 260px;
-        }
-        .search-container:focus-within { border-color: var(--gold-primary); box-shadow: 0 0 20px rgba(255,170,0,0.18); }
-        .search-container i { color: var(--text-muted); font-size: 14px; }
-        .search-bar { background: transparent; border: none; color: white; outline: none; font-size: 14px; width: 100%; font-weight: 700; }
-
-        .container { max-width: 1400px; margin: 40px auto; padding: 0 20px; }
-        .page-section { display: none; }
-        .page-section.active { display: block; animation: sectionEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-        .home-hero {
-            background: linear-gradient(135deg, rgba(20, 20, 24, 0.9) 0%, rgba(10, 10, 14, 0.95) 100%);
-            border: 1px solid var(--border-color); border-radius: 24px; padding: 50px; margin-bottom: 30px; position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        }
-        .home-hero h1 { font-size: 46px; font-weight: 900; margin-bottom: 15px; }
-        .home-hero h1 span { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .home-hero p { color: var(--text-muted); font-size: 17px; max-width: 600px; line-height: 1.6; margin-bottom: 30px; font-weight: 700; }
-        .hero-buttons { display: flex; gap: 15px; }
-        .hero-btn { padding: 13px 30px; border-radius: 12px; font-weight: 900; font-size: 15px; text-decoration: none; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.3s ease; }
-        .hero-btn.primary { background: var(--gold-gradient); color: #000; border: none; box-shadow: 0 5px 20px rgba(255,170,0,0.3); }
-        .hero-btn.secondary { background: rgba(88, 101, 242, 0.15); border: 1px solid rgba(88, 101, 242, 0.4); color: #c7ccff; }
-
-        .home-grid { display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 25px; }
-        .home-panel-card { background: var(--bg-panel); backdrop-filter: var(--glass-blur); border: 1px solid var(--border-color); border-radius: 20px; padding: 25px; }
-        .home-panel-card h3 { font-size: 22px; font-weight: 900; margin-bottom: 20px; color: var(--gold-primary); display: flex; align-items: center; gap: 10px; }
-
-        .stat-row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border-color); font-size: 15px; font-weight: 800; align-items: center; }
-        .stat-row:last-child { border-bottom: none; }
-        .stat-value { color: var(--gold-primary); font-weight: 900; }
-
-        .tested-players-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-        .p-tag { background: rgba(255, 170, 0, 0.1); border: 1px solid rgba(255, 170, 0, 0.3); padding: 4px 11px; border-radius: 8px; font-size: 13px; font-weight: 800; color: var(--gold-primary); }
-        .p-tag.plus-tag { background: var(--gold-gradient); color: #000; border: none; font-weight: 900; }
-
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(12px); z-index: 10000; display: none; align-items: center; justify-content: center;
-        }
-        .modal-overlay.active { display: flex; }
-        .modal-card {
-            background: linear-gradient(135deg, rgba(22, 22, 28, 0.95), rgba(12, 12, 16, 0.98));
-            border: 1px solid rgba(255, 170, 0, 0.4); border-radius: 20px; padding: 35px; width: 100%; max-width: 420px; position: relative;
-        }
-        .modal-close-btn { position: absolute; top: 18px; right: 20px; background: transparent; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; }
-        .modal-icon-badge { width: 54px; height: 54px; background: rgba(255, 170, 0, 0.12); border: 1px solid rgba(255, 170, 0, 0.3); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: var(--gold-primary); font-size: 22px; margin-bottom: 20px; }
-        .modal-title { font-size: 24px; font-weight: 900; color: #fff; margin-bottom: 6px; }
-        .modal-subtitle { font-size: 14px; color: var(--text-muted); font-weight: 700; margin-bottom: 22px; }
-        .modal-input-group { position: relative; margin-bottom: 18px; }
-        .modal-input-group i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
-        .modal-input { width: 100%; padding: 14px 16px 14px 44px; background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid var(--border-color); border-radius: 12px; font-size: 14px; font-weight: 800; outline: none; }
-        .modal-error-msg { color: #ff4d4d; font-size: 13px; font-weight: 800; margin-top: -10px; margin-bottom: 15px; display: none; }
-        .modal-actions { display: flex; gap: 12px; }
-        .modal-btn { flex: 1; padding: 13px; border-radius: 10px; font-weight: 900; font-size: 14px; border: none; cursor: pointer; }
-        .modal-btn.primary { background: var(--gold-gradient); color: #000; }
-        .modal-btn.secondary { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); border: 1px solid var(--border-color); }
-
-        .player-modal-card {
-            background: linear-gradient(135deg, rgba(22, 22, 28, 0.98), rgba(12, 12, 16, 0.99));
-            border: 1px solid rgba(255, 170, 0, 0.4); border-radius: 24px; padding: 35px; width: 100%; max-width: 480px; position: relative; text-align: center;
-        }
-        .device-badge-tag {
-            display: inline-flex; align-items: center; gap: 6px; background: rgba(255, 170, 0, 0.12);
-            border: 1px solid rgba(255, 170, 0, 0.3); color: var(--gold-primary); padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 800; margin-bottom: 12px;
-        }
-
-        .top-action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; gap: 20px; flex-wrap: wrap; }
-        .categories { display: flex; gap: 8px; background: var(--bg-panel); padding: 12px 18px; border-radius: 16px; overflow-x: auto; border: 1px solid var(--border-color); flex: 1; backdrop-filter: var(--glass-blur); }
-        .category {
-            display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; padding: 8px 12px; border-radius: 12px;
-            transition: all 0.3s ease; color: var(--text-muted); min-width: 68px; font-size: 13px; font-weight: 800; flex-shrink: 0;
-        }
-        .category[data-mode="overall"] { margin-right: 22px; }
-        .category img { width: 28px; height: 28px; object-fit: contain; }
-        .category:hover { background: var(--bg-hover); color: var(--text-main); transform: translateY(-3px); }
-        .category.active { background: var(--gold-gradient); color: #000; box-shadow: 0 5px 18px rgba(255, 170, 0, 0.4); }
-
-        .server-widget { display: flex; align-items: center; background: var(--bg-panel); backdrop-filter: var(--glass-blur); border: 1px solid var(--border-color); border-radius: 16px; padding: 8px 18px; gap: 15px; }
-        .server-ip-box { display: flex; align-items: center; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); border-radius: 10px; padding: 6px 16px; gap: 12px; cursor: pointer; }
-        .server-icon-badge { background: linear-gradient(135deg, #e63946, #c1121f); color: white; font-size: 12px; font-weight: 900; padding: 3px 8px; border-radius: 6px; }
-        .server-ip-text { font-size: 15px; font-weight: 800; color: #fff; }
-
-        .admin-panel {
-            margin-bottom: 40px; padding: 30px; background: rgba(18, 18, 24, 0.95); backdrop-filter: var(--glass-blur);
-            border: 2px solid rgba(255, 170, 0, 0.5); border-radius: 20px; display: none; box-shadow: 0 15px 50px rgba(0,0,0,0.8);
-        }
-        .admin-header { color: var(--gold-primary); margin-bottom: 25px; font-size: 22px; font-weight: 900; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
-        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
-        .admin-box { background: rgba(0,0,0,0.5); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); }
-        .admin-box h4 { margin-bottom: 15px; color: #fff; font-size: 18px; font-weight: 900; display: flex; align-items: center; gap: 8px; }
-        .admin-input { width: 100%; padding: 12px 16px; margin-bottom: 12px; background: rgba(255,255,255,0.04); color: #fff; border: 1px solid var(--border-color); border-radius: 10px; font-size: 14px; font-weight: 700; outline: none; }
-        .admin-input:focus { border-color: var(--gold-primary); }
-
-        .tier-inputs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .tier-input-row { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.02); padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border-color); }
-        .tier-input-row img { width: 22px; height: 22px; }
-        .tier-input-row select { background: transparent; color: white; border: none; outline: none; width: 100%; font-size: 14px; font-weight: 800; cursor: pointer; }
-        .tier-input-row select option { background: #111; color: #fff; }
-
-        .admin-btn { padding: 12px; background: var(--gold-gradient); color: #000; border: none; border-radius: 10px; cursor: pointer; font-weight: 900; width: 100%; font-size: 15px; }
-        .admin-btn.danger { background: linear-gradient(135deg, #ff4444, #cc0000); color: white; margin-top: 10px; }
-
-        .rankings-main-layout { display: grid; grid-template-columns: 1fr 340px; gap: 25px; align-items: start; }
-        @media (max-width: 1080px) { .rankings-main-layout { grid-template-columns: 1fr; } }
-
-        .info-widget-card { background: var(--bg-panel); backdrop-filter: var(--glass-blur); border: 1px solid var(--border-color); border-radius: 20px; padding: 20px; position: sticky; top: 90px; }
-        .info-widget-title { font-size: 18px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 8px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
-        .info-tab-buttons { display: flex; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-color); border-radius: 12px; padding: 4px; margin-bottom: 18px; }
-        .info-tab-btn { flex: 1; padding: 8px 0; border: none; background: transparent; color: var(--text-muted); font-size: 14px; font-weight: 800; border-radius: 8px; cursor: pointer; }
-        .info-tab-btn.active { background: var(--bg-hover); color: var(--gold-primary); }
-        .info-tab-content { display: none; }
-        .info-tab-content.active { display: block; }
-        .info-subtitle { font-size: 13px; font-weight: 800; color: var(--text-muted); margin-bottom: 12px; }
-        .info-list-item { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 8px; }
-        .info-title-name { font-size: 15px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 6px; }
-        .info-title-desc { font-size: 12px; color: var(--text-muted); font-weight: 700; }
-        .points-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 8px; }
-        .points-tier-badge { font-size: 13px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 6px; }
-        .points-val { font-size: 12px; font-weight: 800; color: var(--gold-primary); background: rgba(255,170,0,0.1); padding: 3px 8px; border-radius: 6px; }
-
-        .list-headers { display: flex; padding: 0 30px 12px 30px; color: var(--text-muted); font-size: 13px; font-weight: 900; text-transform: uppercase; }
-        .h-rank { width: 165px; }
-        .h-player { flex: 1; }
-        .h-region { width: 90px; text-align: center; }
-        .h-tiers { width: 440px; text-align: center; }
-
-        .ranking-list { display: flex; flex-direction: column; gap: 12px; }
-        .rank-row { 
-            display: flex; align-items: center; background: var(--bg-panel); backdrop-filter: var(--glass-blur); 
-            padding: 12px 24px 12px 14px; border-radius: 16px; border: 1px solid var(--border-color); cursor: pointer; transition: all 0.3s ease;
-        }
-        .rank-row:hover { transform: translateX(8px); border-color: rgba(255,170,0,0.5); background: var(--bg-hover); box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 10; }
-
-        .mctiers-badge {
-            width: 150px; height: 52px; display: flex; align-items: center; justify-content: space-between;
-            padding: 0 28px 0 16px; clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%); border-radius: 8px 0 0 8px; flex-shrink: 0; margin-right: 18px;
-        }
-        .mctiers-badge.rank-1 { background: linear-gradient(110deg, #f5b72b 0%, #fff085 25%, #f5b72b 50%, #d98e04 75%, #f5b72b 100%); background-size: 250% 100%; animation: shineSweep 3.5s infinite; }
-        .mctiers-badge.rank-2 { background: linear-gradient(110deg, #8da0ac 0%, #e2ebf0 25%, #8da0ac 50%, #5a6c77 75%, #8da0ac 100%); background-size: 250% 100%; animation: shineSweep 4s infinite; }
-        .mctiers-badge.rank-3 { background: linear-gradient(110deg, #d47b33 0%, #ffd0a8 25%, #d47b33 50%, #9e4c0e 75%, #d47b33 100%); background-size: 250% 100%; animation: shineSweep 4.5s infinite; }
-        .mctiers-badge.rank-other { background: linear-gradient(135deg, #24313d 0%, #151e26 100%); }
-
-        .mctiers-badge-rank { font-size: 28px; font-weight: 900; font-style: italic; color: #ffffff; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7); }
-        .mctiers-badge-avatar-container { width: 48px; height: 100%; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
-        .mctiers-badge-avatar { height: 48px; width: auto; max-width: 48px; object-fit: contain; filter: drop-shadow(2px 3px 6px rgba(0, 0, 0, 0.85)); }
-
-        .player-info { display: flex; align-items: center; gap: 14px; flex: 1; }
-        .player-details h3 { font-size: 18px; font-weight: 900; margin-bottom: 2px; color: #fff; }
-        .player-details span { font-size: 13px; font-weight: 800; }
-        .region { width: 90px; text-align: center; color: #ff4d4d; font-weight: 900; font-size: 14px; background: rgba(255,77,77,0.1); padding: 5px 0; border-radius: 8px; }
-
-        .player-tiers { width: 440px; display: flex; gap: 4px; justify-content: center; }
-        .tier-badge { display: flex; flex-direction: column; align-items: center; gap: 3px; background: rgba(0,0,0,0.4); padding: 4px 2px; border-radius: 6px; width: 38px; border: 1px solid var(--border-color); }
-        .tier-badge img { width: 18px; height: 18px; object-fit: contain; }
-        .tier-label { font-size: 9px; padding: 1px 0; width: 100%; text-align: center; border-radius: 3px; font-weight: 900; text-transform: uppercase; }
-
-        .tier-columns-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; width: 100%; }
-        .tier-column { background: var(--bg-panel); backdrop-filter: var(--glass-blur); border: 1px solid var(--border-color); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
-        .tier-column-header { padding: 16px; font-weight: 900; font-size: 18px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 10px; border-bottom: 1px solid var(--border-color); text-transform: uppercase; }
-        .tier-column.t1 .tier-column-header { background: linear-gradient(135deg, rgba(255, 170, 0, 0.25), rgba(255, 85, 0, 0.25)); color: #ffaa00; }
-        .tier-column.t2 .tier-column-header { background: linear-gradient(135deg, rgba(200, 200, 220, 0.2), rgba(150, 150, 180, 0.2)); color: #e2e8f0; }
-        .tier-column.t3 .tier-column-header { background: linear-gradient(135deg, rgba(205, 127, 50, 0.25), rgba(160, 80, 20, 0.25)); color: #f97316; }
-        .tier-column.t4 .tier-column-header { background: linear-gradient(135deg, rgba(100, 100, 180, 0.2), rgba(60, 60, 130, 0.2)); color: #a5b4fc; }
-        .tier-column.t5 .tier-column-header { background: linear-gradient(135deg, rgba(80, 80, 100, 0.2), rgba(40, 40, 60, 0.2)); color: #94a3b8; }
-
-        .tier-player-list { padding: 12px; display: flex; flex-direction: column; gap: 8px; min-height: 200px; }
-        .tier-player-card { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.25s ease; }
-        .tier-player-card:hover { background: rgba(255,170,0,0.12); border-color: rgba(255,170,0,0.4); transform: translateY(-3px); }
-        .tier-player-avatar { width: 32px; height: 42px; object-fit: contain; object-position: top center; }
-        .tier-player-name { font-size: 15px; font-weight: 800; color: #fff; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .tier-player-tag { font-size: 11px; font-weight: 900; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; }
-
-        .ht1 { background: linear-gradient(135deg, #ffcc00, #ff9900); color: #000; }
-        .lt1 { background: linear-gradient(135deg, #cc00ff, #7700ff); color: #fff; }
-        .ht2 { background: linear-gradient(135deg, #e69900, #cc6600); color: #000; }
-        .lt2 { background: linear-gradient(135deg, #5555ff, #0000cc); color: #fff; }
-        .ht3 { background: #b37700; color: #fff; }
-        .lt3 { background: #4444dd; color: #fff; }
-        .ht4 { background: #8c5e00; color: #fff; }
-        .lt4 { background: #3333bb; color: #fff; }
-        .ht5 { background: #664400; color: #fff; }
-        .lt5 { background: #222288; color: #fff; }
-        .na-tier { background: rgba(255,255,255,0.05); color: #666; font-style: italic; }
-    </style>
-</head>
-<body>
-
-    <div id="intro-loader">
-        <img src="apextiers.png" alt="ApexTiers" class="loader-logo" onerror="this.style.display='none'">
-        <div class="loader-title">APEXTIERS</div>
-        <div class="loader-subtitle">LOADING GLOBAL RANKINGS...</div>
-        <div class="loader-bar-container"><div class="loader-bar"></div></div>
-    </div>
-
-    <!-- ADMIN PASSWORD MODAL -->
-    <div class="modal-overlay" id="admin-pass-modal" onclick="if(event.target===this) closePassModal();">
-        <div class="modal-card">
-            <button class="modal-close-btn" onclick="closePassModal()"><i class="fa-solid fa-xmark"></i></button>
-            <div class="modal-icon-badge"><i class="fa-solid fa-lock"></i></div>
-            <div class="modal-title">Admin Access</div>
-            <div class="modal-subtitle">Enter security key to manage players & server settings.</div>
-            <div class="modal-input-group">
-                <i class="fa-solid fa-key"></i>
-                <input type="password" id="modal-password-input" class="modal-input" placeholder="Password..." onkeyup="handlePassKeyUp(event)">
-            </div>
-            <div class="modal-error-msg" id="modal-error">Incorrect password. Access denied.</div>
-            <div class="modal-actions">
-                <button class="modal-btn secondary" onclick="closePassModal()">Cancel</button>
-                <button class="modal-btn primary" onclick="submitAdminPassword()">Unlock Panel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- PLAYER PROFILE MODAL -->
-    <div class="modal-overlay" id="player-profile-modal" onclick="if(event.target===this) closePlayerModal();">
-        <div class="player-modal-card">
-            <button class="modal-close-btn" onclick="closePlayerModal()"><i class="fa-solid fa-xmark"></i></button>
-            
-            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
-                <div class="mctiers-badge rank-1" id="modal-player-avatar-frame" style="margin-bottom: 15px; height: 75px; width: 175px; clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%); padding: 0 32px 0 18px;">
-                    <span class="mctiers-badge-rank" id="modal-player-rank-badge-text" style="font-size: 32px;">#1.</span>
-                    <div class="mctiers-badge-avatar-container" style="width: 60px;">
-                        <img src="" alt="" id="modal-player-avatar" style="height: 68px; width: auto; object-fit: contain;">
-                    </div>
-                </div>
-                <h2 id="modal-player-name" style="font-size: 28px; font-weight: 900; color: #fff; margin-bottom: 4px;">PlayerName</h2>
-                
-                <div id="modal-player-title-box" style="margin-bottom: 6px;">
-                    <span id="modal-player-title" class="title-badge title-master" style="font-size: 15px; padding: 4px 14px; border-radius: 20px;">Combat Master</span>
-                </div>
-
-                <div id="modal-player-region" style="color: var(--text-muted); font-size: 14px; font-weight: 800; margin-bottom: 6px;">North America</div>
-                <div id="modal-player-device" class="device-badge-tag"><i class="fa-solid fa-laptop"></i> Java - PC</div>
-
-                <a href="#" id="modal-namemc-link" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 800; text-decoration: none;">
-                    <span style="background: #fff; color: #000; width: 16px; height: 16px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 11px;">n</span> NameMC <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 11px; color: var(--text-muted);"></i>
-                </a>
-            </div>
-
-            <div style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; text-align: left;">Position</div>
-            <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-                <span style="font-size: 18px; font-weight: 900; color: var(--gold-primary);" id="modal-player-rank-text">#1.</span>
-                <span style="font-size: 15px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-trophy" style="color: var(--gold-primary);"></i> OVERALL (<span id="modal-player-points-text">99</span> points)</span>
-            </div>
-
-            <div style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; text-align: left;">Tiers</div>
-            <div id="modal-player-tiers-grid" style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;"></div>
-        </div>
-    </div>
-
-    <!-- Top Navigation -->
-    <nav>
-        <div class="logo-container" onclick="switchTab('home')">
-            <img src="apextiers.png" alt="ApexTiers Logo" class="logo-img" onerror="this.style.display='none'">
-            <div class="logo-text">APEXTIERS</div>
-        </div>
-        <div class="nav-links">
-            <button id="nav-home" class="active" onclick="switchTab('home')"><i class="fa-solid fa-house"></i> Home</button>
-            <button id="nav-rankings" onclick="switchTab('rankings')"><i class="fa-solid fa-trophy"></i> Rankings</button>
-            <a href="https://discord.gg/yJwycfgrDj" target="_blank" id="nav-discord"><i class="fa-brands fa-discord"></i> Discord</a>
-            <a href="#"><i class="fa-solid fa-file-code"></i> API Docs</a>
-        </div>
-        <div class="nav-right-actions">
-            <a href="https://discord.gg/yJwycfgrDj" target="_blank" class="discord-badge" id="discord-count"><span class="discord-dot"></span> Syncing...</a>
-            <button class="admin-gear-btn" onclick="openAdminAuth()" title="Admin Settings"><i class="fa-solid fa-gear"></i></button>
-        </div>
-    </nav>
-
-    <div class="container">
-        
-        <!-- HOME SECTION -->
-        <div id="section-home" class="page-section active">
-            <div class="home-hero">
-                <h1>Welcome to <span>ApexTiers</span></h1>
-                <p>The official competitive Minecraft PvP rankings network. Explore tier lists across 9 game modes, verified test results, and global leaderboards across multiple regions.</p>
-                <div class="hero-buttons">
-                    <button class="hero-btn primary" onclick="switchTab('rankings')"><i class="fa-solid fa-trophy"></i> View Leaderboards</button>
-                    <a href="https://discord.gg/yJwycfgrDj" target="_blank" class="hero-btn secondary"><i class="fa-brands fa-discord"></i> Join Discord</a>
-                </div>
-            </div>
-
-            <div class="home-grid">
-                <div class="home-panel-card">
-                    <h3><i class="fa-solid fa-fire"></i> Network Highlights</h3>
-                    <div class="stat-row"><span>Active Gamemodes</span><span class="stat-value">9 Modes</span></div>
-                    <div class="stat-row"><span>Global Regions</span><span class="stat-value">NA, EU, AS, AU, ME</span></div>
-                </div>
-                <div class="home-panel-card">
-                    <h3><i class="fa-solid fa-server"></i> Server Info</h3>
-                    <div class="stat-row"><span>Java & Bedrock IP</span><span class="stat-value" id="home-display-ip">play.apextiers.fun</span></div>
-                    <div class="stat-row"><span>Server Status</span><span class="stat-value" style="color: #3ba55c;"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> Online</span></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- RANKINGS SECTION -->
-        <div id="section-rankings" class="page-section">
-            
-            <!-- Admin Panel -->
-            <div class="admin-panel" id="admin-panel-section">
-                <div class="admin-header">
-                    <span><i class="fa-solid fa-shield-halved"></i> Admin Management Panel</span>
-                    <button onclick="closeAdminPanel()" style="background:none; border:none; color:#fff; cursor:pointer; font-size: 18px;"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-                <div class="admin-grid">
-                    <div class="admin-box">
-                        <h4><i class="fa-solid fa-user-pen" style="color: var(--gold-primary);"></i> Add / Edit Player Profile</h4>
-                        
-                        <label style="font-size: 13px; color: var(--text-muted); font-weight: 800; margin-bottom: 4px; display: block;">Select Existing Player to Edit:</label>
-                        <select id="admin-select-player" class="admin-input" onchange="loadPlayerToEdit()">
-                            <option value="">-- Create New Player --</option>
-                        </select>
-
-                        <input type="text" id="admin-name" class="admin-input" placeholder="Player Name (e.g. Marlowww)">
-                        <input type="text" id="admin-uuid" class="admin-input" placeholder="Minecraft UUID (Optional)">
-                        <input type="text" id="admin-avatar-url" class="admin-input" placeholder="Custom Avatar Image URL (Optional)">
-                        <select id="admin-region" class="admin-input">
-                            <option value="NA">NA</option><option value="EU">EU</option><option value="AS">AS</option><option value="AU">AU</option><option value="ME">ME</option>
-                        </select>
-                        <select id="admin-device" class="admin-input">
-                            <option value="Java - PC">Java - PC</option><option value="Java - Mobile">Java - Mobile (Pojav)</option><option value="Bedrock - Mobile">Bedrock - Mobile</option><option value="Bedrock - PC">Bedrock - PC</option><option value="Bedrock - Console">Bedrock - Console</option>
-                        </select>
-                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px; font-weight: 800;">Assign Tiers:</p>
-                        <div class="tier-inputs-grid" id="admin-tier-inputs"></div>
-                        <button class="admin-btn" onclick="saveAdminPlayer()">Save / Update Player</button>
-                    </div>
-                    <div class="admin-box">
-                        <h4><i class="fa-solid fa-sliders" style="color: var(--gold-primary);"></i> Network Settings & Removal</h4>
-                        <input type="text" id="admin-server-ip-input" class="admin-input" placeholder="Change Server IP">
-                        <button class="admin-btn" style="margin-bottom: 25px;" onclick="updateServerIP()">Update Server IP</button>
-                        
-                        <h4><i class="fa-solid fa-user-minus" style="color: #ff4444;"></i> Remove Player</h4>
-                        <input type="text" id="admin-remove-name" class="admin-input" placeholder="Exact Name to Remove">
-                        <button class="admin-btn danger" onclick="removeAdminPlayer()">Remove Player</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modes Header Bar -->
-            <div class="top-action-bar">
-                <div class="categories" id="categories-container">
-                    <div class="category active" data-mode="overall"><span style="font-size: 22px;">🏆</span><span>Overall</span></div>
-                    <div class="category" data-mode="npot"><img src="npot.webp" alt="NPot" onerror="this.src='pot.webp'"><span>NPot</span></div>
-                    <div class="category" data-mode="sword"><img src="sword.webp" alt="Sword" onerror="this.src='pot.webp'"><span>Sword</span></div>
-                    <div class="category" data-mode="axe"><img src="axe.webp" alt="Axe" onerror="this.src='pot.webp'"><span>Axe</span></div>
-                    <div class="category" data-mode="smp"><img src="smp.webp" alt="SMP" onerror="this.src='pot.webp'"><span>SMP</span></div>
-                    <div class="category" data-mode="cpvp"><img src="cpvp.webp" alt="CPvP" onerror="this.src='pot.webp'"><span>CPvP</span></div>
-                    <div class="category" data-mode="spearmace"><img src="spearmace.webp" alt="SpearMace" onerror="this.src='pot.webp'"><span>SpearMace</span></div>
-                    <div class="category" data-mode="pot"><img src="pot.webp" alt="Pot" onerror="this.src='pot.webp'"><span>Pot</span></div>
-                    <div class="category" data-mode="uhc"><img src="uhc.webp" alt="UHC" onerror="this.src='pot.webp'"><span>UHC</span></div>
-                    <div class="category" data-mode="mace"><img src="mace.webp" alt="Mace" onerror="this.src='pot.webp'"><span>Mace</span></div>
-                </div>
-
-                <div class="server-widget">
-                    <div class="server-ip-box" onclick="copyIP()" title="Click to copy IP">
-                        <span class="server-icon-badge">CLUB</span>
-                        <span class="server-ip-text" id="display-server-ip">play.apextiers.fun</span>
-                        <i class="fa-brands fa-discord" style="color: #5865F2; font-size: 18px;"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div style="margin-bottom: 20px; display: flex; justify-content: flex-end;">
-                <div class="search-container">
-                    <i class="fa-solid fa-search"></i>
-                    <input type="text" id="search-bar" class="search-bar" placeholder="Search for a legend..." oninput="renderApp()">
-                </div>
-            </div>
-
-            <div class="rankings-main-layout">
-                <div>
-                    <div class="list-headers" id="overall-headers">
-                        <div class="h-rank">Rank</div>
-                        <div class="h-player">Player Profile</div>
-                        <div class="h-region">Region</div>
-                        <div class="h-tiers">Tier Breakdown</div>
-                    </div>
-                    <div id="ranking-container"></div>
-                </div>
-
-                <div class="info-widget-card" id="info-side-widget">
-                    <div class="info-widget-title"><i class="fa-solid fa-circle-info" style="color: var(--gold-primary);"></i> Information</div>
-                    <div class="info-tab-buttons">
-                        <button class="info-tab-btn active" onclick="switchInfoTab('titles')">Titles</button>
-                        <button class="info-tab-btn" onclick="switchInfoTab('points')">Points</button>
-                    </div>
-
-                    <div id="info-tab-titles" class="info-tab-content active">
-                        <div class="info-subtitle">Achievement Titles</div>
-                        <div class="info-list-item"><span class="info-title-name"><i class="fa-solid fa-crown title-grandmaster"></i> Grandmaster</span><span class="info-title-desc">200+ points</span></div>
-                        <div class="info-list-item"><span class="info-title-name"><i class="fa-solid fa-gem title-master"></i> Master</span><span class="info-title-desc">120+ points</span></div>
-                        <div class="info-list-item"><span class="info-title-name"><i class="fa-solid fa-shield-halved title-veteran"></i> Veteran</span><span class="info-title-desc">60+ points</span></div>
-                    </div>
-
-                    <div id="info-tab-points" class="info-tab-content">
-                        <div class="info-subtitle">Points System</div>
-                        <div class="points-row"><span class="points-tier-badge">Tier 1</span><span class="points-val">HT1: 30 • LT1: 27</span></div>
-                        <div class="points-row"><span class="points-tier-badge">Tier 2</span><span class="points-val">HT2: 24 • LT2: 21</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const loader = document.getElementById('intro-loader');
-                if (loader) loader.classList.add('fade-out');
-            }, 800);
-        });
-
-        const GAMEMODES = ['npot', 'sword', 'axe', 'smp', 'cpvp', 'spearmace', 'pot', 'uhc', 'mace'];
-        const TIER_SCORES = { 'HT1': 30, 'LT1': 27, 'HT2': 24, 'LT2': 21, 'HT3': 18, 'LT3': 15, 'HT4': 12, 'LT4': 9, 'HT5': 6, 'LT5': 3, 'N/A': 0 };
-
-        let playersDB = [];
-        let serverIP = localStorage.getItem('apexServerIP') || 'play.apextiers.fun';
-        let currentMode = 'overall';
-        let adminLoggedIn = false;
-
-        document.getElementById('display-server-ip').innerText = serverIP;
-        document.getElementById('home-display-ip').innerText = serverIP;
-        document.getElementById('admin-server-ip-input').value = serverIP;
-
-        async function fetchLivePlayers() {
-            try {
-                const response = await fetch('https://apextiers-api.onrender.com/api/players');
-                if (response.ok) {
-                    playersDB = await response.json();
-                    renderApp();
-                    populateAdminPlayerSelect();
-                }
-            } catch (err) {
-                console.error("Failed to fetch live players from API:", err);
+        if (playerName) {
+            if (EXCLUDED_PLAYERS.includes(playerName.toLowerCase())) {
+                return res.status(404).json({ error: "Player pending retest" });
             }
-        }
-        fetchLivePlayers();
 
-        function getPlayerAvatarUrl(player) {
-            if (!player) return 'https://visage.surgeplay.com/bust/120/Steve';
-            if (player.avatarUrl && player.avatarUrl.trim().length > 0) return player.avatarUrl.trim();
-            let identifier = player.uuid && player.uuid.trim().length >= 30 ? player.uuid.trim().replace(/-/g, '') : (player.name || 'Steve');
-            return `https://visage.surgeplay.com/bust/120/${encodeURIComponent(identifier)}`;
-        }
-
-        function handleAvatarError(img, playerName) {
-            let step = parseInt(img.dataset.failStep || '0') + 1;
-            img.dataset.failStep = step;
-            const cleanName = encodeURIComponent(playerName || 'Steve');
-            if (step === 1) img.src = `https://render.crafthead.net/bust/${cleanName}`;
-            else if (step === 2) img.src = `https://mc-heads.net/bust/${cleanName}/100`;
-            else img.src = `https://visage.surgeplay.com/bust/120/Steve`;
-        }
-
-        function getTitleClass(title) {
-            if (title === "Combat Grandmaster") return "title-badge title-grandmaster";
-            if (title === "Combat Master") return "title-badge title-master";
-            if (title === "Combat Veteran") return "title-badge title-veteran";
-            if (title === "Combat Cadet") return "title-badge title-cadet";
-            if (title === "Fighter") return "title-badge title-fighter";
-            return "title-badge title-rookie";
-        }
-
-        function normalizeGamemodeKey(key) {
-            if (!key) return '';
-            let k = String(key).toLowerCase().trim().replace(/[^a-z0-9]/g, '');
-            if (k.includes('crystal') || k.includes('vanilla') || k === 'cpvp') return 'cpvp';
-            if (k.includes('nodebuff') || k.includes('netherite') || k === 'npot') return 'npot';
-            if (k.includes('spear') || k === 'spearmace') return 'spearmace';
-            if (k.includes('potion') || k.includes('potpvp') || k === 'pot') return 'pot';
-            return k;
-        }
-
-        function getPlayerTier(player, gmKey) {
-            if (!player || !player.tiers || typeof player.tiers !== 'object') return 'N/A';
-            let targetGm = normalizeGamemodeKey(gmKey);
-            for (let rawKey in player.tiers) {
-                if (normalizeGamemodeKey(rawKey) === targetGm) {
-                    let val = player.tiers[rawKey];
-                    if (val && val !== 'None' && val !== 'N/A') return String(val).trim().toUpperCase();
-                }
+            let playerDoc = await Player.findOne({ name: new RegExp(`^${playerName}$`, 'i') });
+            if (!playerDoc) {
+                return res.status(404).json({ error: "Player not found" });
             }
-            return 'N/A';
-        }
 
-        function calculatePoints(tiers) {
-            if (!tiers || typeof tiers !== 'object') return 0;
-            let total = 0, processedModes = new Set();
-            for (let rawGm in tiers) {
-                let normalizedGm = normalizeGamemodeKey(rawGm);
-                if (processedModes.has(normalizedGm)) continue;
-                let val = String(tiers[rawGm]).trim().toUpperCase();
-                if (TIER_SCORES[val]) {
-                    total += TIER_SCORES[val];
-                    processedModes.add(normalizedGm);
-                }
-            }
-            return total;
-        }
-
-        function setupAdminInputs() {
-            const container = document.getElementById('admin-tier-inputs');
-            if (!container) return;
-            let html = '';
-            GAMEMODES.forEach(gm => {
-                const label = gm.toUpperCase();
-                html += `
-                    <div class="tier-input-row" title="${label}">
-                        <img src="${gm}.webp" alt="${gm}" onerror="this.src='pot.webp'">
-                        <select id="admin-gm-${gm}">
-                            <option value="N/A">N/A</option>
-                            ${Object.keys(TIER_SCORES).filter(t => t !== 'N/A').map(t => `<option value="${t}">${t}</option>`).join('')}
-                        </select>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-        setupAdminInputs();
-
-        function populateAdminPlayerSelect() {
-            const select = document.getElementById('admin-select-player');
-            if (!select) return;
-            select.innerHTML = '<option value="">-- Create New Player --</option>';
-            playersDB.forEach(p => {
-                select.innerHTML += `<option value="${p.name}">${p.name} (${p.region})</option>`;
-            });
-        }
-
-        function loadPlayerToEdit() {
-            const selectName = document.getElementById('admin-select-player').value;
-            if (!selectName) {
-                document.getElementById('admin-name').value = '';
-                document.getElementById('admin-uuid').value = '';
-                document.getElementById('admin-avatar-url').value = '';
-                document.getElementById('admin-region').value = 'NA';
-                document.getElementById('admin-device').value = 'Java - PC';
-                GAMEMODES.forEach(gm => document.getElementById(`admin-gm-${gm}`).value = 'N/A');
-                return;
-            }
-            const player = playersDB.find(p => p.name.toLowerCase() === selectName.toLowerCase());
-            if (player) {
-                document.getElementById('admin-name').value = player.name;
-                document.getElementById('admin-uuid').value = player.uuid || '';
-                document.getElementById('admin-avatar-url').value = player.avatarUrl || '';
-                document.getElementById('admin-region').value = player.region || 'NA';
-                document.getElementById('admin-device').value = player.device || 'Java - PC';
-                GAMEMODES.forEach(gm => document.getElementById(`admin-gm-${gm}`).value = getPlayerTier(player, gm));
-            }
-        }
-
-        function openAdminAuth() {
-            if (adminLoggedIn) { switchTab('rankings'); showAdminPanel(); return; }
-            document.getElementById('admin-pass-modal').classList.add('active');
-            document.getElementById('modal-password-input').focus();
-        }
-
-        function closePassModal() { document.getElementById('admin-pass-modal').classList.remove('active'); }
-        function handlePassKeyUp(e) { if (e.key === 'Enter') submitAdminPassword(); }
-
-        function submitAdminPassword() {
-            const passInput = document.getElementById('modal-password-input');
-            if (passInput && passInput.value === "hitler?988") {
-                adminLoggedIn = true;
-                closePassModal();
-                switchTab('rankings');
-                showAdminPanel();
-            } else {
-                document.getElementById('modal-error').style.display = 'block';
-            }
-        }
-
-        function showAdminPanel() {
-            populateAdminPlayerSelect();
-            document.getElementById('admin-panel-section').style.display = 'block';
-        }
-        function closeAdminPanel() { document.getElementById('admin-panel-section').style.display = 'none'; }
-
-        async function saveAdminPlayer() {
-            const name = document.getElementById('admin-name').value.trim();
-            const uuid = document.getElementById('admin-uuid').value.trim();
-            const avatarUrl = document.getElementById('admin-avatar-url').value.trim();
-            const region = document.getElementById('admin-region').value;
-            const device = document.getElementById('admin-device').value;
-
-            if (!name) return alert("Player Name is required.");
-
-            let tiersObj = {};
-            GAMEMODES.forEach(gm => {
-                let val = document.getElementById(`admin-gm-${gm}`).value;
-                if (val !== 'N/A') tiersObj[gm] = val;
-            });
-
-            try {
-                const response = await fetch('https://apextiers-api.onrender.com/api/admin/save-player', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, uuid, avatarUrl, region, device, tiers: tiersObj })
-                });
-
-                if (response.ok) {
-                    alert(`Successfully saved ${name} to server!`);
-                    document.getElementById('admin-name').value = '';
-                    document.getElementById('admin-uuid').value = '';
-                    document.getElementById('admin-avatar-url').value = '';
-                    await fetchLivePlayers();
-                } else {
-                    const err = await response.json();
-                    alert(`Error: ${err.error || 'Failed to save'}`);
-                }
-            } catch (err) {
-                console.error("API error:", err);
-                alert("Failed to connect to API server.");
-            }
-        }
-
-        async function removeAdminPlayer() {
-            const name = document.getElementById('admin-remove-name').value.trim();
-            if (!name) return alert("Enter name to remove.");
-            if (!confirm(`Are you sure you want to permanently delete ${name}?`)) return;
-
-            try {
-                const response = await fetch(`https://apextiers-api.onrender.com/api/players/${encodeURIComponent(name)}`, {
-                    method: 'DELETE'
-                });
-
-                if (response.ok) {
-                    alert(`Successfully removed ${name} from server!`);
-                    document.getElementById('admin-remove-name').value = '';
-                    await fetchLivePlayers();
-                } else {
-                    const err = await response.json();
-                    alert(`Error: ${err.error || 'Player not found on server'}`);
-                }
-            } catch (err) {
-                console.error("API error:", err);
-                alert("Failed to connect to API server.");
-            }
-        }
-
-        function openPlayerModal(playerName) {
-            const player = playersDB.find(p => p.name.toLowerCase() === playerName.toLowerCase());
-            if (!player) return;
-
-            const sortedList = [...playersDB].sort((a, b) => calculatePoints(b.tiers) - calculatePoints(a.tiers));
-            const rank = sortedList.findIndex(p => p.name.toLowerCase() === player.name.toLowerCase()) + 1;
-            const points = calculatePoints(player.tiers);
-            const title = points >= 200 ? "Combat Grandmaster" : points >= 120 ? "Combat Master" : points >= 60 ? "Combat Veteran" : points >= 30 ? "Combat Cadet" : points >= 10 ? "Fighter" : "Rookie";
-
-            const badgeClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
-            const frameElem = document.getElementById('modal-player-avatar-frame');
-            if (frameElem) frameElem.className = `mctiers-badge ${badgeClass}`;
-
-            const badgeTextElem = document.getElementById('modal-player-rank-badge-text');
-            if (badgeTextElem) badgeTextElem.innerText = `#${rank}.`;
-
-            document.getElementById('modal-player-name').innerText = player.name;
-            document.getElementById('modal-player-title').innerHTML = `<i class="fa-solid fa-crown"></i> ${title}`;
-            document.getElementById('modal-player-region').innerText = player.region;
-            document.getElementById('modal-player-rank-text').innerText = `#${rank}.`;
-            document.getElementById('modal-player-points-text').innerText = points;
-
-            const modalImg = document.getElementById('modal-player-avatar');
-            delete modalImg.dataset.failStep;
-            modalImg.src = getPlayerAvatarUrl(player);
-            modalImg.setAttribute('onerror', `handleAvatarError(this, '${player.name}')`);
-            document.getElementById('modal-namemc-link').href = `https://namemc.com/profile/${encodeURIComponent(player.name)}`;
-
-            let modalTiersHTML = '';
-            GAMEMODES.forEach(gm => {
-                let t = getPlayerTier(player, gm);
-                modalTiersHTML += `
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 10px; min-width: 52px;">
-                        <img src="${gm}.webp" alt="${gm}" style="width: 20px; height: 20px;" onerror="this.src='pot.webp'">
-                        <span style="font-size: 10px; color: var(--text-muted);">${gm.toUpperCase()}</span>
-                        <span class="tier-label ${t === 'N/A' ? 'na-tier' : t.toLowerCase()}">${t}</span>
-                    </div>
-                `;
-            });
-            document.getElementById('modal-player-tiers-grid').innerHTML = modalTiersHTML;
-            document.getElementById('player-profile-modal').classList.add('active');
-        }
-
-        function closePlayerModal() { document.getElementById('player-profile-modal').classList.remove('active'); }
-        function switchInfoTab(tab) {
-            document.querySelectorAll('.info-tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('info-tab-titles').classList.remove('active');
-            document.getElementById('info-tab-points').classList.remove('active');
-            if (tab === 'titles') { document.querySelectorAll('.info-tab-btn')[0].classList.add('active'); document.getElementById('info-tab-titles').classList.add('active'); }
-            else { document.querySelectorAll('.info-tab-btn')[1].classList.add('active'); document.getElementById('info-tab-points').classList.add('active'); }
-        }
-
-        function renderApp() {
-            const container = document.getElementById('ranking-container');
-            const overallHeaders = document.getElementById('overall-headers');
-            const searchVal = document.getElementById('search-bar').value.toLowerCase();
-            const infoWidget = document.getElementById('info-side-widget');
-            const mainLayout = document.querySelector('.rankings-main-layout');
-
-            if (!container) return;
-            container.innerHTML = '';
-
-            let list = playersDB.filter(p => !searchVal || (p.name && p.name.toLowerCase().includes(searchVal)));
-
-            if (currentMode === 'overall') {
-                overallHeaders.style.display = 'flex';
-                if (infoWidget) infoWidget.style.display = 'block';
-                if (mainLayout) mainLayout.style.gridTemplateColumns = '';
-
-                list.sort((a, b) => calculatePoints(b.tiers) - calculatePoints(a.tiers));
-
-                let html = '<div class="ranking-list">';
-                list.forEach((player, index) => {
-                    const rank = index + 1;
-                    const badgeClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
-                    const points = calculatePoints(player.tiers);
-                    const title = points >= 200 ? "Combat Grandmaster" : points >= 120 ? "Combat Master" : points >= 60 ? "Combat Veteran" : points >= 30 ? "Combat Cadet" : points >= 10 ? "Fighter" : "Rookie";
-                    const titleClass = getTitleClass(title);
-
-                    let tiersHTML = '';
-                    GAMEMODES.forEach(gm => {
-                        let t = getPlayerTier(player, gm);
-                        tiersHTML += `<div class="tier-badge"><img src="${gm}.webp" alt="${gm}" onerror="this.src='pot.webp'"><span class="tier-label ${t === 'N/A' ? 'na-tier' : t.toLowerCase()}">${t}</span></div>`;
+            let player = playerDoc.toObject();
+            let rawTiers = {};
+            if (playerDoc.tiers) {
+                if (typeof playerDoc.tiers.forEach === 'function') {
+                    playerDoc.tiers.forEach((value, key) => {
+                        rawTiers[key.toLowerCase().replace(/[^a-z0-9]/g, '')] = value;
                     });
+                } else {
+                    Object.keys(playerDoc.tiers).forEach(key => {
+                        rawTiers[key.toLowerCase().replace(/[^a-z0-9]/g, '')] = playerDoc.tiers[key];
+                    });
+                }
+            }
 
-                    html += `
-                        <div class="rank-row ${badgeClass === 'rank-other' ? '' : badgeClass}" onclick="openPlayerModal('${player.name}')">
-                            <div class="mctiers-badge ${badgeClass}"><span class="mctiers-badge-rank">${rank}.</span><div class="mctiers-badge-avatar-container"><img src="${getPlayerAvatarUrl(player)}" alt="${player.name}" class="mctiers-badge-avatar" onerror="handleAvatarError(this, '${player.name}')"></div></div>
-                            <div class="player-info"><div class="player-details"><h3>${player.name}</h3><span><span class="${titleClass}">❖ ${title}</span> • <span style="color: var(--gold-primary);">${points} PTS</span></span></div></div>
-                            <div class="region">${player.region || 'NA'}</div>
-                            <div class="player-tiers">${tiersHTML}</div>
-                        </div>
-                    `;
-                });
-                html += '</div>';
-                container.innerHTML = html;
-            } else {
-                overallHeaders.style.display = 'none';
-                if (infoWidget) infoWidget.style.display = 'none';
-                if (mainLayout) mainLayout.style.gridTemplateColumns = '1fr';
+            let tiersObj = mapPlayerTiers(rawTiers);
+            player.tiers = tiersObj;
+            player.device = player.device || "Java - PC";
+            player.overall = calculateOverallTier(tiersObj);
+            return res.json(player);
+        }
 
-                let tiersMap = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [], 10: [] };
-                list.forEach(player => {
-                    let tVal = getPlayerTier(player, currentMode);
-                    if (tVal !== 'N/A') {
-                        let grp = tVal.includes('1') ? 1 : tVal.includes('2') ? 2 : tVal.includes('3') ? 3 : tVal.includes('4') ? 4 : 5;
-                        tiersMap[grp].push({ ...player, currentTierVal: tVal });
-                    }
-                });
-
-                let colsHTML = '<div class="tier-columns-grid">';
-                const tierTitles = { 1: '🏆 Tier 1', 2: '🥈 Tier 2', 3: '🥉 Tier 3', 4: '⚡ Tier 4', 5: '🛡️️ Tier 5' };
-
-                for (let i = 1; i <= 5; i++) {
-                    colsHTML += `<div class="tier-column t${i}"><div class="tier-column-header">${tierTitles[i]}</div><div class="tier-player-list">`;
-                    if (tiersMap[i].length === 0) colsHTML += `<div style="text-align:center; padding:20px; color:var(--text-muted);">No Players</div>`;
-                    else {
-                        tiersMap[i].sort((a, b) => (a.currentTierVal.startsWith('HT') ? -1 : 1));
-                        tiersMap[i].forEach(p => {
-                            colsHTML += `<div class="tier-player-card" onclick="openPlayerModal('${p.name}')"><img src="${getPlayerAvatarUrl(p)}" alt="${p.name}" class="tier-player-avatar" onerror="handleAvatarError(this, '${p.name}')"><span class="tier-player-name">${p.name}</span><span class="tier-player-tag ${p.currentTierVal.toLowerCase()}">${p.currentTierVal}</span></div>`;
+        const players = await Player.find({});
+        const updatedPlayers = players
+            .filter(p => p.name && !EXCLUDED_PLAYERS.includes(p.name.toLowerCase()))
+            .map(p => {
+                let obj = p.toObject();
+                let rawTiers = {};
+                if (p.tiers) {
+                    if (typeof p.tiers.forEach === 'function') {
+                        p.tiers.forEach((value, key) => {
+                            rawTiers[key.toLowerCase().replace(/[^a-z0-9]/g, '')] = value;
+                        });
+                    } else {
+                        Object.keys(p.tiers).forEach(key => {
+                            rawTiers[key.toLowerCase().replace(/[^a-z0-9]/g, '')] = p.tiers[key];
                         });
                     }
-                    colsHTML += `</div></div>`;
                 }
-                colsHTML += '</div>';
-                container.innerHTML = colsHTML;
-            }
-        }
-
-        document.querySelectorAll('.category').forEach(cat => {
-            cat.addEventListener('click', () => {
-                document.querySelectorAll('.category').forEach(c => c.classList.remove('active'));
-                cat.classList.add('active');
-                currentMode = cat.getAttribute('data-mode');
-                renderApp();
+                let tiersObj = mapPlayerTiers(rawTiers);
+                obj.tiers = tiersObj;
+                obj.device = obj.device || "Java - PC";
+                obj.overall = calculateOverallTier(tiersObj);
+                return obj;
             });
-        });
 
-        function switchTab(tab) {
-            document.getElementById('nav-home').classList.remove('active');
-            document.getElementById('nav-rankings').classList.remove('active');
-            document.getElementById('section-home').classList.remove('active');
-            document.getElementById('section-rankings').classList.remove('active');
+        res.json(updatedPlayers);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Failed to fetch players" });
+    }
+});
 
-            if (tab === 'home') {
-                document.getElementById('nav-home').classList.add('active');
-                document.getElementById('section-home').classList.add('active');
-            } else {
-                document.getElementById('nav-rankings').classList.add('active');
-                document.getElementById('section-rankings').classList.add('active');
-                renderApp();
+// 2. POST API - Sync tier result posted from Discord Bot
+app.post('/api/update-tier', async (req, res) => {
+    const name = req.body.name || req.body.ign;
+    const uuid = req.body.uuid;
+    const region = req.body.region;
+    const device = req.body.device;
+    const gamemode = req.body.gamemode;
+    const newTier = req.body.newTier || req.body.new_tier;
+
+    const clientSecret = req.headers['x-bot-secret'] || req.headers['x-api-key'] || req.body.apiKey || req.body.secret || req.body.bot_secret;
+    const validSecret = process.env.BOT_SECRET_KEY || process.env.BOT_SECRET;
+
+    if (!clientSecret || clientSecret !== validSecret) {
+        return res.status(403).json({ error: "Unauthorized request" });
+    }
+    if (!name || !gamemode || !newTier) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    try {
+        let player = await Player.findOne({ name: new RegExp(`^${name}$`, 'i') });
+
+        if (!player) {
+            player = new Player({
+                name: name,
+                uuid: uuid || "",
+                region: region || "NA",
+                device: device || "Java - PC",
+                tiers: {}
+            });
+        }
+
+        if (region) player.region = region;
+        if (uuid) player.uuid = uuid;
+        if (device) player.device = device;
+
+        let gmKey = gamemode.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (gmKey === 'nethpot' || gmKey === 'netheritepot') gmKey = 'npot';
+        if (gmKey === 'crystalvanilla' || gmKey === 'crystal' || gmKey === 'vanilla' || gmKey === 'cvp') gmKey = 'cpvp';
+
+        let cleanedTier = String(newTier).trim().toUpperCase();
+        const tierMatch = String(newTier).match(/(HT[1-5]|LT[1-5]|T[1-5])/i);
+        if (tierMatch) {
+            cleanedTier = tierMatch[0].toUpperCase();
+        }
+
+        player.tiers.set(gmKey, cleanedTier);
+        player.markModified('tiers');
+        await player.save();
+
+        res.json({ message: `Successfully updated ${name}'s ${gmKey} tier to ${cleanedTier}`, player });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error updating player tier" });
+    }
+});
+
+// 3. POST API - Admin Save / Create Player Endpoint
+app.post('/api/admin/save-player', async (req, res) => {
+    const { name, ign, uuid, avatarUrl, region, device, tiers } = req.body;
+    const playerName = name || ign;
+
+    if (!playerName) {
+        return res.status(400).json({ error: "Player name is required" });
+    }
+
+    try {
+        let player = await Player.findOne({ name: new RegExp(`^${playerName}$`, 'i') });
+
+        if (!player) {
+            player = new Player({ name: playerName });
+        }
+
+        if (uuid !== undefined) player.uuid = uuid;
+        if (avatarUrl !== undefined) player.avatarUrl = avatarUrl;
+        if (region !== undefined) player.region = region;
+        if (device !== undefined) player.device = device;
+
+        if (tiers && typeof tiers === 'object') {
+            for (const gm in tiers) {
+                let gmKey = gm.toLowerCase().replace(/[^a-z0-9]/g, '');
+                if (gmKey === 'nethpot' || gmKey === 'netheritepot') gmKey = 'npot';
+                if (gmKey === 'crystalvanilla' || gmKey === 'crystal' || gmKey === 'vanilla' || gmKey === 'cvp') gmKey = 'cpvp';
+                
+                let val = String(tiers[gm]).trim().toUpperCase();
+                player.tiers.set(gmKey, val);
             }
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            player.markModified('tiers');
         }
 
-        function updateServerIP() {
-            const newIp = document.getElementById('admin-server-ip-input').value.trim();
-            if (!newIp) return;
-            serverIP = newIp;
-            localStorage.setItem('apexServerIP', serverIP);
-            document.getElementById('display-server-ip').innerText = serverIP;
-            document.getElementById('home-display-ip').innerText = serverIP;
-            alert("Server IP updated successfully!");
-        }
+        await player.save();
+        res.json({ message: `Successfully saved player ${playerName}`, player });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error saving player" });
+    }
+});
 
-        function copyIP() {
-            navigator.clipboard.writeText(serverIP);
-            alert(`Copied server IP: ${serverIP}`);
+// 4. DELETE API - Remove Player from MongoDB
+app.delete('/api/players/:name', async (req, res) => {
+    const playerName = req.params.name;
+    try {
+        const result = await Player.deleteOne({ name: new RegExp(`^${playerName}$`, 'i') });
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: "Player not found" });
         }
-    </script>
-</body>
-</html>
+        res.json({ message: `Successfully deleted ${playerName}` });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error deleting player" });
+    }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`ApexTiers API server running on port ${PORT}`);
+});
