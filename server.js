@@ -68,6 +68,27 @@ function calculateOverallTier(tiers) {
     return 'LT5';
 }
 
+// Helper Function: Calculates Total Tier Points for Position Ranking
+function calculateTotalPoints(tiers) {
+    const tierPoints = {
+        'HT1': 10, 'LT1': 9,
+        'HT2': 8,  'LT2': 7,
+        'HT3': 6,  'LT3': 5,
+        'HT4': 4,  'LT4': 3,
+        'HT5': 2,  'LT5': 1,
+        'T1': 10,  'T2': 8,  'T3': 6,  'T4': 4,  'T5': 2
+    };
+
+    let totalScore = 0;
+    for (const gm in tiers) {
+        const tierVal = tiers[gm] ? tiers[gm].toUpperCase() : 'N/A';
+        if (tierPoints[tierVal] !== undefined) {
+            totalScore += tierPoints[tierVal];
+        }
+    }
+    return totalScore;
+}
+
 const standardModes = ['npot', 'sword', 'axe', 'smp', 'cpvp', 'spearmace', 'pot', 'uhc', 'mace'];
 
 // Helper to sanitize tier object keys and map gamemode aliases
@@ -86,44 +107,15 @@ function mapPlayerTiers(rawTiers) {
     return tiersObj;
 }
 
-// 1. GET API - Fetch single player or all players
+// 1. GET API - Fetch single player or all players with dynamically calculated position
 app.get('/api/players', async (req, res) => {
     try {
         const playerName = req.query.name || req.query.ign || req.query.player;
 
-        if (playerName) {
-            if (EXCLUDED_PLAYERS.includes(playerName.toLowerCase())) {
-                return res.status(404).json({ error: "Player pending retest" });
-            }
-
-            let playerDoc = await Player.findOne({ name: new RegExp(`^${playerName}$`, 'i') });
-            if (!playerDoc) {
-                return res.status(404).json({ error: "Player not found" });
-            }
-
-            let player = playerDoc.toObject();
-            let rawTiers = {};
-            if (playerDoc.tiers) {
-                if (typeof playerDoc.tiers.forEach === 'function') {
-                    playerDoc.tiers.forEach((value, key) => {
-                        rawTiers[key.toLowerCase().replace(/[^a-z0-9]/g, '')] = value;
-                    });
-                } else {
-                    Object.keys(playerDoc.tiers).forEach(key => {
-                        rawTiers[key.toLowerCase().replace(/[^a-z0-9]/g, '')] = playerDoc.tiers[key];
-                    });
-                }
-            }
-
-            let tiersObj = mapPlayerTiers(rawTiers);
-            player.tiers = tiersObj;
-            player.device = player.device || "Java - PC";
-            player.overall = calculateOverallTier(tiersObj);
-            return res.json(player);
-        }
-
+        // Fetch all players to calculate accurate global leaderboard positions
         const players = await Player.find({});
-        const updatedPlayers = players
+        
+        let processedPlayers = players
             .filter(p => p.name && !EXCLUDED_PLAYERS.includes(p.name.toLowerCase()))
             .map(p => {
                 let obj = p.toObject();
@@ -143,10 +135,33 @@ app.get('/api/players', async (req, res) => {
                 obj.tiers = tiersObj;
                 obj.device = obj.device || "Java - PC";
                 obj.overall = calculateOverallTier(tiersObj);
+                obj.points = calculateTotalPoints(tiersObj);
                 return obj;
             });
 
-        res.json(updatedPlayers);
+        // Sort players by highest total points to assign rank positions
+        processedPlayers.sort((a, b) => b.points - a.points);
+        processedPlayers.forEach((p, index) => {
+            p.position = index + 1;
+        });
+
+        // If specific player was requested by name/ign
+        if (playerName) {
+            if (EXCLUDED_PLAYERS.includes(playerName.toLowerCase())) {
+                return res.status(404).json({ error: "Player pending retest" });
+            }
+
+            const targetPlayer = processedPlayers.find(p => p.name.toLowerCase() === playerName.toLowerCase());
+
+            if (!targetPlayer) {
+                return res.status(404).json({ error: "Player not found" });
+            }
+
+            return res.json(targetPlayer);
+        }
+
+        // Return full list with positions assigned
+        res.json(processedPlayers);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Failed to fetch players" });
