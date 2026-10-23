@@ -22,6 +22,15 @@ const playerSchema = new mongoose.Schema({
 
 const Player = mongoose.model('Player', playerSchema);
 
+// MongoDB Tester Schema
+const testerSchema = new mongoose.Schema({
+    discordId: { type: String, required: true, unique: true },
+    username: { type: String, default: "Tester" },
+    tests: { type: Number, default: 0 }
+});
+
+const Tester = mongoose.model('Tester', testerSchema);
+
 // Connect to MongoDB
 const MONGO_URI = process.env.MONGO_URI;
 if (MONGO_URI) {
@@ -278,6 +287,63 @@ app.delete('/api/players/:name', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Server error deleting player" });
+    }
+});
+
+// ==========================================
+// TESTER LEADERBOARD ENDPOINTS
+// ==========================================
+
+// 5. POST API - Add / Increment test count for a tester
+app.post('/api/tester/add', async (req, res) => {
+    const { discordId, username } = req.body;
+    if (!discordId) {
+        return res.status(400).json({ error: "discordId is required" });
+    }
+
+    try {
+        let tester = await Tester.findOne({ discordId });
+        if (!tester) {
+            tester = new Tester({ discordId, username: username || "Tester", tests: 0 });
+        }
+        tester.tests += 1;
+        if (username) tester.username = username;
+        await tester.save();
+
+        res.json({ message: "Test successfully recorded", tests: tester.tests, tester });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error recording test" });
+    }
+});
+
+// 6. GET API - Fetch Top Tester Leaderboard
+app.get('/api/tester/leaderboard', async (req, res) => {
+    try {
+        const topTesters = await Tester.find({}).sort({ tests: -1 }).limit(10);
+        res.json(topTesters);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error fetching tester leaderboard" });
+    }
+});
+
+// 7. GET API - Fetch test count for a specific tester by discordId
+app.get('/api/tester/count', async (req, res) => {
+    const discordId = req.query.discordId || req.query.id;
+    if (!discordId) {
+        return res.status(400).json({ error: "discordId query parameter is required" });
+    }
+
+    try {
+        const tester = await Tester.findOne({ discordId });
+        if (!tester) {
+            return res.json({ discordId, tests: 0 });
+        }
+        res.json(tester);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error fetching tester count" });
     }
 });
 
