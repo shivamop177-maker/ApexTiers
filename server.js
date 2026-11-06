@@ -121,7 +121,6 @@ app.get('/api/players', async (req, res) => {
     try {
         const playerName = req.query.name || req.query.ign || req.query.player;
 
-        // Fetch all players to calculate accurate global leaderboard positions
         const players = await Player.find({});
         
         let processedPlayers = players
@@ -148,13 +147,11 @@ app.get('/api/players', async (req, res) => {
                 return obj;
             });
 
-        // Sort players by highest total points to assign rank positions
         processedPlayers.sort((a, b) => b.points - a.points);
         processedPlayers.forEach((p, index) => {
             p.position = index + 1;
         });
 
-        // If specific player was requested by name/ign
         if (playerName) {
             if (EXCLUDED_PLAYERS.includes(playerName.toLowerCase())) {
                 return res.status(404).json({ error: "Player pending retest" });
@@ -169,7 +166,6 @@ app.get('/api/players', async (req, res) => {
             return res.json(targetPlayer);
         }
 
-        // Return full list with positions assigned
         res.json(processedPlayers);
     } catch (err) {
         console.error(err);
@@ -234,8 +230,15 @@ app.post('/api/update-tier', async (req, res) => {
     }
 });
 
-// 3. POST API - Admin Save / Create Player Endpoint
+// 3. POST API - Admin Save / Create Player Endpoint (SECURED)
 app.post('/api/admin/save-player', async (req, res) => {
+    const clientSecret = req.headers['x-admin-secret'] || req.headers['x-bot-secret'];
+    const validSecret = process.env.ADMIN_SECRET_KEY || process.env.BOT_SECRET_KEY || process.env.BOT_SECRET;
+
+    if (!clientSecret || clientSecret !== validSecret) {
+        return res.status(403).json({ error: "Unauthorized admin request" });
+    }
+
     const { name, ign, uuid, avatarUrl, region, device, tiers } = req.body;
     const playerName = name || ign;
 
@@ -275,8 +278,15 @@ app.post('/api/admin/save-player', async (req, res) => {
     }
 });
 
-// 4. DELETE API - Remove Player from MongoDB
+// 4. DELETE API - Remove Player from MongoDB (SECURED)
 app.delete('/api/players/:name', async (req, res) => {
+    const clientSecret = req.headers['x-admin-secret'] || req.headers['x-bot-secret'];
+    const validSecret = process.env.ADMIN_SECRET_KEY || process.env.BOT_SECRET_KEY || process.env.BOT_SECRET;
+
+    if (!clientSecret || clientSecret !== validSecret) {
+        return res.status(403).json({ error: "Unauthorized admin request" });
+    }
+
     const playerName = req.params.name;
     try {
         const result = await Player.deleteOne({ name: new RegExp(`^${playerName}$`, 'i') });
@@ -294,8 +304,15 @@ app.delete('/api/players/:name', async (req, res) => {
 // TESTER LEADERBOARD ENDPOINTS
 // ==========================================
 
-// 5. POST API - Add / Increment test count for a tester
+// 5. POST API - Add / Increment test count for a tester (SECURED for Bot)
 app.post('/api/tester/add', async (req, res) => {
+    const clientSecret = req.headers['x-bot-secret'] || req.headers['x-api-key'];
+    const validSecret = process.env.BOT_SECRET_KEY || process.env.BOT_SECRET;
+
+    if (validSecret && (!clientSecret || clientSecret !== validSecret)) {
+        return res.status(403).json({ error: "Unauthorized request" });
+    }
+
     const { discordId, username } = req.body;
     if (!discordId) {
         return res.status(400).json({ error: "discordId is required" });
@@ -320,7 +337,7 @@ app.post('/api/tester/add', async (req, res) => {
 // 6. GET API - Fetch Top Tester Leaderboard
 app.get('/api/tester/leaderboard', async (req, res) => {
     try {
-        const topTesters = await Tester.find({}).sort({ tests: -1 }).limit(10);
+        const topTesters = await Tester.find({}.sort({ tests: -1 }).limit(10));
         res.json(topTesters);
     } catch (err) {
         console.error(err);
